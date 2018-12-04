@@ -1,0 +1,39 @@
+version: '3.4'
+
+services:
+  theta.platform.ui.instruments.api:
+    image: thetaplatformuiinstrumentsapi
+    networks:
+      theta-service-net:
+        aliases:
+          - theta.platform.ui.instruments.api
+    build:
+      context: .
+      dockerfile: Theta.Platform.UI.Instruments.API/Dockerfile
+
+  theta.platform.ui.pricing.streaming:
+    image: thetaplatformuipricingstreaming
+    networks:
+      theta-service-net:
+        aliases:
+          - theta.platform.ui.pricing.streaming
+    build:
+      context: .
+      dockerfile: Theta.Platform.UI.Pricing.Streaming/Dockerfile
+    depends_on:
+      - theta.platform.ui.instruments.api
+
+  theta.platform.ui.orders.api:
+    image: thetaplatformuiordersapi
+    networks:
+      theta-service-net:
+        aliases:
+          - theta.platform.ui.orders.api
+    build:
+      context: .
+      dockerfile: Theta.Platform.UI.Orders.API/Dockerfile
+  
+
+networks:
+  theta-service-net:
+    driver: bridge

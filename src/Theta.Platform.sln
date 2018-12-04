@@ -1,0 +1,63 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.106
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UI", "UI", "{74E6E762-1A8B-4E04-9D52-1786E10280CD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Orders", "Orders", "{662D099B-2049-4CD8-97DF-B6442F2CFCA1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Pricing", "Pricing", "{EBB2FF39-DD21-45A2-B773-8B04FFB49B02}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{809AA02E-5650-4BD9-B9F9-D04B04BD9A56}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Theta.Platform.UI.Orders.API", "Theta.Platform.UI.Orders.API\Theta.Platform.UI.Orders.API.csproj", "{9F003029-736E-42A7-9ACF-AD11B0795D8D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Theta.Platform.Domain", "Theta.Platform.Domain\Theta.Platform.Domain.csproj", "{9D4872E8-BC64-4EAC-A819-F2CA1B2DE78F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Theta.Platform.UI.Pricing.Streaming", "Theta.Platform.UI.Pricing.Streaming\Theta.Platform.UI.Pricing.Streaming.csproj", "{35D0BD80-6443-478B-8F45-D916BBD0FD2D}"
+EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{C0DDDDC7-DD3C-4DCF-BD76-8D0178929C55}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Theta.Platform.UI.Instruments.API", "Theta.Platform.UI.Instruments.API\Theta.Platform.UI.Instruments.API.csproj", "{311C88FF-0F4D-4D74-A9AD-9027D5AD7F5F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9F003029-736E-42A7-9ACF-AD11B0795D8D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9F003029-736E-42A7-9ACF-AD11B0795D8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9F003029-736E-42A7-9ACF-AD11B0795D8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9F003029-736E-42A7-9ACF-AD11B0795D8D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9D4872E8-BC64-4EAC-A819-F2CA1B2DE78F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9D4872E8-BC64-4EAC-A819-F2CA1B2DE78F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9D4872E8-BC64-4EAC-A819-F2CA1B2DE78F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9D4872E8-BC64-4EAC-A819-F2CA1B2DE78F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{35D0BD80-6443-478B-8F45-D916BBD0FD2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{35D0BD80-6443-478B-8F45-D916BBD0FD2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{35D0BD80-6443-478B-8F45-D916BBD0FD2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{35D0BD80-6443-478B-8F45-D916BBD0FD2D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C0DDDDC7-DD3C-4DCF-BD76-8D0178929C55}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C0DDDDC7-DD3C-4DCF-BD76-8D0178929C55}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C0DDDDC7-DD3C-4DCF-BD76-8D0178929C55}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C0DDDDC7-DD3C-4DCF-BD76-8D0178929C55}.Release|Any CPU.Build.0 = Release|Any CPU
+		{311C88FF-0F4D-4D74-A9AD-9027D5AD7F5F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{311C88FF-0F4D-4D74-A9AD-9027D5AD7F5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{311C88FF-0F4D-4D74-A9AD-9027D5AD7F5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{311C88FF-0F4D-4D74-A9AD-9027D5AD7F5F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{809AA02E-5650-4BD9-B9F9-D04B04BD9A56} = {74E6E762-1A8B-4E04-9D52-1786E10280CD}
+		{9F003029-736E-42A7-9ACF-AD11B0795D8D} = {809AA02E-5650-4BD9-B9F9-D04B04BD9A56}
+		{35D0BD80-6443-478B-8F45-D916BBD0FD2D} = {809AA02E-5650-4BD9-B9F9-D04B04BD9A56}
+		{311C88FF-0F4D-4D74-A9AD-9027D5AD7F5F} = {809AA02E-5650-4BD9-B9F9-D04B04BD9A56}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0466CF9F-7513-4BB0-B64D-05ED8BF8B0D4}
+	EndGlobalSection
+EndGlobal
