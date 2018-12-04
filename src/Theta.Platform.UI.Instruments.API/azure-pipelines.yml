@@ -10,5 +10,5 @@ variables:
   imageName: 'thetaplatformuiinstrumentsapi:$(build.buildId)'
 
 steps:
-- script: docker build -f Theta.Platform.UI.Instruments.API/Dockerfile -t $(imageName) .
+- script: docker build -f src/Theta.Platform.UI.Instruments.API/Dockerfile -t $(imageName) .
   displayName: 'docker build'
