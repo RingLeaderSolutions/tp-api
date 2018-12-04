@@ -13,6 +13,7 @@ trigger:
     include:
       - src/Theta.Platform.UI.Instruments.API/*
 
+container: build_container
 steps:
 - script: docker build -f Theta.Platform.UI.Instruments.API/Dockerfile -t $(imageName) .
   displayName: 'docker build'
