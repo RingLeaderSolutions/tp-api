@@ -8,7 +8,7 @@ pool:
   vmImage: 'Ubuntu 16.04'
 
 variables:
-  imageName: 'thetaplatformuiinstrumentsapi:$(build.buildId)'
+  imageName: 'thetaplatformuiinstrumentsapi:$(build.buildNumber)'
 
 trigger:
   paths:
