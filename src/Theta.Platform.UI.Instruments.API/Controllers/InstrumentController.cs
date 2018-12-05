@@ -24,7 +24,7 @@ namespace Theta.Platform.UI.Instruments.API.Controllers
                     new InstrumentId { Id = "A0GZPU", IdType = InstrumentIdType.WKN },
                     new InstrumentId { Id = "TR27", IdType = InstrumentIdType.Symbol },
                 }.ToArray(),
-                Name = "UK 10 Year Gilt",
+                Name = "UK 10 Year Gilt X",
                 Category = "Government Bond",
                 CouponRate = 4.250m,
                 CouponType = CouponType.Fixed,
