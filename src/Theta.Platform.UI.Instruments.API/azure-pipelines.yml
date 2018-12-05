@@ -1,9 +1,7 @@
 name: $(SourceBranchName)-$(Date:yyyyMMdd)$(Rev:.r)
 
-resources:
-  containers:
-    - container: build_container
-      image: ubuntu:16.04
+pool:
+  vmImage: 'Ubuntu 16.04'
 
 variables:
   imageName: 'thetaplatformuiinstrumentsapi:$(build.buildNumber)'
@@ -11,9 +9,8 @@ variables:
 trigger:
   paths:
     include:
-      - src/Theta.Platform.UI.Instruments.API/*
+    - src/Theta.Platform.UI.Instruments.API/*
 
-container: build_container
 steps:
 - script: docker build -f Theta.Platform.UI.Instruments.API/Dockerfile -t $(imageName) .
   displayName: 'docker build'
