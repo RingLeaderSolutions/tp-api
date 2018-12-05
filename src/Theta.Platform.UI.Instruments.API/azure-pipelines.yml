@@ -9,7 +9,7 @@ variables:
 trigger:
   branches:
     include:
-    - *
+    - '*'
   paths:
     include:
     - src/Theta.Platform.UI.Instruments.API/*
