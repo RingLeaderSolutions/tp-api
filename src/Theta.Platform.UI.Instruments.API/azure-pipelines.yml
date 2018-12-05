@@ -6,11 +6,6 @@ pool:
 variables:
   imageName: 'thetaplatformuiinstrumentsapi:$(build.buildNumber)'
 
-trigger:
-  paths:
-    include:
-    - src/Theta.Platform.UI.Instruments.API/*
-
 steps:
 - script: docker build -f Theta.Platform.UI.Instruments.API/Dockerfile -t $(imageName) .
   displayName: 'docker build'
