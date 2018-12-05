@@ -14,25 +14,25 @@ Assuming you have already created an `azure-pipelines.yml` file at the root of t
 Sadly that's not the case, so here's a guide on how to get the pipeline showing in the UI - written for posterity as this flow is not exactly intuitive.
 
 ### Step 1: Navigate to Pipelines > Build and click on "New build pipeline"
-- ![Step 1](img-create-pipeline/step-1.png "")
+- ![Step 1](.attachments/img-create-pipeline/step-1.png "")
 
 ### Step 2: (Unintuitively) Click on the "Use visual designer without YAML" link
-- ![Step 2](img-create-pipeline/step-2.png "")
+- ![Step 2](.attachments/img-create-pipeline/step-2.png "")
 
 ### Step 3: Select the repository
-- ![Step 3](img-create-pipeline/step-3.png "")
+- ![Step 3](.attachments/img-create-pipeline/step-3.png "")
 
 ### Step 4: Select YAML as the starting template
-- ![Step 4](img-create-pipeline/step-4.png "")
+- ![Step 4](.attachments/img-create-pipeline/step-4.png "")
 
 ### Step 5: Navigate to and select the path in which your `azure-pipelines.yml` resides
-- ![Step 5](img-create-pipeline/step-5.png "")
+- ![Step 5](.attachments/img-create-pipeline/step-5.png "")
 
 ### Step 6: Enter a name for the pipeline and ensure the path is correct
-- ![Step 6](img-create-pipeline/step-6.png "")
+- ![Step 6](.attachments/img-create-pipeline/step-6.png "")
 
 ### Step 7: Save and queue your first build
-- ![Step 7](img-create-pipeline/step-7.png "")
+- ![Step 7](.attachments/img-create-pipeline/step-7.png "")
 
 ### Step 8: Done! 
 Your build should now display in the UI and be linked to the `azure-pipelines.yml` file for further updates later on.
