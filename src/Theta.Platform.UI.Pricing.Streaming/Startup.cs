@@ -5,7 +5,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.DependencyInjection;
+using Theta.Platform.UI.Pricing.Streaming.Services;
 
 namespace Theta.Platform.UI.Pricing.Streaming
 {
@@ -28,6 +30,8 @@ namespace Theta.Platform.UI.Pricing.Streaming
             services.AddSignalR();
 
             ConfigureAuthService(services);
+
+            services.AddSingleton<RandomPriceGenerator>();
         }
 
         private void ConfigureAuthService(IServiceCollection services)
@@ -52,6 +56,8 @@ namespace Theta.Platform.UI.Pricing.Streaming
                 routes.MapHub<PricesHub>("/hub", options =>
                     options.Transports = Microsoft.AspNetCore.Http.Connections.HttpTransports.All);
             });
+
+            app.ApplicationServices.GetService<RandomPriceGenerator>();
         }
     }
 }
