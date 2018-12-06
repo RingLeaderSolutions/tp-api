@@ -29,6 +29,7 @@ steps:
   condition: succeeded()
 
 - task: DotNetCoreCLI@2
+  displayName: 'Run Unit Tests'
   inputs:
     command: test
     projects: '**/*Tests/*.csproj'
