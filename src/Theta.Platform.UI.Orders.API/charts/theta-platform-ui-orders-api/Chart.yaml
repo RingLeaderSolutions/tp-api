@@ -1,0 +1,4 @@
+apiVersion: v1
+description: Orders API for the UI 
+name: theta-platform-ui-orders-api
+version: v0.1.0

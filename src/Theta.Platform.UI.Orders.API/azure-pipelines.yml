@@ -1,10 +1,11 @@
-name: $(SourceBranchName)-$(Date:yyyyMMdd)$(Rev:.r)
-
 pool:
   vmImage: 'Ubuntu 16.04'
 
+
 variables:
-  imageName: 'thetaplatformuipricingstreaming:$(build.buildNumber)'
+  registryServerName: '$(registryName).azurecr.io'
+  imageName: '$(projectName)'
+  # define 4 more variables: projectName, registryName, registryLogin and registryPassword in the build pipeline in UI
 
 trigger:
   branches:
@@ -12,9 +13,35 @@ trigger:
     - '*'
   paths:
     include:
-    - src/Theta.Platform.UI.Pricing.Streaming/*
+    - src/Theta.Platform.UI.Orders.API/*
 
 steps:
-- script: docker build -f Theta.Platform.UI.Pricing.Streaming/Dockerfile -t $(imageName) .
+- script: docker build -f $(projectNamePath)/Dockerfile -t $(registryServerName)/$(imageName):$(build.buildId) .
   displayName: 'docker build'
   workingDirectory: 'src'
+
+- bash: docker login $(registryServerName) -u $(registryLogin) -p $(registryPassword)
+  displayName: 'docker login'
+
+- bash: |
+    docker push $(registryServerName)/$(imageName):$(build.buildId)
+  displayName: 'docker push'
+  condition: succeeded()
+
+- task: HelmInstaller@0
+  displayName: 'Install Helm 2.11.0'
+  inputs:
+    helmVersion: 2.11.0
+
+- bash: helm init --client-only --wait
+  displayName: 'helm init'
+
+- bash: helm package --version $(build.buildId) --destination $(build.artifactStagingDirectory) $(projectNamePath)/charts/$(projectName)
+  displayName: 'helm package'
+  workingDirectory: 'src' 
+
+- bash: az acr helm push -n $(registryName) -u $(registryLogin) -p $(registryPassword) $(build.artifactStagingDirectory)/$(projectName)-$(build.buildId).tgz
+  displayName: 'az acr helm push'
+  condition: succeeded()
+
+ 

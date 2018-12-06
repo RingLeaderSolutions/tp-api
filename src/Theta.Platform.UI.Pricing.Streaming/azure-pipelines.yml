@@ -12,7 +12,7 @@ trigger:
     - '*'
   paths:
     include:
-    - src/Theta.Platform.UI.Orders.API/*
+    - src/Theta.Platform.UI.Pricing.Streaming/*
 
 steps:
 - script: docker build -f Theta.Platform.UI.Orders.API/Dockerfile -t $(imageName) .
