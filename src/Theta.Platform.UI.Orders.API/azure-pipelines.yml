@@ -13,10 +13,10 @@ trigger:
     - '*'
   paths:
     include:
-    - src/$(build.definitionName)/*
+    - src/$(projectNamePath)/*
 
 steps:
-- bash: docker build -f $(system.defaultWorkingDirectory)/src/$(projectName)/Dockerfile -t $(registryServerName)/$(imageName):$(build.buildId) -t $(registryServerName)/$(imageName):latest $(system.defaultWorkingDirectory)/src/$(projectName)
+- bash: docker build -f $(system.defaultWorkingDirectory)/src/$(projectNamePath)/Dockerfile -t $(registryServerName)/$(imageName):$(build.buildId) -t $(registryServerName)/$(imageName):latest $(system.defaultWorkingDirectory)/src/$(projectNamePath)
   displayName: 'docker build'
 
 - bash: docker login $(registryServerName) -u $(registryLogin) -p $(registryPassword)
@@ -36,10 +36,10 @@ steps:
 - bash: helm init --client-only --wait
   displayName: 'helm init'
 
-- bash: helm package --version $(build.buildId) --destination $(build.artifactStagingDirectory) $(system.defaultWorkingDirectory)/$(projectName)/charts
+- bash: helm package --version $(build.buildId) --destination $(build.artifactStagingDirectory) $(system.defaultWorkingDirectory)/$(projectNamePath)/charts
   displayName: 'helm package'
 
-- bash: az acr helm push -n $(registryName) -u $(registryLogin) -p $(registryPassword) $(build.artifactStagingDirectory)/$(projectName)-$(build.buildId).tgz
+- bash: az acr helm push -n $(registryName) -u $(registryLogin) -p $(registryPassword) $(build.artifactStagingDirectory)/$(projectNamePath)-$(build.buildId).tgz
   displayName: 'az acr helm push'
   condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))
 
