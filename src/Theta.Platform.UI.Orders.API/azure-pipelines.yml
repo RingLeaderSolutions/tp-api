@@ -40,7 +40,7 @@ steps:
   displayName: 'helm package'
   workingDirectory: 'src' 
 
-- bash: az acr helm push -n $(registryName) -u $(registryLogin) -p $(registryPassword) $(build.artifactStagingDirectory)/$(projectNamePath)-$(build.buildId).tgz
+- bash: az acr helm push -n $(registryName) -u $(registryLogin) -p $(registryPassword) $(build.artifactStagingDirectory)/$(projectName)-$(build.buildId).tgz
   displayName: 'az acr helm push'
   condition: succeeded()
 
