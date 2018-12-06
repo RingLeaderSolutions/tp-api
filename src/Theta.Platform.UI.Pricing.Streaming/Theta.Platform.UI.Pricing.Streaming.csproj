@@ -21,4 +21,8 @@
     <PackageReference Include="System.Reactive" Version="4.1.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Theta.Platform.Domain\Theta.Platform.Domain.csproj" />
+  </ItemGroup>
+
 </Project>

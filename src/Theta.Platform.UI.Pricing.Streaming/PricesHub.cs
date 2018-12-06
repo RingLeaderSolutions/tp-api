@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Flurl.Http;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
-using Theta.Platform.UI.Pricing.Streaming.Model;
+using Theta.Platform.Domain.Instruments;
 
 namespace Theta.Platform.UI.Pricing.Streaming
 {
@@ -25,6 +24,7 @@ namespace Theta.Platform.UI.Pricing.Streaming
             await base.OnDisconnectedAsync(exception);
         }
 
+
         public async Task Subscribe(string instrumentId)
         {
             var instrumentResult = await $"http://theta.platform.ui.instruments.api/api/Instrument/{instrumentId}"
@@ -42,6 +42,7 @@ namespace Theta.Platform.UI.Pricing.Streaming
             Trace.Write($"Subscribing {Context.ConnectionId} to instrument [{instrument.Id.ToString()} - [{instrument.Category}/{instrument.AssetClass.ToString()}/{instrument.Name}`]");
             await Groups.AddToGroupAsync(Context.ConnectionId, instrument.Id.ToString());
         }
+
 
         public async Task Unsubscribe(string instrumentId)
         {

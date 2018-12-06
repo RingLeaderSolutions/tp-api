@@ -1,6 +1,7 @@
 ﻿using System;
+using Theta.Platform.Domain.Instruments;
 
-namespace Theta.Platform.Domain
+namespace Theta.Platform.Domain.Order
 {
     public class Order
     {
