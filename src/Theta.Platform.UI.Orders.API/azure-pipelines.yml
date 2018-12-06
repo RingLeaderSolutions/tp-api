@@ -16,7 +16,7 @@ trigger:
     - src/Theta.Platform.UI.Orders.API/*
 
 steps:
-- bash: docker build -f $(projectNamePath)/Dockerfile -t $(registryServerName)/$(imageName):$(build.buildId) -t $(registryServerName)/$(imageName):latest $(projectNamePath)
+- script: docker build -f $(projectNamePath)/Dockerfile -t $(registryServerName)/$(imageName):$(build.buildId) $(projectNamePath) .
   displayName: 'docker build'
   workingDirectory: 'src'
 
