@@ -33,6 +33,7 @@ steps:
   inputs:
     command: test
     projects: '**/*Tests/*.csproj'
+    arguments: '--collect "Code coverage"'
 
 - task: HelmInstaller@0
   displayName: 'Install Helm 2.11.0'
