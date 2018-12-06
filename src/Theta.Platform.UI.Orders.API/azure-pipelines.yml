@@ -16,8 +16,9 @@ trigger:
     - src/Theta.Platform.UI.Orders.API/*
 
 steps:
-- bash: docker build -f $(system.defaultWorkingDirectory)/src/$(projectNamePath)/Dockerfile -t $(registryServerName)/$(imageName):$(build.buildId) -t $(registryServerName)/$(imageName):latest $(system.defaultWorkingDirectory)/src/$(projectNamePath)
+- bash: docker build -f $(projectNamePath)/Dockerfile -t $(registryServerName)/$(imageName):$(build.buildId) -t $(registryServerName)/$(imageName):latest $(projectNamePath)
   displayName: 'docker build'
+  workingDirectory: 'src'
 
 - bash: docker login $(registryServerName) -u $(registryLogin) -p $(registryPassword)
   displayName: 'docker login'
@@ -36,8 +37,9 @@ steps:
 - bash: helm init --client-only --wait
   displayName: 'helm init'
 
-- bash: helm package --version $(build.buildId) --destination $(build.artifactStagingDirectory) $(system.defaultWorkingDirectory)/$(projectNamePath)/charts
+- bash: helm package --version $(build.buildId) --destination $(build.artifactStagingDirectory) $(projectNamePath)/charts
   displayName: 'helm package'
+  workingDirectory: 'src' 
 
 - bash: az acr helm push -n $(registryName) -u $(registryLogin) -p $(registryPassword) $(build.artifactStagingDirectory)/$(projectNamePath)-$(build.buildId).tgz
   displayName: 'az acr helm push'
