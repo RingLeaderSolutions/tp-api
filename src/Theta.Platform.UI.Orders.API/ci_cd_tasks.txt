@@ -1,9 +1,0 @@
-external - internal ips
-scaling
-cleanup pipeline variables
-cleanup images
-service principal config
-default yaml
-build failure notifications
-unit test step in build 
-postman ms threshold on endpoints
