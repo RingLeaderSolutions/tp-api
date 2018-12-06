@@ -5,7 +5,7 @@ EXPOSE 443
 
 FROM microsoft/dotnet:2.1-sdk AS build
 WORKDIR /src
-COPY Theta.Platform.UI.Orders.API/Theta.Platform.UI.Orders.API.csproj Theta.Platform.UI.Orders.API/
+COPY /src/Theta.Platform.UI.Orders.API/Theta.Platform.UI.Orders.API.csproj /src/Theta.Platform.UI.Orders.API/
 RUN dotnet restore Theta.Platform.UI.Orders.API/Theta.Platform.UI.Orders.API.csproj
 COPY . .
 WORKDIR /src/Theta.Platform.UI.Orders.API
