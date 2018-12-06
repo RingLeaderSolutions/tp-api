@@ -25,7 +25,6 @@ steps:
 
 - bash: |
     docker push $(registryServerName)/$(imageName):$(build.buildId)
-    docker push $(registryServerName)/$(imageName):latest
   displayName: 'docker push'
   condition: succeeded()
 
