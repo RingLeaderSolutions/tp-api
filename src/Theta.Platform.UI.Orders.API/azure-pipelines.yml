@@ -28,6 +28,12 @@ steps:
   displayName: 'docker push'
   condition: succeeded()
 
+- task: DotNetCoreCLI@2
+  inputs:
+    command: test
+    projects: '**/*Tests/*.csproj'
+    arguments: '--configuration $(buildConfiguration)'
+
 - task: HelmInstaller@0
   displayName: 'Install Helm 2.11.0'
   inputs:
