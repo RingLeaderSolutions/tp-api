@@ -13,10 +13,10 @@ trigger:
     - '*'
   paths:
     include:
-    - src/Theta.$(Build.DefinitionName)/*
+    - src/$(build.definitionName)/*
 
 steps:
-- bash: docker build -f $(system.defaultWorkingDirectory)/src/$(projectName)/Dockerfile -t $(registryServerName)/$(imageName):$(build.buildId) -t $(registryServerName)/$(imageName):latest $(system.defaultWorkingDirectory)/$(projectName)
+- bash: docker build -f $(system.defaultWorkingDirectory)/src/$(projectName)/Dockerfile -t $(registryServerName)/$(imageName):$(build.buildId) -t $(registryServerName)/$(imageName):latest $(system.defaultWorkingDirectory)/src/$(projectName)
   displayName: 'docker build'
 
 - bash: docker login $(registryServerName) -u $(registryLogin) -p $(registryPassword)
