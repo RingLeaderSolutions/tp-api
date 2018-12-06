@@ -37,7 +37,7 @@ steps:
 - bash: helm init --client-only --wait
   displayName: 'helm init'
 
-- bash: helm package --version $(build.buildId) --destination $(build.artifactStagingDirectory) $(projectNamePath)/charts
+- bash: helm package --version $(build.buildId) --destination $(build.artifactStagingDirectory) $(projectNamePath)/charts/$(projectName)
   displayName: 'helm package'
   workingDirectory: 'src' 
 
