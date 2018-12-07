@@ -8,6 +8,7 @@ variables:
   # define 5 more variables: projectName, projectNamePath, registryName, registryLogin and registryPassword in the build pipeline in UI
 
 trigger:
+  batch: true
   branches:
     include:
     - '*'
