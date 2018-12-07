@@ -1,0 +1,4 @@
+apiVersion: v1
+description: Instruments API for the UI 
+name: theta-platform-ui-instruments-api
+version: v0.1.0
