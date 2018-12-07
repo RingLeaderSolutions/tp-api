@@ -26,10 +26,18 @@ Sadly that's not the case, so here's a guide on how to get the pipeline showing 
 - ![Step 4](.attachments/img-create-pipeline/step-4.png "")
 
 ### Step 5: Navigate to and select the path in which your `azure-pipelines.yml` resides
+Note that for service pipelines there is a shared generic pipeline yml in the src folder.
 - ![Step 5](.attachments/img-create-pipeline/step-5.png "")
 
 ### Step 6: Enter a name for the pipeline and ensure the path is correct
 - ![Step 6](.attachments/img-create-pipeline/step-6.png "")
+
+### Step 6A: If creating a service pipeline, create the necessary build variables
+- ![Step 6a](.attachments/img-create-pipeline/step-6a.png "")
+
+### Step 6B: If creating a service pipeline, add the triggers manually
+At the time of writing build variables in trigger paths do not seem to be working.  A [GitHub issue](https://github.com/MicrosoftDocs/vsts-docs/issues/2691) has been raised for this.
+- ![Step 6b](.attachments/img-create-pipeline/step-6b.png "")
 
 ### Step 7: Save and queue your first build
 - ![Step 7](.attachments/img-create-pipeline/step-7.png "")

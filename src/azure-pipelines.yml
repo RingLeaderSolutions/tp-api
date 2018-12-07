@@ -14,7 +14,11 @@ trigger:
     - '*'
   paths:
     include:
-    - src/$(projectNamePath)/*
+    - 'src/$(projectNamePath)/*'
+    - 'src/$(projectNamePath).Tests/*'
+    # note, varibales in trigger paths do not seem to be working 
+    # (see issue https://github.com/MicrosoftDocs/vsts-docs/issues/2691 raised on doc https://docs.microsoft.com/en-us/azure/devops/pipelines/build/triggers?view=vsts&tabs=yaml)
+    # for now follow steps in docs/Azure-DevOps-Pipelines.md
 
 steps:
 - task: DotNetCoreCLI@2
