@@ -1,7 +1,3 @@
-pool:
-  vmImage: 'Ubuntu 16.04'
-
-
 variables:
   registryServerName: '$(registryName).azurecr.io'
   imageName: '$(projectName)'
@@ -20,37 +16,66 @@ trigger:
     # (see issue https://github.com/MicrosoftDocs/vsts-docs/issues/2691 raised on doc https://docs.microsoft.com/en-us/azure/devops/pipelines/build/triggers?view=vsts&tabs=yaml)
     # for now follow steps in docs/Azure-DevOps-Pipelines.md
 
-steps:
-- task: DotNetCoreCLI@2
-  displayName: 'run unit tests'
-  inputs:
-    command: test
-    projects: '**/$(projectNamePath).Tests/*.csproj'
+jobs:
+- job: versioning
+  pool:
+    vmImage: 'vs2017-win2016'
+  steps:
+  - powershell: $(system.defaultWorkingDirectory)/src/get-major-minor-version.ps1
+    name: setMajorMinorStep
+    displayName: 'read major minor'
+    workingDirectory: $(system.defaultWorkingDirectory)/src/$(projectNamePath)
+  - script: echo "The Major Minor Version is $(setvarStep.majorMinor)"
+    name: echoMajorMinorStep
+    displayName: 'echo major minor'
 
-- script: docker build -f $(projectNamePath)/Dockerfile -t $(registryServerName)/$(imageName):$(build.buildId) .
-  displayName: 'docker build'
-  workingDirectory: 'src'
+- job: build
+  dependsOn: versioning
 
-- bash: docker login $(registryServerName) -u $(registryLogin) -p $(registryPassword)
-  displayName: 'docker login'
+  pool:
+    vmImage: 'Ubuntu 16.04'
 
-- bash: |
-    docker push $(registryServerName)/$(imageName):$(build.buildId)
-  displayName: 'docker push'
-  condition: succeeded()
+  variables:
+    majorMinor: $[dependencies.versioning.outputs['setMajorMinorStep.majorMinor']]
+    patch: $[counter(dependencies.versioning.outputs['setMajorMinorStep.majorMinor'])]
 
-- task: HelmInstaller@0
-  displayName: 'Install Helm 2.11.0'
-  inputs:
-    helmVersion: 2.11.0
+  steps:
+  - bash: echo "The patch is $(patch)"
+    displayName: 'echo patch'
 
-- bash: helm init --client-only --wait
-  displayName: 'helm init'
+  - bash: echo "##vso[build.updatebuildnumber]$(majorMinor).$(patch)"
+    displayName: 'update build number to major.minor.patch'
 
-- bash: helm package --version $(build.buildId) --destination $(build.artifactStagingDirectory) $(projectNamePath)/charts/$(projectName)
-  displayName: 'helm package'
-  workingDirectory: 'src' 
+  - task: DotNetCoreCLI@2
+    displayName: 'run unit tests'
+    inputs:
+      command: test
+      projects: '**/$(projectNamePath).Tests/*.csproj'
 
-- bash: az acr helm push -n $(registryName) -u $(registryLogin) -p $(registryPassword) $(build.artifactStagingDirectory)/$(projectName)-$(build.buildId).tgz
-  displayName: 'az acr helm push'
-  condition: succeeded()
+  - script: docker build -f $(projectNamePath)/Dockerfile -t $(registryServerName)/$(imageName):$(build.buildNumber) .
+    displayName: 'docker build'
+    workingDirectory: 'src'
+
+  - bash: docker login $(registryServerName) -u $(registryLogin) -p $(registryPassword)
+    displayName: 'docker login'
+
+  - bash: |
+      docker push $(registryServerName)/$(imageName):$(build.buildNumber)
+    displayName: 'docker push'
+    condition: succeeded()
+
+  - task: HelmInstaller@0
+    displayName: 'Install Helm 2.11.0'
+    inputs:
+      helmVersion: 2.11.0
+
+  - bash: helm init --client-only --wait
+    displayName: 'helm init'
+
+  - bash: helm package --version $(build.buildNumber) --destination $(build.artifactStagingDirectory) $(projectNamePath)/charts/$(projectName)
+    displayName: 'helm package'
+    workingDirectory: 'src' 
+
+  - bash: az acr helm push -n $(registryName) -u $(registryLogin) -p $(registryPassword) $(build.artifactStagingDirectory)/$(projectName)-$(build.buildNumber).tgz
+    displayName: 'az acr helm push'
+    condition: succeeded()
