@@ -21,7 +21,11 @@ Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-co
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Theta.Platform.UI.Instruments.API", "Theta.Platform.UI.Instruments.API\Theta.Platform.UI.Instruments.API.csproj", "{311C88FF-0F4D-4D74-A9AD-9027D5AD7F5F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Theta.Platform.UI.Orders.API.Tests", "Theta.Platform.UI.Orders.API.Tests\Theta.Platform.UI.Orders.API.Tests.csproj", "{6F9B2E36-D109-4969-954C-6D69682C0C5E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Theta.Platform.UI.Orders.API.Tests", "Theta.Platform.UI.Orders.API.Tests\Theta.Platform.UI.Orders.API.Tests.csproj", "{6F9B2E36-D109-4969-954C-6D69682C0C5E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Theta.Platform.UI.Instruments.API.Tests", "Theta.Platform.UI.Instruments.API.Tests\Theta.Platform.UI.Instruments.API.Tests.csproj", "{83A4335C-CEEC-4EAB-8FA0-649ED78B9800}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Theta.Platform.UI.Pricing.Streaming.Tests", "Theta.Platform.UI.Pricing.Streaming.Tests\Theta.Platform.UI.Pricing.Streaming.Tests.csproj", "{9C45EB77-9267-4C3A-BCDD-CEED99D7DB3A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -53,6 +57,14 @@ Global
 		{6F9B2E36-D109-4969-954C-6D69682C0C5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6F9B2E36-D109-4969-954C-6D69682C0C5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6F9B2E36-D109-4969-954C-6D69682C0C5E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{83A4335C-CEEC-4EAB-8FA0-649ED78B9800}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{83A4335C-CEEC-4EAB-8FA0-649ED78B9800}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{83A4335C-CEEC-4EAB-8FA0-649ED78B9800}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{83A4335C-CEEC-4EAB-8FA0-649ED78B9800}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9C45EB77-9267-4C3A-BCDD-CEED99D7DB3A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C45EB77-9267-4C3A-BCDD-CEED99D7DB3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C45EB77-9267-4C3A-BCDD-CEED99D7DB3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C45EB77-9267-4C3A-BCDD-CEED99D7DB3A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -63,6 +75,8 @@ Global
 		{35D0BD80-6443-478B-8F45-D916BBD0FD2D} = {809AA02E-5650-4BD9-B9F9-D04B04BD9A56}
 		{311C88FF-0F4D-4D74-A9AD-9027D5AD7F5F} = {809AA02E-5650-4BD9-B9F9-D04B04BD9A56}
 		{6F9B2E36-D109-4969-954C-6D69682C0C5E} = {809AA02E-5650-4BD9-B9F9-D04B04BD9A56}
+		{83A4335C-CEEC-4EAB-8FA0-649ED78B9800} = {809AA02E-5650-4BD9-B9F9-D04B04BD9A56}
+		{9C45EB77-9267-4C3A-BCDD-CEED99D7DB3A} = {809AA02E-5650-4BD9-B9F9-D04B04BD9A56}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0466CF9F-7513-4BB0-B64D-05ED8BF8B0D4}

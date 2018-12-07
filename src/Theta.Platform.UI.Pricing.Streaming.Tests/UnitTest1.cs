@@ -1,6 +1,6 @@
 using NUnit.Framework;
 
-namespace Theta.Platform.UI.Orders.API.Tests
+namespace Theta.Platform.UI.Pricing.Streaming.Tests
 {
     [TestFixture]
     public class Tests
