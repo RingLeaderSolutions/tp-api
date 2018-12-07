@@ -16,6 +16,12 @@ trigger:
     - src/Theta.Platform.UI.Orders.API/*
 
 steps:
+- task: DotNetCoreCLI@2
+  displayName: 'run unit tests'
+  inputs:
+    command: test
+    projects: '**/$(projectNamePath).Tests/*.csproj'
+
 - script: docker build -f $(projectNamePath)/Dockerfile -t $(registryServerName)/$(imageName):$(build.buildId) .
   displayName: 'docker build'
   workingDirectory: 'src'
