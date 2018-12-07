@@ -52,7 +52,7 @@ jobs:
       command: test
       projects: '**/$(projectNamePath).Tests/*.csproj'
 
-  - script: docker build -f $(projectNamePath)/Dockerfile -t $(registryServerName)/$(imageName):$(build.buildId) .
+  - script: docker build -f $(projectNamePath)/Dockerfile -t $(registryServerName)/$(imageName):$(build.buildNumber) .
     displayName: 'docker build'
     workingDirectory: 'src'
 
@@ -60,7 +60,7 @@ jobs:
     displayName: 'docker login'
 
   - bash: |
-      docker push $(registryServerName)/$(imageName):$(build.buildId)
+      docker push $(registryServerName)/$(imageName):$(build.buildNumber)
     displayName: 'docker push'
     condition: succeeded()
 
@@ -72,10 +72,10 @@ jobs:
   - bash: helm init --client-only --wait
     displayName: 'helm init'
 
-  - bash: helm package --version $(build.buildId) --destination $(build.artifactStagingDirectory) $(projectNamePath)/charts/$(projectName)
+  - bash: helm package --version $(build.buildNumber) --destination $(build.artifactStagingDirectory) $(projectNamePath)/charts/$(projectName)
     displayName: 'helm package'
     workingDirectory: 'src' 
 
-  - bash: az acr helm push -n $(registryName) -u $(registryLogin) -p $(registryPassword) $(build.artifactStagingDirectory)/$(projectName)-$(build.buildId).tgz
+  - bash: az acr helm push -n $(registryName) -u $(registryLogin) -p $(registryPassword) $(build.artifactStagingDirectory)/$(projectName)-$(build.buildNumber).tgz
     displayName: 'az acr helm push'
     condition: succeeded()
