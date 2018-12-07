@@ -5,7 +5,7 @@ pool:
 variables:
   registryServerName: '$(registryName).azurecr.io'
   imageName: '$(projectName)'
-  # define 4 more variables: projectName, registryName, registryLogin and registryPassword in the build pipeline in UI
+  # define 5 more variables: projectName, projectNamePath, registryName, registryLogin and registryPassword in the build pipeline in UI
 
 trigger:
   branches:
@@ -13,7 +13,7 @@ trigger:
     - '*'
   paths:
     include:
-    - src/Theta.Platform.UI.Orders.API/*
+    - src/$(projectNamePath)/*
 
 steps:
 - task: DotNetCoreCLI@2
@@ -49,5 +49,3 @@ steps:
 - bash: az acr helm push -n $(registryName) -u $(registryLogin) -p $(registryPassword) $(build.artifactStagingDirectory)/$(projectName)-$(build.buildId).tgz
   displayName: 'az acr helm push'
   condition: succeeded()
-
- 
