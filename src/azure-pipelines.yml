@@ -1,0 +1,53 @@
+pool:
+  vmImage: 'Ubuntu 16.04'
+
+
+variables:
+  registryServerName: '$(registryName).azurecr.io'
+  imageName: '$(projectName)'
+  # define 4 more variables: projectName, registryName, registryLogin and registryPassword in the build pipeline in UI
+
+trigger:
+  branches:
+    include:
+    - '*'
+  paths:
+    include:
+    - src/Theta.Platform.UI.Orders.API/*
+
+steps:
+- task: DotNetCoreCLI@2
+  displayName: 'run unit tests'
+  inputs:
+    command: test
+    projects: '**/$(projectNamePath).Tests/*.csproj'
+
+- script: docker build -f $(projectNamePath)/Dockerfile -t $(registryServerName)/$(imageName):$(build.buildId) .
+  displayName: 'docker build'
+  workingDirectory: 'src'
+
+- bash: docker login $(registryServerName) -u $(registryLogin) -p $(registryPassword)
+  displayName: 'docker login'
+
+- bash: |
+    docker push $(registryServerName)/$(imageName):$(build.buildId)
+  displayName: 'docker push'
+  condition: succeeded()
+
+- task: HelmInstaller@0
+  displayName: 'Install Helm 2.11.0'
+  inputs:
+    helmVersion: 2.11.0
+
+- bash: helm init --client-only --wait
+  displayName: 'helm init'
+
+- bash: helm package --version $(build.buildId) --destination $(build.artifactStagingDirectory) $(projectNamePath)/charts/$(projectName)
+  displayName: 'helm package'
+  workingDirectory: 'src' 
+
+- bash: az acr helm push -n $(registryName) -u $(registryLogin) -p $(registryPassword) $(build.artifactStagingDirectory)/$(projectName)-$(build.buildId).tgz
+  displayName: 'az acr helm push'
+  condition: succeeded()
+
+ 
