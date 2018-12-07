@@ -11,7 +11,7 @@ namespace Theta.Platform.UI.Instruments.API.Tests
         }
 
         [Test]
-        public void Test1()
+        public void Test101()
         {
             Assert.IsTrue(1 == 1);
         }
