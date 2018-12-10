@@ -28,6 +28,8 @@ Breifly:
 - CI (an Azure DevOps Build Pipeline) creates a Docker image and a Helm package and pushes both to an Azure Container Registry
 - CD (an Azure DevOps Release Pipeline) performs a Helm upgrade against a specified Azure Kubernetes cluster
 
+This is subject to change depending on how we'd like to structure container registries.  It may be that we have a seperate container registery per environment or per client in production, and therefore the push to the registry (from an artifact store) is part of the CD pipeline.
+
 To create a Build or Release pipeline follow the instructions in [Azure DevOps Pipeline](Azure-DevOps-Pipelines.md).
 
 ## Kubernetes
