@@ -52,7 +52,7 @@ jobs:
       command: test
       projects: '**/$(projectNamePath).Tests/*.csproj'
 
-  - script: docker build --build-arg Version="$(build.buildNumber)" -f $(projectNamePath)/Dockerfile -t $(registryServerName)/$(imageName):$(build.buildNumber) .
+  - script: docker build -f $(projectNamePath)/Dockerfile -t $(registryServerName)/$(imageName):$(build.buildNumber) .
     displayName: 'docker build'
     workingDirectory: 'src'
 
