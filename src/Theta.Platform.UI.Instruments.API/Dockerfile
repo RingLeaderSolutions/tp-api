@@ -1,4 +1,5 @@
 FROM microsoft/dotnet:2.1-aspnetcore-runtime AS base
+ARG Version
 WORKDIR /app
 EXPOSE 80
 EXPOSE 443
@@ -12,7 +13,7 @@ WORKDIR /src/Theta.Platform.UI.Instruments.API
 RUN dotnet build Theta.Platform.UI.Instruments.API.csproj -c Release -o /app
 
 FROM build AS publish
-RUN dotnet publish Theta.Platform.UI.Instruments.API.csproj -c Release -o /app
+RUN dotnet publish Theta.Platform.UI.Instruments.API.csproj /p:Version=$Version -c Release -o /app
 
 FROM base AS final
 WORKDIR /app
