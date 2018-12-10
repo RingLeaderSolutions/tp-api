@@ -4,9 +4,7 @@ Azure DevOps has two types of "pipeline":
 - Build
 - Release
 
-Azure DevOps supports providing a YAML configuration file, `azure-pipelines.yml`, to define a Build pipeline. 
-
-At the time of writing, defining Release Pipelines with YAML is not supported, but is planned. This [work item](https://dev.azure.com/mseng/Azure%20DevOps%20Roadmap/_workitems/edit/1221170) tracks their nearness to public release.
+Azure DevOps supports providing a YAML configuration file, `azure-pipelines.yml`, to define a Build pipeline.
 
 ## Creating a Build Pipeline
 Assuming you have already created an `azure-pipelines.yml` file at the root of the project you are working on (should usually be alongside the `Dockerfile`), you may expect Azure DevOps to reflect the new pipeline you defined immediately after commit. 
@@ -33,6 +31,7 @@ Note that for service pipelines there is a shared generic pipeline yml in the sr
 - ![Step 6](.attachments/img-create-pipeline/step-6.png "")
 
 ### Step 6A: If creating a service pipeline, create the necessary build variables
+These are documented in the generic `azure-pipelines.yml` file.
 - ![Step 6a](.attachments/img-create-pipeline/step-6a.png "")
 
 ### Step 6B: If creating a service pipeline, add the triggers manually
@@ -44,3 +43,26 @@ At the time of writing build variables in trigger paths do not seem to be workin
 
 ### Step 8: Done! 
 Your build should now display in the UI and be linked to the `azure-pipelines.yml` file for further updates later on.
+
+## Creating a Release Pipeline
+
+At the time of writing, defining Release Pipelines with YAML is not supported, but is planned. This [work item](https://dev.azure.com/mseng/Azure%20DevOps%20Roadmap/_workitems/edit/1221170) tracks their nearness to public release.
+
+Therefore to create a Release Pipeline you'll need to clone an existing Pipeline.
+
+### Step 1: Clone Pipeline
+- ![Step 1](.attachments/img-create-release-pipeline/step-1.png "")
+
+### Step 2: Rename the Pipeline
+- ![Step 2](.attachments/img-create-release-pipeline/step-2.png "")
+
+### Step 3: Remove the Artifact and add a new one for the correct corresponding Build Pipeline
+- ![Step 3](.attachments/img-create-release-pipeline/step-3.png "")
+
+### Step 4: Enable the Continuous deployment trigger and add a branch filter
+- ![Step 4](.attachments/img-create-release-pipeline/step-4.png "")
+
+### Step 5: Update the Variables
+- ![Step 5](.attachments/img-create-release-pipeline/step-5.png "")
+
+### Step 6: Click Save and Queue your first release
