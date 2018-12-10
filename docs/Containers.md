@@ -32,6 +32,19 @@ This is subject to change depending on how we'd like to structure container regi
 
 To create a Build or Release pipeline follow the instructions in [Azure DevOps Pipeline](Azure-DevOps-Pipelines.md).
 
+## Versioning strategy
+
+We intend to use [SemVer 2.0](https://semver.org/spec/v2.0.0.html) to consistently version our microservices and their corresponding containers.
+
+.Net Core allows the setting of a `VersionPrefix` e.g. 1.2.3 and a `VersionSuffix` e.g. alpha to form a `Version` e.g. 1.2.3-alpha (more details [here](https://andrewlock.net/version-vs-versionsuffix-vs-packageversion-what-do-they-all-mean/)).
+
+The Azure DevOps Build Pipeline currently creates the `VersionPrefix` (major.minor.patch).  The major.minor portion is controlled by a repository file (`version.txt`, so we can change it on branches etc) and the patch is controlled by an automatic counter in Azure DevOps.
+
+This is achieved with two jobs in the pipeline:
+
+- one to read the `version.txt` file, exporting a variable `majorMinor` in future jobs
+- the next job uses the `majorMinor` variable within a counter expression (so if the major minor version changes, the counter starts from zero again). This job then has a step to set the build number which is used as a parameter in various dotnet, docker and helm steps.
+
 ## Kubernetes
 
 The Kubernetes cluster can be managed from the Azure Shell [shell.azure.com](https://shell.azure.com) using commands such as those found on the [Kubernetes cheatsheet](https://kubernetes.io/docs/reference/kubectl/cheatsheet/).
