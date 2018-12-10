@@ -36,7 +36,7 @@ To create a Build or Release pipeline follow the instructions in [Azure DevOps P
 
 The Kubernetes cluster can be managed from the Azure Shell [shell.azure.com](https://shell.azure.com) using commands such as those found on the [Kubernetes cheatsheet](https://kubernetes.io/docs/reference/kubectl/cheatsheet/).
 
-Kubernetes also has a dashboard.  To connect to the dashboard, locate the AKS using the Azure portal [potal.azure.com](https://portal.azure.com) and simply click `View Kubernetes dashboard` and follow the connection steps:
+Kubernetes also has a dashboard.  To connect to the dashboard, locate the AKS using the Azure portal [portal.azure.com](https://portal.azure.com) and simply click `View Kubernetes dashboard` and follow the connection steps:
 
 1. Open Azure CLI version 2.0.27 or later. This will not work in cloud shell and must be running on your local machine. [How to install the Azure CLI](https://docs.microsoft.com/en-gb/cli/azure/install-azure-cli?view=azure-cli-latest).
 1. If you do not already have kubectl installed in your CLI, run the following command:
