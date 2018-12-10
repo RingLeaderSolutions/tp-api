@@ -1,0 +1,21 @@
+FROM microsoft/dotnet:2.1-aspnetcore-runtime AS base
+WORKDIR /app
+EXPOSE 80
+EXPOSE 443
+
+FROM microsoft/dotnet:2.1-sdk AS build
+WORKDIR /src
+COPY Theta.Platform.Order.Management.Service/Theta.Platform.Order.Management.Service.csproj Theta.Platform.Order.Management.Service/
+RUN dotnet restore Theta.Platform.Order.Management.Service/Theta.Platform.Order.Management.Service.csproj
+COPY . .
+WORKDIR /src/Theta.Platform.Order.Management.Service
+RUN dotnet build Theta.Platform.Order.Management.Service.csproj -c Release -o /app
+
+FROM build AS publish
+ARG Version
+RUN dotnet publish Theta.Platform.Order.Management.Service.csproj /p:Version=$Version -c Release -o /app
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app .
+ENTRYPOINT ["dotnet", "Theta.Platform.Order.Management.Service.dll"]
