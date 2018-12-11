@@ -32,7 +32,7 @@ namespace Theta.Platform.Order.Management.Service.Messaging.Subscribers
             return new OrderCreatedEvent()
             {
                 CurrencyCode = obj.CurrencyCode,
-                Id = obj.Id,
+                Id = obj.DeskId,
                 LimitPrice = obj.LimitPrice,
                 Quantity = obj.Quantity,
                 Type = obj.Type

@@ -36,7 +36,7 @@ namespace Theta.Platform.Order.Management.Service.Data
 
         public async Task<List<Order>> GetOrder(Guid orderId)
         {
-            var results = await _ordersTable.ExecuteQueryAsync(Query("PartitionKey", orderId));
+            var results = await _ordersTable.ExecuteQueryAsync(Query("OrderId", orderId));
 
             return results?.Select(order => order.ToOrder()).ToList();
         }
@@ -50,7 +50,7 @@ namespace Theta.Platform.Order.Management.Service.Data
 
         public async Task<List<Order>> GetOrdersForEntity(Guid entityId)
         {
-            var results = await _ordersTable.ExecuteQueryAsync(Query("EntityId", entityId));
+            var results = await _ordersTable.ExecuteQueryAsync(Query("PartitionKey", entityId));
 
             return results?.Select(order => order.ToOrder()).ToList();
         }

@@ -12,7 +12,7 @@ namespace Theta.Platform.Order.Management.Service
     {
         public static OrderEntity ToOrderEntity(this Order order, string messageId)
         {
-            return new OrderEntity(order.Id, messageId)
+            return new OrderEntity(order.DeskId, messageId)
             {
                 CurrencyCode = order.CurrencyCode,
                 LimitPrice = order.LimitPrice,
@@ -24,7 +24,7 @@ namespace Theta.Platform.Order.Management.Service
                 Type = order.Type,
                 InstrumentId = order.InstrumentId,
                 OwnerId = order.OwnerId,
-                EntityId = order.EntityId
+                OrderId = order.OrderId
             };
         }
 
@@ -32,7 +32,7 @@ namespace Theta.Platform.Order.Management.Service
         {
             return new Order()
             {
-                Id = new Guid(orderEntity.PartitionKey),
+                DeskId = new Guid(orderEntity.PartitionKey),
                 InstrumentId = orderEntity.InstrumentId,
                 CurrencyCode = orderEntity.CurrencyCode,
                 LimitPrice = orderEntity.LimitPrice,
@@ -43,7 +43,7 @@ namespace Theta.Platform.Order.Management.Service
                 Status = orderEntity.Status,
                 Type = orderEntity.Type,
                 OwnerId = orderEntity.OwnerId,
-                EntityId = orderEntity.EntityId
+                OrderId = orderEntity.OrderId
             };
         }
 

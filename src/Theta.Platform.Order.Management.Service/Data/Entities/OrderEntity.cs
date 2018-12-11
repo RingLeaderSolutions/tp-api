@@ -8,9 +8,9 @@ namespace Theta.Platform.Order.Management.Service.Data.Entities
 {
     public class OrderEntity : CustomTableEntity
     {
-        public OrderEntity(Guid orderId, string messageId)
+        public OrderEntity(Guid deskId, string messageId)
         {
-            this.PartitionKey = orderId.ToString();
+            this.PartitionKey = deskId.ToString();
             this.RowKey = messageId;
         }
 
@@ -22,7 +22,7 @@ namespace Theta.Platform.Order.Management.Service.Data.Entities
 
         public Guid OwnerId { get; set; }
 
-        public Guid EntityId { get; set; }
+        public Guid OrderId { get; set; }
 
         public OrderStatus Status { get; set; }
 

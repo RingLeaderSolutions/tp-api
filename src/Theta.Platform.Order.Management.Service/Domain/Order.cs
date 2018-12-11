@@ -4,7 +4,7 @@ namespace Theta.Platform.Order.Management.Service
 {
     public class Order
     {
-        public Guid Id { get; set; }
+        public Guid DeskId { get; set; }
 
         public Guid? ParentOrderId { get; set; }
 
@@ -12,7 +12,7 @@ namespace Theta.Platform.Order.Management.Service
 
         public Guid OwnerId { get; set; }
 
-        public Guid EntityId { get; set; }
+        public Guid OrderId { get; set; }
 
         public OrderStatus Status { get; set; }
 
