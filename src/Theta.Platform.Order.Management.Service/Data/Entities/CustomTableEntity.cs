@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 
 namespace Theta.Platform.Order.Management.Service.Data.Entities
 {
+    // Storing decimals and enums 
+    // https://stackoverflow.com/questions/11071899/storing-decimal-data-type-in-azure-tables
     public class CustomTableEntity : TableEntity
     {
         public override void ReadEntity(IDictionary<string, EntityProperty> properties, OperationContext operationContext)

@@ -45,7 +45,9 @@ namespace Theta.Platform.Order.Management.Service
 
             services.AddTransient<IPubsubResourceManager, PubsubResourceManager>();
             services.AddTransient<ISubscriber<Order, OrderCreatedEvent>, CreateOrderSubscriber>();
+            services.AddSingleton<IAzureStorageResourceManager, AzureStorageResourceManager>();
             services.AddTransient<IOrderRepository, OrderRepository>();
+
 
             services.AddCors(options =>
             {
@@ -73,8 +75,11 @@ namespace Theta.Platform.Order.Management.Service
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public async void Configure(IApplicationBuilder app, IHostingEnvironment env, IAzureStorageResourceManager azureStorageResourceManager)
         {
+            // Setup the cloud storage table
+            await azureStorageResourceManager.CreateOrdersTableAsync();
+
             // Register the recievers
             app.ApplicationServices.GetServices<ISubscriber<Order, OrderCreatedEvent>>()
                 .ToList().ForEach(x => x.RegisterOnMessageHandlerAndReceiveMessages());

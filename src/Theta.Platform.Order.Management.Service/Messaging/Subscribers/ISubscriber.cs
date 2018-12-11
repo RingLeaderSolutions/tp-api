@@ -10,6 +10,6 @@ namespace Theta.Platform.Order.Management.Service.Messaging.Subscribers
     {
         void RegisterOnMessageHandlerAndReceiveMessages();
 
-        Task<V> ProcessAsync(T obj, string messageId, IOrderRepository orderRepository);
+        Task<V> ProcessMessageAsync(T obj, string messageId, IOrderRepository orderRepository);
     }
 }

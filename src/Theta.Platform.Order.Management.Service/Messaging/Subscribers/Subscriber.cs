@@ -59,14 +59,14 @@ namespace Theta.Platform.Order.Management.Service.Messaging.Subscribers
 
             var entity = JsonConvert.DeserializeObject<T>(messageText);
 
-            var evt = await this.ProcessAsync(entity, message.MessageId, _orderRepository);
+            var evt = await this.ProcessMessageAsync(entity, message.MessageId, _orderRepository);
 
             await _eventPublisher.PublishAsync(evt);
 
             await _subscriptionClient.CompleteAsync(message.SystemProperties.LockToken);
         }
 
-        public abstract Task<V> ProcessAsync(T obj, string messageId, IOrderRepository orderRepository);
+        public abstract Task<V> ProcessMessageAsync(T obj, string messageId, IOrderRepository orderRepository);
 
         static Task ExceptionReceivedHandler(ExceptionReceivedEventArgs exceptionReceivedEventArgs)
         {

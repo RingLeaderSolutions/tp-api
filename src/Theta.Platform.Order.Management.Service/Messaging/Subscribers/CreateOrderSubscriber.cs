@@ -23,7 +23,7 @@ namespace Theta.Platform.Order.Management.Service.Messaging.Subscribers
             _orderExprationPublisher = new Publisher(pubSubConfiguration, "cancel-order");
         }
 
-        public override async Task<OrderCreatedEvent> ProcessAsync(Order obj, string messageId, IOrderRepository orderRepository)
+        public override async Task<OrderCreatedEvent> ProcessMessageAsync(Order obj, string messageId, IOrderRepository orderRepository)
         {
             Console.WriteLine("Recieved Message");
 

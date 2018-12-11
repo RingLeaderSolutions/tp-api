@@ -30,12 +30,6 @@ namespace Theta.Platform.Order.Management.Service.Configuration
             get
             {
                 return $"Endpoint={Endpoint};SharedAccessKeyName={SharedAccessKeyName};SharedAccessKey={SharedAccessKey}";
-//#if DEBUG
-//                return "UseDevelopmentStorage=true";
-//#else
-//                return $"DefaultEndpointsProtocol={DefaultEndpointsProtocol};AccountName={AccountName};AccountKey{AccountKey};TableEndpoint={TableEndpoint};";
-//#endif
-
             }
         }
 

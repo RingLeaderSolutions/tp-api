@@ -23,13 +23,6 @@ namespace Theta.Platform.Order.Management.Service.Data
             _tableClient = _storageAccount.CreateCloudTableClient();
 
             _ordersTable = _tableClient.GetTableReference("orders");
-
-            CreateOrdersTableAsync();
-        }
-
-        async void CreateOrdersTableAsync()
-        {
-            await _ordersTable.CreateIfNotExistsAsync();
         }
 
         public async Task CreateOrder(Order order, string messageId)

@@ -1,6 +1,6 @@
 using NUnit.Framework;
 
-namespace Tests
+namespace Theta.Platform.Order.Management.Service.Tests
 {
     public class Tests
     {

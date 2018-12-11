@@ -20,12 +20,6 @@ namespace Theta.Platform.Order.Management.Service.Configuration
             get
             {
                 return $"DefaultEndpointsProtocol={DefaultEndpointsProtocol};AccountName={AccountName};AccountKey={AccountKey};TableEndpoint={TableEndpoint};";
-//#if DEBUG
-//                return "UseDevelopmentStorage=true";
-//#else
-//                return $"DefaultEndpointsProtocol={DefaultEndpointsProtocol};AccountName={AccountName};AccountKey{AccountKey};TableEndpoint={TableEndpoint};";
-//#endif
-
             }
         }
     }
