@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reactive.Linq;
 using Microsoft.AspNetCore.SignalR;
-using Theta.Platform.Domain.Instruments;
+using Theta.Platform.UI.Pricing.Streaming.Domain.Instruments;
 
 namespace Theta.Platform.UI.Pricing.Streaming.Services
 {

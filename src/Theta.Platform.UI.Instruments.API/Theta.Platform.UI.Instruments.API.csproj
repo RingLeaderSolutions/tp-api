@@ -18,8 +18,4 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="4.0.1" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Theta.Platform.Domain\Theta.Platform.Domain.csproj" />
-  </ItemGroup>
-
 </Project>

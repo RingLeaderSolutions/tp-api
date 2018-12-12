@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
-using Theta.Platform.Domain.Instruments;
+using Theta.Platform.UI.Instruments.API.Domain.Instruments;
 
 namespace Theta.Platform.UI.Instruments.API.Controllers
 {

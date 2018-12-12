@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Flurl.Http;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
-using Theta.Platform.Domain.Instruments;
+using Theta.Platform.UI.Pricing.Streaming.Domain.Instruments;
 
 namespace Theta.Platform.UI.Pricing.Streaming
 {
