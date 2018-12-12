@@ -16,6 +16,7 @@ spec:
     metadata:
       labels:
         app: {{ template "fullname" . }}
+        aadpodidbinding: thetaservicesidentity
     spec:
 {{ if .Values.image.private }}
       imagePullSecrets:

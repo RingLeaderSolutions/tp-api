@@ -4,4 +4,4 @@ metadata:
   name: {identity}-binding
 spec:
   AzureIdentity: {identity}
-  Selector: {identity}
+  Selector: thetaservicesidentity
