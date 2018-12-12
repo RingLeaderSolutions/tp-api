@@ -23,9 +23,9 @@ namespace Theta.Platform.Common.SecretManagement
                 return appSetting;
             }
 
-            var azureServiceTokenProvider = new AzureServiceTokenProvider();
+            var tokenProvider = new AzureServiceTokenProvider();
 
-            var kv = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(azureServiceTokenProvider.KeyVaultTokenCallback));
+            var kv = new KeyVaultClient((authority, resource, scope) => tokenProvider.KeyVaultTokenCallback(authority, resource, scope));
             var secretBundle = await kv.GetSecretAsync($"https://{_vaultName}.vault.azure.net/", secretName);
 
             return secretBundle.Value;
