@@ -2,29 +2,29 @@
 using System.Reactive.Linq;
 using Microsoft.AspNetCore.SignalR;
 using Theta.Platform.UI.Pricing.Streaming.Domain.Instruments;
+using Theta.Platform.UI.Pricing.Streaming.Hubs;
 
 namespace Theta.Platform.UI.Pricing.Streaming.Services
 {
     public class RandomPriceGenerator
     {
         private readonly IHubContext<PricesHub> _hub;
-        private readonly Random random = new Random();
+        private readonly Random _random = new Random();
 
         public RandomPriceGenerator(IHubContext<PricesHub> hub)
         {
             _hub = hub;
-            GeneratePrices();
         }
 
 
-        private void GeneratePrices()
+        public void GeneratePrices()
         {
             Observable.Generate(
                 0,
                 _ => true,
                 x => x + 1,
-                _ => random.Next(100, 200),
-                _ => TimeSpan.FromMilliseconds(random.Next(1, 2) * 1000))
+                _ => _random.Next(100, 200),
+                _ => TimeSpan.FromMilliseconds(_random.Next(1, 2) * 1000))
             .Subscribe(x =>
                 {
                     var instrument = GetRandomInstrument();
@@ -43,7 +43,7 @@ namespace Theta.Platform.UI.Pricing.Streaming.Services
         private Instrument GetRandomInstrument()
         {
             var all = InstrumentSampleData.All;
-            var index = random.Next(0, all.Count);
+            var index = _random.Next(0, all.Count);
 
             return all[index];
         }

@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.DependencyInjection;
+using Theta.Platform.UI.Pricing.Streaming.Hubs;
 using Theta.Platform.UI.Pricing.Streaming.Services;
 
 namespace Theta.Platform.UI.Pricing.Streaming
@@ -32,6 +27,7 @@ namespace Theta.Platform.UI.Pricing.Streaming
             ConfigureAuthService(services);
 
             services.AddSingleton<RandomPriceGenerator>();
+            services.AddSingleton<RandomNotificationGenerator>();
         }
 
         private void ConfigureAuthService(IServiceCollection services)
@@ -55,9 +51,16 @@ namespace Theta.Platform.UI.Pricing.Streaming
             {
                 routes.MapHub<PricesHub>("/hub", options =>
                     options.Transports = Microsoft.AspNetCore.Http.Connections.HttpTransports.All);
+                routes.MapHub<NotificationsHub>("/hubNotifications", options =>
+                    options.Transports = Microsoft.AspNetCore.Http.Connections.HttpTransports.All);
             });
 
-            app.ApplicationServices.GetService<RandomPriceGenerator>();
+            app.ApplicationServices.GetService<RandomPriceGenerator>()
+                .GeneratePrices();
+
+
+            app.ApplicationServices.GetService<RandomNotificationGenerator>()
+                .GenerateNotifications();
         }
     }
 }
