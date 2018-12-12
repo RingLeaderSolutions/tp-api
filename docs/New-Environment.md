@@ -4,10 +4,11 @@ This document will eventually list the steps to creating a new Theta platform en
 
 ## Infrastructure Steps
 
-1. Add the new enviornment name to `theta-platform\infra\environment-names\common.ps1`
-2. Run `theta-platform\infra\create-key-vault.ps1`
-
 TODO: Terraform / Azure Resource Manager template documentation
+
+1. Add the new enviornment name to `theta-platform\infra\environment-names\common.ps1`
+2. Run `theta-platform\infra\create-key-vault.ps1` to create a Key Vault
+3. Run `configure-k8s-managed-service-identity.ps1` to allow the k8s pods to get and list secrets in the Key Vault via a Managed Service Identity
 
 ## Application Steps
 
