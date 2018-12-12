@@ -12,7 +12,8 @@ WORKDIR /src/Theta.Platform.UI.Pricing.Streaming
 RUN dotnet build Theta.Platform.UI.Pricing.Streaming.csproj -c Release -o /app
 
 FROM build AS publish
-RUN dotnet publish Theta.Platform.UI.Pricing.Streaming.csproj -c Release -o /app
+ARG Version
+RUN dotnet publish Theta.Platform.UI.Pricing.Streaming.csproj /p:Version=$Version -c Release -o /app
 
 FROM base AS final
 WORKDIR /app

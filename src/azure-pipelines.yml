@@ -1,0 +1,81 @@
+variables:
+  registryServerName: '$(registryName).azurecr.io'
+  imageName: '$(projectName)'
+  # define 5 more variables: projectName, projectNamePath, registryName, registryLogin and registryPassword in the build pipeline in UI
+
+trigger:
+  batch: true
+  branches:
+    include:
+    - '*'
+  paths:
+    include:
+    - 'src/$(projectNamePath)/*'
+    - 'src/$(projectNamePath).Tests/*'
+    # note, varibales in trigger paths do not seem to be working 
+    # (see issue https://github.com/MicrosoftDocs/vsts-docs/issues/2691 raised on doc https://docs.microsoft.com/en-us/azure/devops/pipelines/build/triggers?view=vsts&tabs=yaml)
+    # for now follow steps in docs/Azure-DevOps-Pipelines.md
+
+jobs:
+- job: versioning
+  pool:
+    vmImage: 'vs2017-win2016'
+  steps:
+  - powershell: $(system.defaultWorkingDirectory)/src/get-major-minor-version.ps1
+    name: setMajorMinorStep
+    displayName: 'read major minor'
+    workingDirectory: $(system.defaultWorkingDirectory)/src/$(projectNamePath)
+  - script: echo "The Major Minor Version is $(setvarStep.majorMinor)"
+    name: echoMajorMinorStep
+    displayName: 'echo major minor'
+
+- job: build
+  dependsOn: versioning
+
+  pool:
+    vmImage: 'Ubuntu 16.04'
+
+  variables:
+    majorMinor: $[dependencies.versioning.outputs['setMajorMinorStep.majorMinor']]
+    patch: $[counter(dependencies.versioning.outputs['setMajorMinorStep.majorMinor'])]
+
+  steps:
+  - bash: echo "The patch is $(patch)"
+    displayName: 'echo patch'
+
+  - bash: echo "##vso[build.updatebuildnumber]$(majorMinor).$(patch)"
+    displayName: 'update build number to major.minor.patch'
+
+  - task: DotNetCoreCLI@2
+    displayName: 'run unit tests'
+    inputs:
+      command: test
+      projects: '**/$(projectNamePath).Tests/*.csproj'
+
+  - script: docker build --build-arg Version="$(build.buildNumber)" -f $(projectNamePath)/Dockerfile -t $(registryServerName)/$(imageName):$(build.buildNumber) .
+    displayName: 'docker build'
+    workingDirectory: 'src'
+
+  - bash: docker login $(registryServerName) -u $(registryLogin) -p $(registryPassword)
+    displayName: 'docker login'
+
+  - bash: |
+      docker push $(registryServerName)/$(imageName):$(build.buildNumber)
+    displayName: 'docker push'
+    condition: succeeded()
+
+  - task: HelmInstaller@0
+    displayName: 'Install Helm 2.11.0'
+    inputs:
+      helmVersion: 2.11.0
+
+  - bash: helm init --client-only --wait
+    displayName: 'helm init'
+
+  - bash: helm package --version $(build.buildNumber) --destination $(build.artifactStagingDirectory) $(projectNamePath)/charts/$(projectName)
+    displayName: 'helm package'
+    workingDirectory: 'src' 
+
+  - bash: az acr helm push -n $(registryName) -u $(registryLogin) -p $(registryPassword) $(build.artifactStagingDirectory)/$(projectName)-$(build.buildNumber).tgz
+    displayName: 'az acr helm push'
+    condition: succeeded()

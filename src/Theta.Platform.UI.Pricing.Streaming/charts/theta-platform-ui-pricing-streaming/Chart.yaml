@@ -1,0 +1,4 @@
+apiVersion: v1
+description: Pricing Streaming Service for the UI 
+name: theta-platform-ui-pricing-streaming
+version: v0.1.0
