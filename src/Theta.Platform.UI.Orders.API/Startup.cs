@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Swagger;
+using Theta.Platform.Common.SecretManagement;
 
 namespace Theta.Platform.UI.Orders.API
 {
@@ -20,6 +21,9 @@ namespace Theta.Platform.UI.Orders.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // TODO - vault name automatically determined via convention + detection of environment name
+            services.AddTransient<IVault, Vault>(x => new Vault("theta-dev-platform-vault"));
+
             services.AddCors(options =>
             {
                 options.AddPolicy("CorsPolicy",

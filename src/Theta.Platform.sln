@@ -31,6 +31,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Theta.Platform.Order.Manage
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Theta.Platform.Order.Management.Service.Tests", "Theta.Platform.Order.Management.Service.Tests\Theta.Platform.Order.Management.Service.Tests.csproj", "{C8B89621-54E8-4B13-A646-37F5C4545512}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Theta.Platform.Common", "Theta.Platform.Common\Theta.Platform.Common.csproj", "{ED0A1058-184C-4D0D-A23B-AF18FA668A0F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -77,6 +79,10 @@ Global
 		{C8B89621-54E8-4B13-A646-37F5C4545512}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C8B89621-54E8-4B13-A646-37F5C4545512}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C8B89621-54E8-4B13-A646-37F5C4545512}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED0A1058-184C-4D0D-A23B-AF18FA668A0F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED0A1058-184C-4D0D-A23B-AF18FA668A0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED0A1058-184C-4D0D-A23B-AF18FA668A0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED0A1058-184C-4D0D-A23B-AF18FA668A0F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
