@@ -10,7 +10,8 @@ services:
     build:
       context: .
       dockerfile: Theta.Platform.UI.Instruments.API/Dockerfile
-
+      args:
+        Version: 0.0.1-dev
   theta.platform.ui.pricing.streaming:
     image: thetaplatformuipricingstreaming
     networks:
@@ -20,6 +21,8 @@ services:
     build:
       context: .
       dockerfile: Theta.Platform.UI.Pricing.Streaming/Dockerfile
+      args:
+        Version: 0.0.1-dev
     depends_on:
       - theta.platform.ui.instruments.api
 
@@ -32,6 +35,8 @@ services:
     build:
       context: .
       dockerfile: Theta.Platform.UI.Orders.API/Dockerfile
+      args:
+        Version: 0.0.1-dev
   
 
 networks:
