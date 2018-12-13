@@ -4,11 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Theta.Platform.Order.Management.Service.Configuration;
 using Theta.Platform.Order.Management.Service.Data;
+using Theta.Platform.Order.Management.Service.Domain.Commands;
 using Theta.Platform.Order.Management.Service.Messaging.MessageContracts;
 
 namespace Theta.Platform.Order.Management.Service.Messaging.Subscribers
 {
-    public class CreateOrderSubscriber : Subscriber<Service.Order, OrderCreatedEvent>, ISubscriber<Service.Order, OrderCreatedEvent>
+    public class CreateOrderSubscriber : Subscriber<CreateOrderCommand>, ISubscriber<CreateOrderCommand>
     {
         protected override string SubscriptionName => "create-order_order-management-service";
 
@@ -23,20 +24,12 @@ namespace Theta.Platform.Order.Management.Service.Messaging.Subscribers
             _orderExprationPublisher = new Publisher(pubSubConfiguration, "cancel-order");
         }
 
-        public override async Task<OrderCreatedEvent> ProcessMessageAsync(Order obj, string messageId, IOrderRepository orderRepository)
+        public override async Task ProcessMessageAsync(CreateOrderCommand createOrderCommand, string messageId, IOrderRepository orderRepository)
         {
             Console.WriteLine("Recieved Message");
 
-            await orderRepository.CreateOrder(obj, messageId);
-
-            return new OrderCreatedEvent()
-            {
-                CurrencyCode = obj.CurrencyCode,
-                Id = obj.DeskId,
-                LimitPrice = obj.LimitPrice,
-                Quantity = obj.Quantity,
-                Type = obj.Type
-            };
+            // replace with OrderProcessManager (kill repo and all ref to Table Storage)
+            await orderRepository.CreateOrder(createOrderCommand, messageId);
         }
     }
 }

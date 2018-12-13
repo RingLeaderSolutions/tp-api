@@ -44,7 +44,7 @@ namespace Theta.Platform.Order.Management.Service
             services.AddSingleton<IPubSubConfiguration>(pubSubConfiguration);
 
             services.AddTransient<IPubsubResourceManager, PubsubResourceManager>();
-            services.AddTransient<ISubscriber<Order, OrderCreatedEvent>, CreateOrderSubscriber>();
+            services.AddTransient<ISubscriber<CreateOrderCommand>, CreateOrderSubscriber>();
             services.AddSingleton<IAzureStorageResourceManager, AzureStorageResourceManager>();
             services.AddTransient<IOrderRepository, OrderRepository>();
 

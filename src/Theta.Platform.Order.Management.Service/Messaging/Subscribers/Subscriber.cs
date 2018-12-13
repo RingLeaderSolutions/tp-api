@@ -10,7 +10,7 @@ using Theta.Platform.Order.Management.Service.Data;
 
 namespace Theta.Platform.Order.Management.Service.Messaging.Subscribers
 {
-    public abstract class Subscriber<T, V>
+    public abstract class Subscriber<T>
     {
         private readonly IPubsubResourceManager _pubsubResourceManager;
         private readonly IOrderRepository _orderRepository;
@@ -59,14 +59,12 @@ namespace Theta.Platform.Order.Management.Service.Messaging.Subscribers
 
             var entity = JsonConvert.DeserializeObject<T>(messageText);
 
-            var evt = await this.ProcessMessageAsync(entity, message.MessageId, _orderRepository);
-
-            await _eventPublisher.PublishAsync(evt);
+            await this.ProcessMessageAsync(entity, message.MessageId, _orderRepository);
 
             await _subscriptionClient.CompleteAsync(message.SystemProperties.LockToken);
         }
 
-        public abstract Task<V> ProcessMessageAsync(T obj, string messageId, IOrderRepository orderRepository);
+        public abstract Task ProcessMessageAsync(T obj, string messageId, IOrderRepository orderRepository);
 
         static Task ExceptionReceivedHandler(ExceptionReceivedEventArgs exceptionReceivedEventArgs)
         {
