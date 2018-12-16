@@ -26,9 +26,9 @@ namespace Theta.Platform.Order.Management.Service.Messaging.Subscribers
 
             var order = await orderRepository.GetAsync<Domain.Order>(completeOrderCommand.OrderId);
 
-            if (order == null)
+            if (IsAggregateNull(order))
             {
-                // Handle
+                // IsNull Handle, Log, etc
             }
 
             order.Reject(completeOrderCommand.Reason);

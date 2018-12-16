@@ -24,9 +24,10 @@ namespace Theta.Platform.Order.Management.Service.Messaging.Subscribers
         {
             var order = await orderRepository.GetAsync<Domain.Order>(createOrderCommand.OrderId);
 
-            if (order != null)
+            if (!IsAggregateNull(order))
             {
                 order.RaiseInvalidRequestEvent("Create", "Order already exists");
+                await orderRepository.Save(order);
                 return;
             }
 

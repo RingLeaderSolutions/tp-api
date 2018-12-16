@@ -58,6 +58,11 @@ namespace Theta.Platform.Order.Management.Service.Messaging.Subscribers
             await _subscriptionClient.CompleteAsync(message.SystemProperties.LockToken);
         }
 
+        protected bool IsAggregateNull<V>(V aggregate) where V : IAggregateRoot
+        {
+            return aggregate == null || aggregate.Version == -1;
+        }
+
         public abstract Task ProcessMessageAsync(T obj, IAggregateRepository orderRepository);
 
         static Task ExceptionReceivedHandler(ExceptionReceivedEventArgs exceptionReceivedEventArgs)

@@ -26,14 +26,15 @@ namespace Theta.Platform.Order.Management.Service.Messaging.Subscribers
 
             var order = await orderRepository.GetAsync<Domain.Order>(completeOrderCommand.OrderId);
 
-            if (order == null)
+            if (IsAggregateNull(order))
             {
-                // Handle
+                // IsNull Handle, Log, etc
             }
 
             if (order.Status != OrderStatus.Filled)
             {
                 order.RaiseInvalidRequestEvent("Complete", "Order not in Filled Status when Complete requested");
+                await orderRepository.Save(order);
                 return;
             }
 

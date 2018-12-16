@@ -17,7 +17,7 @@ namespace Theta.Platform.Order.Management.Service.Messaging.Subscribers
         public PickupOrderSubscriber(IPubsubResourceManager pubsubResourceManager, IPubSubConfiguration pubSubConfiguration, IAggregateRepository orderRepository)
             : base(pubsubResourceManager, pubSubConfiguration, orderRepository)
         {
-            
+           var order =  orderRepository.GetAsync<Domain.Order>(new Guid("24a287a2-f359-4a1f-91ed-989983f4990a")).Result;
         }
 
         public override async Task ProcessMessageAsync(PickupOrderCommand completeOrderCommand, IAggregateRepository orderRepository)
@@ -26,14 +26,15 @@ namespace Theta.Platform.Order.Management.Service.Messaging.Subscribers
 
             var order = await orderRepository.GetAsync<Domain.Order>(completeOrderCommand.OrderId);
 
-            if (order == null)
+            if (IsAggregateNull(order))
             {
-                // Handle
+                // IsNull Handle, Log, etc
             }
 
             if (order.Status != OrderStatus.Pending)
             {
                 order.RaiseInvalidRequestEvent("Pickup", "Order not in Pending Status when Pickup requested");
+                await orderRepository.Save(order);
                 return;
             }
 

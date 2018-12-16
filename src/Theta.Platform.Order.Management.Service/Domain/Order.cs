@@ -45,7 +45,7 @@ namespace Theta.Platform.Order.Management.Service.Domain
             Register<OrderPickedUpEvent>(When);
             Register<OrderPutDownEvent>(When);
             Register<SupplementaryEvidenceReceivedEvent>(When);
-            Register<InvalidStateChangeException>(When);
+            Register<InvalidStateChangeRequestedEvent>(When);
         }
 
         public Guid DeskId { get; set; }
@@ -129,7 +129,7 @@ namespace Theta.Platform.Order.Management.Service.Domain
             SupplementaryEvidence = evt.SupplementaryEvidence;
         }
 
-        private void When(InvalidStateChangeException evt)
+        private void When(InvalidStateChangeRequestedEvent evt)
         {
             // Log?
         }
