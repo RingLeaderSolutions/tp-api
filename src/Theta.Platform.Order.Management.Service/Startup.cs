@@ -13,13 +13,15 @@ using Microsoft.Extensions.Options;
 using Microsoft.WindowsAzure.Storage;
 using Swashbuckle.AspNetCore.Swagger;
 using Microsoft.WindowsAzure.Storage.Table;
-using Theta.Platform.Order.Management.Service.Data;
 using Theta.Platform.Order.Management.Service.Configuration;
 using Theta.Platform.Order.Management.Service.Messaging.Subscribers;
-using Theta.Platform.Order.Management.Service.Messaging.MessageContracts;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.ServiceBus.Fluent;
 using Theta.Platform.Order.Management.Service.Messaging;
+using Theta.Platform.Order.Management.Service.Domain.Commands;
+using Theta.Platform.Order.Management.Service.Framework;
+using EventStore.ClientAPI;
+using System.Net;
 
 namespace Theta.Platform.Order.Management.Service
 {
@@ -35,19 +37,25 @@ namespace Theta.Platform.Order.Management.Service
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var datastorageConfiguration = new DatastorageConfiguration();
-            Configuration.GetSection("Datastorage").Bind(datastorageConfiguration);
-            services.AddSingleton<IDatastorageConfiguration>(datastorageConfiguration);
-
             var pubSubConfiguration = new PubSubConfiguration();
             Configuration.GetSection("PubSub").Bind(pubSubConfiguration);
             services.AddSingleton<IPubSubConfiguration>(pubSubConfiguration);
 
-            services.AddTransient<IPubsubResourceManager, PubsubResourceManager>();
-            services.AddTransient<ISubscriber<CreateOrderCommand>, CreateOrderSubscriber>();
-            services.AddSingleton<IAzureStorageResourceManager, AzureStorageResourceManager>();
-            services.AddTransient<IOrderRepository, OrderRepository>();
+            var eventStoreConnection = EventStoreConnection.Create(
+                ConnectionSettings.Default,
+                new IPEndPoint(IPAddress.Loopback, 1113));
 
+            services.AddSingleton<IEventStoreConnection>(eventStoreConnection);
+
+            services.AddTransient<IPubsubResourceManager, PubsubResourceManager>();
+            services.AddTransient<IAggregateRepository, AggregateRepository>();
+
+            services.AddTransient<ISubscriber<CreateOrderCommand>, CreateOrderSubscriber>();
+            services.AddTransient<ISubscriber<CompleteOrderCommand>, CompleteOrderSubscriber>();
+            services.AddTransient<ISubscriber<PickupOrderCommand>, PickupOrderSubscriber>();
+            services.AddTransient<ISubscriber<PutDownOrderCommand>, PutDownOrderSubscriber>();
+            services.AddTransient<ISubscriber<RejectOrderCommand>, RejectOrderSubscriber>();
+            services.AddTransient<ISubscriber<RegisterSupplementaryEvidenceCommand>, RRegisterSupplementaryEvidenceCommandSubscriber>();
 
             services.AddCors(options =>
             {
@@ -75,14 +83,30 @@ namespace Theta.Platform.Order.Management.Service
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public async void Configure(IApplicationBuilder app, IHostingEnvironment env, IAzureStorageResourceManager azureStorageResourceManager)
+        public async void Configure(IApplicationBuilder app, IHostingEnvironment env, IEventStoreConnection eventStoreConnection)
         {
-            // Setup the cloud storage table
-            await azureStorageResourceManager.CreateOrdersTableAsync();
+            // Connect to Eventstore
+            await eventStoreConnection.ConnectAsync();
 
             // Register the recievers
-            app.ApplicationServices.GetServices<ISubscriber<Order, OrderCreatedEvent>>()
+            app.ApplicationServices.GetServices<ISubscriber<CreateOrderCommand>>()
                 .ToList().ForEach(x => x.RegisterOnMessageHandlerAndReceiveMessages());
+
+            app.ApplicationServices.GetServices<ISubscriber<CompleteOrderCommand>>()
+                .ToList().ForEach(x => x.RegisterOnMessageHandlerAndReceiveMessages());
+
+            app.ApplicationServices.GetServices<ISubscriber<RejectOrderCommand>>()
+                .ToList().ForEach(x => x.RegisterOnMessageHandlerAndReceiveMessages());
+
+            app.ApplicationServices.GetServices<ISubscriber<PickupOrderCommand>>()
+                .ToList().ForEach(x => x.RegisterOnMessageHandlerAndReceiveMessages());
+
+            app.ApplicationServices.GetServices<ISubscriber<PutDownOrderCommand>>()
+                .ToList().ForEach(x => x.RegisterOnMessageHandlerAndReceiveMessages());
+
+            app.ApplicationServices.GetServices<ISubscriber<RegisterSupplementaryEvidenceCommand>>()
+                .ToList().ForEach(x => x.RegisterOnMessageHandlerAndReceiveMessages());
+
 
             app.UseCors("CorsPolicy");
             if (env.IsDevelopment())

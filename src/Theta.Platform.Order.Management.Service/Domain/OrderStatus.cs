@@ -12,6 +12,7 @@ namespace Theta.Platform.Order.Management.Service
         Working,
         PartiallyFilled,
         Filled,
-        Done
+        Done, 
+        Rejected
     }
 }

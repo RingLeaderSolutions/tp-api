@@ -1,10 +1,14 @@
 ﻿using System;
-using Theta.Platform.EventStore;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Theta.Platform.Order.Management.Service.Domain.Events;
+using Theta.Platform.Order.Management.Service.Framework;
 
-namespace Theta.Platform.Order.Management.Service
+namespace Theta.Platform.Order.Management.Service.Domain
 {
-    public class Order : AggregateBase
+
+    public class Order : AggregateRoot
     {
         public Order(
             Guid deskId,
@@ -12,15 +16,14 @@ namespace Theta.Platform.Order.Management.Service
             Guid? parentOrderId,
             Guid instrumentId,
             Guid ownerId,
-            OrderStatus status,
             decimal quantity,
             OrderType type,
             decimal limitPrice,
             string currencyCode,
             MarkupUnit markupUnit,
-            decimal markupValue)
+            decimal markupValue) : this()
         {
-            RaiseEvent(new OrderCreatedEvent(
+            Raise(new OrderCreatedEvent(
                 deskId,
                 orderId,
                 parentOrderId,
@@ -34,6 +37,17 @@ namespace Theta.Platform.Order.Management.Service
                 markupValue));
         }
 
+        private Order()
+        {
+            Register<OrderCreatedEvent>(When);
+            Register<OrderCompletedEvent>(When);
+            Register<OrderRejectedEvent>(When);
+            Register<OrderPickedUpEvent>(When);
+            Register<OrderPutDownEvent>(When);
+            Register<SupplementaryEvidenceReceivedEvent>(When);
+            Register<InvalidStateChangeException>(When);
+        }
+
         public Guid DeskId { get; set; }
 
         public Guid? ParentOrderId { get; set; }
@@ -41,8 +55,6 @@ namespace Theta.Platform.Order.Management.Service
         public Guid InstrumentId { get; set; }
 
         public Guid OwnerId { get; set; }
-
-        public Guid OrderId { get; set; }
 
         public OrderStatus Status { get; private set; }
 
@@ -58,12 +70,48 @@ namespace Theta.Platform.Order.Management.Service
 
         public decimal MarkupValue { get; set; }
 
-        public override object Identifier => $"trade-{OrderId}";
+        public string SupplementaryEvidence { get; set; }
 
-        public void Apply(OrderCreatedEvent evt)
+
+        public void RecordSupplementaryEvidence(string supplementaryEvidence)
+        {
+            Raise(new SupplementaryEvidenceReceivedEvent(Id, supplementaryEvidence));
+        }
+
+        public void Complete()
+        {
+            Raise(new OrderCompletedEvent(Id));
+        }
+
+        public void Reject(string reason)
+        {
+            Raise(new OrderRejectedEvent(Id, reason));
+        }
+
+        public void Pickup(Guid ownerId)
+        {
+            Raise(new OrderPickedUpEvent(Id, ownerId));
+        }
+
+        public void RejectPickup(Guid ownerId, string reason)
+        {
+            Raise(new OrderPickUpRejectedEvent(Id, ownerId, reason));
+        }
+
+        public void PutDown()
+        {
+            Raise(new OrderPutDownEvent(Id));
+        }
+
+        public void RaiseInvalidRequestEvent(string eventType, string exception)
+        {
+            Raise(new InvalidStateChangeRequestedEvent(Id, eventType, exception));
+        }
+
+        public void When(OrderCreatedEvent evt)
         {
             DeskId = evt.DeskId;
-            OrderId = evt.OrderId;
+            Id = evt.OrderId;
             ParentOrderId = evt.ParentOrderId;
             InstrumentId = evt.InstrumentId;
             OwnerId = evt.OwnerId;
@@ -76,19 +124,35 @@ namespace Theta.Platform.Order.Management.Service
             MarkupValue = evt.MarkupValue;
         }
 
-        public void RecordSupplementaryEvidence(string supplementaryEvidence)
+        private void When(SupplementaryEvidenceReceivedEvent evt)
         {
-            RaiseEvent(new SupplementaryEvidenceReceivedEvent(OrderId, supplementaryEvidence));
+            SupplementaryEvidence = evt.SupplementaryEvidence;
         }
 
-        public void Reject(string reason)
+        private void When(InvalidStateChangeException evt)
         {
-            RaiseEvent(new OrderRejectedEvent(OrderId, reason));
+            // Log?
         }
 
-        public void Complete()
+        private void When(OrderCompletedEvent evt)
         {
-            RaiseEvent(new OrderCompletedEvent(OrderId));
+            Status = OrderStatus.Done;
+        }
+
+        private void When(OrderRejectedEvent evt)
+        {
+            Status = OrderStatus.Rejected;
+        }
+
+        private void When(OrderPickedUpEvent evt)
+        {
+            OwnerId = evt.OwnerId;
+            Status = OrderStatus.Working;
+        }
+
+        private void When(OrderPutDownEvent evt)
+        {
+            Status = OrderStatus.Pending;
         }
     }
 }

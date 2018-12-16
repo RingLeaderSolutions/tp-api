@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Theta.Platform.Order.Management.Service.Configuration;
-using Theta.Platform.Order.Management.Service.Data;
 using Theta.Platform.Order.Management.Service.Domain.Commands;
-using Theta.Platform.Order.Management.Service.Messaging.MessageContracts;
+using Theta.Platform.Order.Management.Service.Framework;
 
 namespace Theta.Platform.Order.Management.Service.Messaging.Subscribers
 {
@@ -15,21 +14,33 @@ namespace Theta.Platform.Order.Management.Service.Messaging.Subscribers
 
         protected override Subscription Subscription => this.PubSubConfiguration.Subscriptions.FirstOrDefault(x => x.SubscriptionName == SubscriptionName);
 
-        private readonly IPublisher _orderExprationPublisher;
-
-        public CreateOrderSubscriber(IPubsubResourceManager pubsubResourceManager, IPubSubConfiguration pubSubConfiguration, IOrderRepository orderRepository)
+        public CreateOrderSubscriber(IPubsubResourceManager pubsubResourceManager, IPubSubConfiguration pubSubConfiguration, IAggregateRepository orderRepository)
             : base(pubsubResourceManager, pubSubConfiguration, orderRepository)
         {
-            // Publish an Auto-Expration command?
-            _orderExprationPublisher = new Publisher(pubSubConfiguration, "cancel-order");
+            
         }
 
-        public override async Task ProcessMessageAsync(CreateOrderCommand createOrderCommand, string messageId, IOrderRepository orderRepository)
+        public override async Task ProcessMessageAsync(CreateOrderCommand createOrderCommand, IAggregateRepository orderRepository)
         {
-            Console.WriteLine("Recieved Message");
+            var order = await orderRepository.GetAsync<Domain.Order>(createOrderCommand.OrderId);
 
-            // replace with OrderProcessManager (kill repo and all ref to Table Storage)
-            await orderRepository.CreateOrder(createOrderCommand, messageId);
+            if (order != null)
+            {
+                order.RaiseInvalidRequestEvent("Create", "Order already exists");
+                return;
+            }
+
+            await orderRepository.Save(new Domain.Order(
+                createOrderCommand.DeskId, createOrderCommand.OrderId,
+                createOrderCommand.ParentOrderId,
+                createOrderCommand.InstrumentId,
+                createOrderCommand.OwnerId,
+                createOrderCommand.Quantity,
+                createOrderCommand.Type,
+                createOrderCommand.LimitPrice,
+                createOrderCommand.CurrencyCode,
+                createOrderCommand.MarkupUnit,
+                createOrderCommand.MarkupValue));
         }
     }
 }

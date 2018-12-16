@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Theta.Platform.Order.Management.Service.Data;
+using Theta.Platform.Order.Management.Service.Framework;
 
 namespace Theta.Platform.Order.Management.Service.Controllers
 {
@@ -11,9 +11,9 @@ namespace Theta.Platform.Order.Management.Service.Controllers
     [ApiController]
     public class OrderController : ControllerBase
     {
-        private readonly IOrderRepository _orderRepository;
+        private readonly IAggregateRepository _orderRepository;
 
-        public OrderController(IOrderRepository orderRepository)
+        public OrderController(IAggregateRepository orderRepository)
         {
             this._orderRepository = orderRepository;
         }
@@ -21,40 +21,14 @@ namespace Theta.Platform.Order.Management.Service.Controllers
         [HttpGet("{orderId}")]
         public async Task<IActionResult> Get(Guid orderId)
         {
-            var orders = await _orderRepository.GetOrder(orderId);
+            var order = await _orderRepository.GetAsync<Domain.Order>(orderId);
 
-            if (orders == null || orders.Any() == false)
+            if (order == null)
             {
                 return NotFound();
             }
 
-            return Ok(orders);
-        }
-
-        [HttpGet("entity/{entityId}")]
-        public async Task<IActionResult> GetByEntityId(Guid entityId)
-        {
-            var orders = await _orderRepository.GetOrdersForEntity(entityId);
-
-            if (orders == null || orders.Any() == false)
-            {
-                return NotFound();
-            }
-
-            return Ok(orders);
-        }
-
-        [HttpGet("owner/{ownerId}")]
-        public async Task<IActionResult> GetByOwnerId(Guid ownerId)
-        {
-            var orders = await _orderRepository.GetOrdersForOwner(ownerId);
-
-            if (orders == null || orders.Any() == false)
-            {
-                return NotFound();
-            }
-
-            return Ok(orders);
+            return Ok(order);
         }
     }
 }

@@ -16,9 +16,11 @@ namespace Theta.Platform.Order.Management.Service.Domain.Commands
                     decimal quantity,
                     OrderType type,
                     decimal limitPrice,
-                   string currencyCode,
-                   MarkupUnit markupUnit,
-                   decimal markupValue)
+                    string currencyCode,
+                    MarkupUnit markupUnit,
+                    decimal markupValue,
+                    DateTime? goodTillDate,
+                    TimeInForce timeInForce)
         {
             DeskId = deskId;
             OrderId = orderId;
@@ -31,6 +33,8 @@ namespace Theta.Platform.Order.Management.Service.Domain.Commands
             CurrencyCode = currencyCode;
             MarkupUnit = markupUnit;
             MarkupValue = markupValue;
+            GoodTillDate = goodTillDate;
+            TimeInForce = timeInForce;
         }
 
         public Guid DeskId { get; set; }
@@ -54,5 +58,9 @@ namespace Theta.Platform.Order.Management.Service.Domain.Commands
         public MarkupUnit MarkupUnit { get; set; }
 
         public decimal MarkupValue { get; set; }
+
+        public DateTime? GoodTillDate { get; set; }
+
+        public TimeInForce TimeInForce { get; set; }
     }
 }

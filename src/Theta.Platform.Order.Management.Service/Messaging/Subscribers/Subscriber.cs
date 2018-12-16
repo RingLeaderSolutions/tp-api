@@ -6,33 +6,27 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Theta.Platform.Order.Management.Service.Configuration;
-using Theta.Platform.Order.Management.Service.Data;
+using Theta.Platform.Order.Management.Service.Framework;
 
 namespace Theta.Platform.Order.Management.Service.Messaging.Subscribers
 {
     public abstract class Subscriber<T>
     {
         private readonly IPubsubResourceManager _pubsubResourceManager;
-        private readonly IOrderRepository _orderRepository;
+        private readonly IAggregateRepository _orderRepository;
         private readonly ISubscriptionClient _subscriptionClient;
-        private readonly IPublisher _eventPublisher;
-
+        
         protected abstract string SubscriptionName { get; }
         protected abstract Subscription Subscription { get; }
 
         public IPubSubConfiguration PubSubConfiguration { get; }
 
-        protected Subscriber(IPubsubResourceManager pubsubResourceManager, IPubSubConfiguration pubSubConfiguration, IOrderRepository orderRepository)
+        protected Subscriber(IPubsubResourceManager pubsubResourceManager, IPubSubConfiguration pubSubConfiguration, IAggregateRepository orderRepository)
         {
             PubSubConfiguration = pubSubConfiguration;
 
             _pubsubResourceManager = pubsubResourceManager;
             _orderRepository = orderRepository;
-
-            // Ensure the event topic exists
-            _pubsubResourceManager.EnsureTopicExists(Subscription.EventTopicName);
-
-            _eventPublisher = new Publisher(PubSubConfiguration, Subscription.EventTopicName);
 
             // Ensure the Command topic and subscription exist
             _pubsubResourceManager.EnsureTopicSubscriptionExists(Subscription.TopicName, Subscription.SubscriptionName);
@@ -59,12 +53,12 @@ namespace Theta.Platform.Order.Management.Service.Messaging.Subscribers
 
             var entity = JsonConvert.DeserializeObject<T>(messageText);
 
-            await this.ProcessMessageAsync(entity, message.MessageId, _orderRepository);
+            await this.ProcessMessageAsync(entity, _orderRepository);
 
             await _subscriptionClient.CompleteAsync(message.SystemProperties.LockToken);
         }
 
-        public abstract Task ProcessMessageAsync(T obj, string messageId, IOrderRepository orderRepository);
+        public abstract Task ProcessMessageAsync(T obj, IAggregateRepository orderRepository);
 
         static Task ExceptionReceivedHandler(ExceptionReceivedEventArgs exceptionReceivedEventArgs)
         {
