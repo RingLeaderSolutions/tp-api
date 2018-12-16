@@ -17,7 +17,7 @@ namespace Theta.Platform.Order.Management.Service.Messaging.Subscribers
         public PickupOrderSubscriber(IPubsubResourceManager pubsubResourceManager, IPubSubConfiguration pubSubConfiguration, IAggregateRepository orderRepository)
             : base(pubsubResourceManager, pubSubConfiguration, orderRepository)
         {
-           var order =  orderRepository.GetAsync<Domain.Order>(new Guid("24a287a2-f359-4a1f-91ed-989983f4990a")).Result;
+           //var order =  orderRepository.GetAsync<Domain.Order>(new Guid("24a287a2-f359-4a1f-91ed-989983f4990a")).Result;
         }
 
         public override async Task ProcessMessageAsync(PickupOrderCommand completeOrderCommand, IAggregateRepository orderRepository)
