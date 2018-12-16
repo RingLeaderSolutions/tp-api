@@ -55,6 +55,7 @@ namespace Theta.Platform.Order.Management.Service
             services.AddTransient<ISubscriber<PickupOrderCommand>, PickupOrderSubscriber>();
             services.AddTransient<ISubscriber<PutDownOrderCommand>, PutDownOrderSubscriber>();
             services.AddTransient<ISubscriber<RejectOrderCommand>, RejectOrderSubscriber>();
+            services.AddTransient<ISubscriber<FillOrderCommand>, FillOrderSubscriber>();
             services.AddTransient<ISubscriber<RegisterSupplementaryEvidenceCommand>, RRegisterSupplementaryEvidenceCommandSubscriber>();
 
             services.AddCors(options =>
@@ -102,6 +103,9 @@ namespace Theta.Platform.Order.Management.Service
                 .ToList().ForEach(x => x.RegisterOnMessageHandlerAndReceiveMessages());
 
             app.ApplicationServices.GetServices<ISubscriber<PutDownOrderCommand>>()
+                .ToList().ForEach(x => x.RegisterOnMessageHandlerAndReceiveMessages());
+
+            app.ApplicationServices.GetServices<ISubscriber<FillOrderCommand>>()
                 .ToList().ForEach(x => x.RegisterOnMessageHandlerAndReceiveMessages());
 
             app.ApplicationServices.GetServices<ISubscriber<RegisterSupplementaryEvidenceCommand>>()

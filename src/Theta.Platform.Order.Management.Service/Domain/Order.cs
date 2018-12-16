@@ -44,6 +44,7 @@ namespace Theta.Platform.Order.Management.Service.Domain
             Register<OrderRejectedEvent>(When);
             Register<OrderPickedUpEvent>(When);
             Register<OrderPutDownEvent>(When);
+            Register<OrderFilledEvent>(When);
             Register<SupplementaryEvidenceReceivedEvent>(When);
             Register<InvalidStateChangeRequestedEvent>(When);
         }
@@ -72,6 +73,16 @@ namespace Theta.Platform.Order.Management.Service.Domain
 
         public string SupplementaryEvidence { get; set; }
 
+        public decimal OustandingQuantity
+        {
+            get
+            {
+                return Quantity - Fills.Sum(f => f.Quantity);
+            }
+        }
+
+        public List<Fill> Fills { get; set; }
+
 
         public void RecordSupplementaryEvidence(string supplementaryEvidence)
         {
@@ -91,6 +102,11 @@ namespace Theta.Platform.Order.Management.Service.Domain
         public void Pickup(Guid ownerId)
         {
             Raise(new OrderPickedUpEvent(Id, ownerId));
+        }
+
+        public void Fill(Guid orderId, Guid rFQId, decimal price, decimal quantity)
+        {
+            Raise(new OrderFilledEvent(orderId, rFQId, price, quantity));
         }
 
         public void RejectPickup(Guid ownerId, string reason)
@@ -122,6 +138,7 @@ namespace Theta.Platform.Order.Management.Service.Domain
             CurrencyCode = evt.CurrencyCode;
             MarkupUnit = evt.MarkupUnit;
             MarkupValue = evt.MarkupValue;
+            Fills = new List<Fill>();
         }
 
         private void When(SupplementaryEvidenceReceivedEvent evt)
@@ -137,6 +154,20 @@ namespace Theta.Platform.Order.Management.Service.Domain
         private void When(OrderCompletedEvent evt)
         {
             Status = OrderStatus.Done;
+        }
+
+        private void When(OrderFilledEvent evt)
+        {
+            if (evt.Quantity < OustandingQuantity)
+            {
+                Status = OrderStatus.PartiallyFilled;
+            }
+            else
+            {
+                Status = OrderStatus.Filled;
+            }
+
+            Fills.Add(new Domain.Fill(evt.RFQId, evt.Price, evt.Quantity));
         }
 
         private void When(OrderRejectedEvent evt)
