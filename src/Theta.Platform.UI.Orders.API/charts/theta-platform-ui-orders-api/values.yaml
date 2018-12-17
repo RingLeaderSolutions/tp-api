@@ -1,4 +1,6 @@
 replicaCount: 1
+theta:
+  environment: dev
 image:
   private: false
   pullPolicy: Always
