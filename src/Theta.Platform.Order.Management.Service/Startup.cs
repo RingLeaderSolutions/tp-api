@@ -22,6 +22,7 @@ using Theta.Platform.Order.Management.Service.Domain.Commands;
 using Theta.Platform.Order.Management.Service.Framework;
 using EventStore.ClientAPI;
 using System.Net;
+using EventStore.ClientAPI.SystemData;
 
 namespace Theta.Platform.Order.Management.Service
 {
@@ -41,9 +42,12 @@ namespace Theta.Platform.Order.Management.Service
             Configuration.GetSection("PubSub").Bind(pubSubConfiguration);
             services.AddSingleton<IPubSubConfiguration>(pubSubConfiguration);
 
-            var eventStoreConnection = EventStoreConnection.Create(
-                ConnectionSettings.Default,
-                new IPEndPoint(IPAddress.Loopback, 1113));
+            var setting = ConnectionSettings.Create()
+                .SetDefaultUserCredentials(new UserCredentials("admin", "pass123"));
+
+            var tcpEndPoint = new IPEndPoint(IPAddress.Loopback, 1113);
+            IEventStoreConnection eventStoreConnection = EventStoreConnection
+                .Create(setting, tcpEndPoint);
 
             services.AddSingleton<IEventStoreConnection>(eventStoreConnection);
 
