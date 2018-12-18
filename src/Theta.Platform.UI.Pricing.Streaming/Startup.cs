@@ -47,6 +47,8 @@ namespace Theta.Platform.UI.Pricing.Streaming
 
             //app.UseAuthentication();
 
+
+
             app.UseSignalR(routes =>
             {
                 routes.MapHub<PricesHub>("/hub", options =>
