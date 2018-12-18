@@ -32,3 +32,5 @@ spec:
         env:
           - name: ASPNETCORE_ENVIRONMENT
             value: Development
+          - name: theta-environment
+            value: {{ .Values.theta.environment }}
