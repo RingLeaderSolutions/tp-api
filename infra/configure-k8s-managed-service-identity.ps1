@@ -13,6 +13,10 @@ az account set -s $subscriptionId
 
 $resourceGroup = "theta-$environment"
 
+# Set the default context to this environment's cluster
+az aks get-credentials --resource-group $resourceGroup --name "$resourceGroup-cluster"
+kubectl config use-context "$resourceGroup-cluster"
+
 # Configure your Kubernetes cluster to run Azure AD Pod Identity infrastructure
 kubectl create -f https://raw.githubusercontent.com/Azure/aad-pod-identity/master/deploy/infra/deployment.yaml
 
