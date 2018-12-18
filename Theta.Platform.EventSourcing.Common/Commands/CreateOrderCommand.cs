@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Theta.Platform.Order.Management.Service.Domain.Commands
+namespace Theta.Platform.Messaging.Commands
 {
     public class CreateOrderCommand
     {
@@ -14,13 +14,13 @@ namespace Theta.Platform.Order.Management.Service.Domain.Commands
                     Guid instrumentId,
                     Guid ownerId,
                     decimal quantity,
-                    OrderType type,
+                    string orderType,
                     decimal limitPrice,
                     string currencyCode,
-                    MarkupUnit markupUnit,
+                    string markupUnit,
                     decimal markupValue,
                     DateTime? goodTillDate,
-                    TimeInForce timeInForce)
+                    string timeInForce)
         {
             DeskId = deskId;
             OrderId = orderId;
@@ -28,7 +28,7 @@ namespace Theta.Platform.Order.Management.Service.Domain.Commands
             InstrumentId = instrumentId;
             OwnerId = ownerId;
             Quantity = quantity;
-            Type = type;
+            OrderType = orderType;
             LimitPrice = limitPrice;
             CurrencyCode = currencyCode;
             MarkupUnit = markupUnit;
@@ -49,18 +49,18 @@ namespace Theta.Platform.Order.Management.Service.Domain.Commands
 
         public decimal Quantity { get; set; }
 
-        public OrderType Type { get; set; }
+        public string OrderType { get; set; }
 
         public decimal LimitPrice { get; set; }
 
         public string CurrencyCode { get; set; }
 
-        public MarkupUnit MarkupUnit { get; set; }
+        public string MarkupUnit { get; set; }
 
         public decimal MarkupValue { get; set; }
 
         public DateTime? GoodTillDate { get; set; }
 
-        public TimeInForce TimeInForce { get; set; }
+        public string TimeInForce { get; set; }
     }
 }

@@ -14,4 +14,9 @@
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.0.2105168" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\Theta.Platform.Messaging.EventStore\Theta.Platform.Messaging.EventStore.csproj" />
+    <ProjectReference Include="..\Theta.Platform.Domain\Theta.Platform.Domain.csproj" />
+  </ItemGroup>
+
 </Project>

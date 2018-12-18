@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
-using Theta.Paltform.Order.Read.Service.Framework;
+using Theta.Paltform.Order.Read.Service.Data;
 
 namespace Theta.Paltform.Order.Read.Service.Controllers
 {
@@ -12,29 +12,22 @@ namespace Theta.Paltform.Order.Read.Service.Controllers
     [ApiController]
     public class OrderController : ControllerBase
     {
-        private IMemoryCache _cache;
+        private IOrderReader _orderReader;
 
-        public OrderController(IMemoryCache memoryCache)
+        public OrderController(IOrderReader orderReader)
         {
-            _cache = memoryCache;
+            _orderReader = orderReader;
         }
 
-        // GET api/values
         [HttpGet]
         public ActionResult<Domain.Order> Get(Guid orderId)
         {
-            List<object> events = new List<object>();
+            var order = _orderReader.GetById(orderId);
 
-            if (_cache.TryGetValue<List<object>>(orderId, out events))
-            {
-                var order = (IAggregateRoot)Activator.CreateInstance(typeof(Domain.Order), true);
-                events.ForEach(order.Apply);
-                order.ClearEvents();
+            if (order == null)
+                return NotFound();
 
-                return Ok(order);
-            }
-
-            return NotFound();
+            return Ok(order);
         }
     }
 }

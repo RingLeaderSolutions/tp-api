@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Theta.Platform.Messaging.Events;
 
-namespace Theta.Paltform.Order.Read.Service.Domain.Events
+namespace Theta.Platform.Messaging.Events
 {
-    public class OrderPutDownEvent : IDomainEvent
+    public class OrderPutDownEvent : IEvent
     {
         public OrderPutDownEvent(Guid orderId)
         {
@@ -13,5 +14,9 @@ namespace Theta.Paltform.Order.Read.Service.Domain.Events
         }
 
         public Guid OrderId { get; }
+
+        public Guid AggregateId => OrderId;
+
+        public string Type => this.GetType().Name;
     }
 }

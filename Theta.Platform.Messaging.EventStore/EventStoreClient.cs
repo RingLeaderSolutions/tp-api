@@ -32,8 +32,21 @@ namespace Theta.Platform.Messaging.EventStore
 
 			do
 			{
-				slice = await _connection.ReadStreamEventsForwardAsync(streamName, sliceStart, 200, false);
-				deserializedEvents.AddRange(slice.Events.Select(Deserialize<IEvent>));
+				slice = await _connection.ReadStreamEventsForwardAsync(streamName, sliceStart, 200, true);
+
+                var events = slice.Events;
+
+                foreach (var evt in events)
+                {
+                    var item = Deserialize<IEvent>(evt.Event);
+
+                    if (item != null)
+                    {
+                        deserializedEvents.Add(item);
+                    }
+                }
+
+                //deserializedEvents.AddRange(events.Select(x => ));
 				sliceStart = slice.NextEventNumber;
 			} while (!slice.IsEndOfStream);
 
@@ -50,8 +63,8 @@ namespace Theta.Platform.Messaging.EventStore
 
 			do
 			{
-				slice = await _connection.ReadAllEventsForwardAsync(sliceStart, 200, false);
-				deserializedEvents.AddRange(slice.Events.Select(Deserialize<IEvent>));
+				slice = await _connection.ReadAllEventsForwardAsync(sliceStart, 200, true);
+				deserializedEvents.AddRange(slice.Events.Select(x => Deserialize<IEvent>(x.Event)));
 				sliceStart = slice.NextPosition;
 			} while (!slice.IsEndOfStream);
 
@@ -68,8 +81,8 @@ namespace Theta.Platform.Messaging.EventStore
 
 			do
 			{
-				slice = await _connection.ReadStreamEventsForwardAsync(streamName, sliceStart, 200, false);
-				deserializedEvents.AddRange(slice.Events.Select(Deserialize<IEvent>));
+				slice = await _connection.ReadStreamEventsForwardAsync(streamName, sliceStart, 200, true);
+				deserializedEvents.AddRange(slice.Events.Select(x => Deserialize<IEvent>(x.Event)));
 				sliceStart = slice.NextEventNumber;
 			} while (!slice.IsEndOfStream);
 
@@ -96,7 +109,11 @@ namespace Theta.Platform.Messaging.EventStore
 					var onEventReceived = new Func<EventStoreSubscription, ResolvedEvent, Task>(
 						(subscription, ev) =>
 						{
-							var domainEvent = Deserialize<IEvent>(ev);
+							var domainEvent = Deserialize<IEvent>(ev.Event);
+
+                            if (domainEvent == null)
+                                return Task.CompletedTask;
+
 							obs.OnNext(domainEvent);
 							return Task.CompletedTask;
 						});
@@ -118,7 +135,7 @@ namespace Theta.Platform.Messaging.EventStore
 					var onEventReceived = new Func<EventStoreSubscription, ResolvedEvent, Task>(
 						(subscription, ev) =>
 						{
-							var domainEvent = Deserialize<TEvent>(ev);
+							var domainEvent = Deserialize<TEvent>(ev.Event);
 							obs.OnNext(domainEvent);
 							return Task.CompletedTask;
 						});
@@ -137,7 +154,7 @@ namespace Theta.Platform.Messaging.EventStore
 					var onEventReceived = new Func<EventStoreSubscription, ResolvedEvent, Task>(
 						(subscription, ev) =>
 						{
-							var domainEvent = Deserialize<IEvent>(ev);
+							var domainEvent = Deserialize<IEvent>(ev.Event);
 							obs.OnNext(domainEvent);
 							return Task.CompletedTask;
 						});
@@ -161,14 +178,29 @@ namespace Theta.Platform.Messaging.EventStore
 			}
 		}
 
-		private TEvent Deserialize<TEvent>(ResolvedEvent resolvedEvent) where TEvent : IEvent
-		{
-			var data = Encoding.UTF8.GetString(resolvedEvent.Event.Data);
-			return JsonConvert
-				.DeserializeObject<TEvent>(data, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Objects });
-		}
+        private TEvent Deserialize<TEvent>(RecordedEvent recordedEvent) where TEvent : IEvent
+        {
+            if (recordedEvent == null)
+                return default(TEvent);
 
-		private byte[] Serialize(IEvent evt)
+            if (!recordedEvent.IsJson)
+                return default(TEvent);
+
+            var data = Encoding.UTF8.GetString(recordedEvent.Data);
+
+            try
+            {
+                return JsonConvert
+                    .DeserializeObject<TEvent>(data, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Objects });
+            }
+            catch (Exception ex)
+            {
+                // TODO Handle
+                return default(TEvent);
+            }
+        }
+
+        private byte[] Serialize(IEvent evt)
 		{
 			return Encoding.UTF8.GetBytes(
 				JsonConvert.SerializeObject(evt, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Objects }));

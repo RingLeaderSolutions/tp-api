@@ -7,7 +7,9 @@ namespace Theta.Paltform.Order.Read.Service.Domain
         public Fill(Guid rFQId, decimal price, decimal quantity)
         {
             RFQId = rFQId;
+
             Price = price;
+
             Quantity = quantity;
         }
 

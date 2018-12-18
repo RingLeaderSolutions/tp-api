@@ -1,46 +1,46 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Theta.Platform.Order.Management.Service.Configuration;
-using Theta.Platform.Order.Management.Service.Domain.Commands;
-using Theta.Platform.Order.Management.Service.Framework;
+﻿//using System;
+//using System.Collections.Generic;
+//using System.Linq;
+//using System.Threading.Tasks;
+//using Theta.Platform.Order.Management.Service.Configuration;
+//using Theta.Platform.Order.Management.Service.Domain.Commands;
+//using Theta.Platform.Order.Management.Service.Framework;
 
-namespace Theta.Platform.Order.Management.Service.Messaging.Subscribers
-{
-    public class RRegisterSupplementaryEvidenceCommandSubscriber : Subscriber<RegisterSupplementaryEvidenceCommand>, ISubscriber<RegisterSupplementaryEvidenceCommand>
-    {
-        protected override string SubscriptionName => "rse-order_order-management-service";
+//namespace Theta.Platform.Order.Management.Service.Messaging.Subscribers
+//{
+//    public class RRegisterSupplementaryEvidenceCommandSubscriber : Subscriber<RegisterSupplementaryEvidenceCommand>, ISubscriber<RegisterSupplementaryEvidenceCommand>
+//    {
+//        protected override string SubscriptionName => "rse-order_order-management-service";
 
-        protected override Subscription Subscription => this.PubSubConfiguration.Subscriptions.FirstOrDefault(x => x.SubscriptionName == SubscriptionName);
+//        protected override Subscription Subscription => this.PubSubConfiguration.Subscriptions.FirstOrDefault(x => x.SubscriptionName == SubscriptionName);
 
-        public RRegisterSupplementaryEvidenceCommandSubscriber(IPubsubResourceManager pubsubResourceManager, IPubSubConfiguration pubSubConfiguration, IAggregateRepository orderRepository)
-            : base(pubsubResourceManager, pubSubConfiguration, orderRepository)
-        {
+//        public RRegisterSupplementaryEvidenceCommandSubscriber(IPubsubResourceManager pubsubResourceManager, IPubSubConfiguration pubSubConfiguration, IAggregateRepository orderRepository)
+//            : base(pubsubResourceManager, pubSubConfiguration, orderRepository)
+//        {
             
-        }
+//        }
 
-        public override async Task ProcessMessageAsync(RegisterSupplementaryEvidenceCommand completeOrderCommand, IAggregateRepository orderRepository)
-        {
-            Console.WriteLine("Recieved Message");
+//        public override async Task ProcessMessageAsync(RegisterSupplementaryEvidenceCommand completeOrderCommand, IAggregateRepository orderRepository)
+//        {
+//            Console.WriteLine("Recieved Message");
 
-            var order = await orderRepository.GetAsync<Domain.Order>(completeOrderCommand.OrderId);
+//            var order = await orderRepository.GetAsync<Domain.Order>(completeOrderCommand.OrderId);
 
-            if (IsAggregateNull(order))
-            {
-                // IsNull Handle, Log, etc
-            }
+//            if (IsAggregateNull(order))
+//            {
+//                // IsNull Handle, Log, etc
+//            }
 
-            if (order != null)
-            {
-                order.RaiseInvalidRequestEvent("RegisterSupplementaryEvidence", "Order not in Complete Status when RegisterSupplementaryEvidence requested");
-                await orderRepository.Save(order);
-                return;
-            }
+//            if (order != null)
+//            {
+//                order.RaiseInvalidRequestEvent("RegisterSupplementaryEvidence", "Order not in Complete Status when RegisterSupplementaryEvidence requested");
+//                await orderRepository.Save(order);
+//                return;
+//            }
 
-            order.RecordSupplementaryEvidence(completeOrderCommand.SupplementaryEvidence);
+//            order.RecordSupplementaryEvidence(completeOrderCommand.SupplementaryEvidence);
 
-            await orderRepository.Save(order);
-        }
-    }
-}
+//            await orderRepository.Save(order);
+//        }
+//    }
+//}

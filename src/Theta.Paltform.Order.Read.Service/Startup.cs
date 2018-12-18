@@ -13,6 +13,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Theta.Paltform.Order.Read.Service.Configuration;
+using Theta.Paltform.Order.Read.Service.Data;
+using Theta.Platform.Messaging.Events;
+using Theta.Platform.Messaging.EventStore;
+using Theta.Platform.Messaging.EventStore.Configuration;
+using Theta.Platform.Messaging.EventStore.Factories;
 
 namespace Theta.Paltform.Order.Read.Service
 {
@@ -28,27 +34,30 @@ namespace Theta.Paltform.Order.Read.Service
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var setting = ConnectionSettings.Create()
-                .SetDefaultUserCredentials(new UserCredentials("admin", "changeit"));
+            var eventStoreConfiguration = new EventStoreConfiguration();
+            Configuration.GetSection("EventStore").Bind(eventStoreConfiguration);
+            services.AddSingleton<IEventStoreConfiguration>(eventStoreConfiguration);
 
-            var tcpEndPoint = new IPEndPoint(IPAddress.Loopback, 1113);
-            IEventStoreConnection eventStoreConnection = EventStoreConnection
-                .Create(setting, tcpEndPoint);
+            EventStoreConnectionFactory factory = new EventStoreConnectionFactory(eventStoreConfiguration);
 
-            services.AddMemoryCache();
+            services.AddSingleton<IEventStoreConnectionFactory>(factory);
 
-            services.AddSingleton<IEventStoreConnection>(eventStoreConnection);
-            services.AddSingleton<IOrdersSubscriber, OrdersSubscriber>();
+            var eventStoreClient = new EventStoreClient(factory);
 
+            services.AddSingleton<IEventStreamingClient>(eventStoreClient);
+            services.AddSingleton<IEventPersistenceClient>(eventStoreClient);
+            services.AddSingleton<IOrderReader, OrderReader>();
+
+           
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
 
 
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IOrdersSubscriber ordersSubscriber)
+        public async void Configure(IApplicationBuilder app, IHostingEnvironment env, IOrderReader orderReader)
         {
-            ordersSubscriber.Subscribe();
+            await orderReader.StartAsync();
 
             if (env.IsDevelopment())
             {

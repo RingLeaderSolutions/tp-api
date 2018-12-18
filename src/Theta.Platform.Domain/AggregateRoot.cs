@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Theta.Platform.Messaging.Events;
 
 namespace Theta.Platform.Domain
 {
@@ -13,12 +14,12 @@ namespace Theta.Platform.Domain
 
 		public int Version { get; protected set; } = -1;
 
-		List<object> IAggregateRoot.GetEvents()
+        public List<object> GetEvents()
 		{
 			return _events;
 		}
 
-		void IAggregateRoot.ClearEvents()
+        public void ClearEvents()
 		{
 			_events.Clear();
 		}
@@ -28,16 +29,16 @@ namespace Theta.Platform.Domain
 			_handlers.Add(typeof(T), e => when((T)e));
 		}
 
-		void IAggregateRoot.Apply(object e)
-		{
-			Raise(e);
-			Version++;
-		}
-
 		protected void Raise(object e)
 		{
 			_handlers[e.GetType()](e);
 			_events.Add(e);
 		}
-	}
+
+        public void Apply(IEvent e)
+        {
+            Raise(e);
+            Version++;
+        }
+    }
 }

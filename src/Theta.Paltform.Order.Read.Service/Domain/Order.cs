@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Theta.Paltform.Order.Read.Service.Domain.Events;
-using Theta.Paltform.Order.Read.Service.Framework;
+using Theta.Platform.Domain;
+using Theta.Platform.Messaging.Events;
 
 namespace Theta.Paltform.Order.Read.Service.Domain
 {
@@ -30,10 +30,10 @@ namespace Theta.Paltform.Order.Read.Service.Domain
                 instrumentId,
                 ownerId,
                 quantity,
-                type,
+                type.ToString(),
                 limitPrice,
                 currencyCode,
-                markupUnit,
+                markupUnit.ToString(),
                 markupValue));
         }
 
@@ -61,7 +61,7 @@ namespace Theta.Paltform.Order.Read.Service.Domain
 
         public decimal Quantity { get; set; }
 
-        public OrderType Type { get; set; }
+        public OrderType OrderType { get; set; }
 
         public decimal LimitPrice { get; set; }
 
@@ -82,7 +82,6 @@ namespace Theta.Paltform.Order.Read.Service.Domain
         }
 
         public List<Fill> Fills { get; set; }
-
 
         public void RecordSupplementaryEvidence(string supplementaryEvidence)
         {
@@ -133,10 +132,10 @@ namespace Theta.Paltform.Order.Read.Service.Domain
             OwnerId = evt.OwnerId;
             Status = OrderStatus.Pending;
             Quantity = evt.Quantity;
-            Type = evt.Type;
+            OrderType = (OrderType)Enum.Parse(typeof(OrderType), evt.OrderType);
             LimitPrice = evt.LimitPrice;
             CurrencyCode = evt.CurrencyCode;
-            MarkupUnit = evt.MarkupUnit;
+            MarkupUnit = (MarkupUnit)Enum.Parse(typeof(MarkupUnit), evt.MarkupUnit);
             MarkupValue = evt.MarkupValue;
             Fills = new List<Fill>();
         }

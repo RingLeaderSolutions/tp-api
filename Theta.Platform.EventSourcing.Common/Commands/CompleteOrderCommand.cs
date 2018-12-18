@@ -3,12 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Theta.Platform.Order.Management.Service.Domain.Commands
+namespace Theta.Platform.Messaging.Commands
 {
-    public class PickupOrderCommand
+    public class CompleteOrderCommand
     {
         public Guid OrderId { get; set; }
-
-        public Guid OwnerId { get; set; }
     }
 }

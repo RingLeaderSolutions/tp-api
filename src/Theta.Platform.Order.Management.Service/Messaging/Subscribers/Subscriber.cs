@@ -5,12 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Theta.Platform.Messaging.Commands;
 using Theta.Platform.Order.Management.Service.Configuration;
 using Theta.Platform.Order.Management.Service.Framework;
 
 namespace Theta.Platform.Order.Management.Service.Messaging.Subscribers
 {
-    public abstract class Subscriber<T>
+    public abstract class Subscriber<IServiceBusActionableMessage<T>> where T : ICommand
     {
         private readonly IPubsubResourceManager _pubsubResourceManager;
         private readonly IAggregateRepository _orderRepository;

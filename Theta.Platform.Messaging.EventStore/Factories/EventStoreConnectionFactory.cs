@@ -1,5 +1,6 @@
 ﻿using EventStore.ClientAPI;
 using EventStore.ClientAPI.SystemData;
+using System.Net;
 using Theta.Platform.Messaging.EventStore.Configuration;
 
 namespace Theta.Platform.Messaging.EventStore.Factories
@@ -15,10 +16,14 @@ namespace Theta.Platform.Messaging.EventStore.Factories
 
 		public IEventStoreConnection Create()
 		{
-			var setting = ConnectionSettings.Create()
-				.SetDefaultUserCredentials(new UserCredentials(_configuration.Username, _configuration.Password));
+            var setting = ConnectionSettings.Create().SetDefaultUserCredentials(
+                new UserCredentials(_configuration.Username, _configuration.Password));
 
-			return EventStoreConnection.Create(setting, _configuration.Endpoint);
-		}
+            var tcpEndPoint = new IPEndPoint(IPAddress.Loopback, 1113);
+            IEventStoreConnection eventStoreConnection = EventStoreConnection
+                .Create(setting, tcpEndPoint);
+
+            return eventStoreConnection;
+        }
 	}
 }

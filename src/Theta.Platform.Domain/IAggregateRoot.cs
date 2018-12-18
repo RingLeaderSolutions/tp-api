@@ -6,7 +6,11 @@ namespace Theta.Platform.Domain
 {
 	public interface IAggregateRoot
 	{
-		void Apply(IEvent e);
+        List<object> GetEvents();
+
+        void ClearEvents();
+
+        void Apply(IEvent e);
 
 		Guid Id { get; }
 

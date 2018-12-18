@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Theta.Platform.Messaging.Events;
 
-namespace Theta.Platform.Order.Management.Service.Domain.Events
+namespace Theta.Platform.Messaging.Events
 {
-    public class OrderCreatedEvent
+    public class OrderCreatedEvent : IEvent
     {
         public OrderCreatedEvent(
             Guid deskId,
@@ -14,11 +15,11 @@ namespace Theta.Platform.Order.Management.Service.Domain.Events
             Guid instrumentId,
             Guid ownerId,
             decimal quantity,
-            OrderType type,
+            string orderType,
             decimal limitPrice,
-           string currencyCode,
-           MarkupUnit markupUnit,
-           decimal markupValue)
+            string currencyCode,
+            string markupUnit,
+            decimal markupValue)
         {
             DeskId = deskId;
             OrderId = orderId;
@@ -26,7 +27,7 @@ namespace Theta.Platform.Order.Management.Service.Domain.Events
             InstrumentId = instrumentId;
             OwnerId = ownerId;
             Quantity = quantity;
-            Type = type;
+            OrderType = orderType;
             LimitPrice = limitPrice;
             CurrencyCode = currencyCode;
             MarkupUnit = markupUnit;
@@ -45,14 +46,18 @@ namespace Theta.Platform.Order.Management.Service.Domain.Events
 
         public decimal Quantity { get; set; }
 
-        public OrderType Type { get; set; }
+        public string OrderType { get; set; }
 
         public decimal LimitPrice { get; set; }
 
         public string CurrencyCode { get; set; }
 
-        public MarkupUnit MarkupUnit { get; set; }
+        public string MarkupUnit { get; set; }
 
         public decimal MarkupValue { get; set; }
+
+        public Guid AggregateId => OrderId;
+
+        public string Type => this.GetType().Name;
     }
 }
