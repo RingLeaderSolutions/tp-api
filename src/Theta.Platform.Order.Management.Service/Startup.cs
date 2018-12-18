@@ -43,7 +43,7 @@ namespace Theta.Platform.Order.Management.Service
             services.AddSingleton<IPubSubConfiguration>(pubSubConfiguration);
 
             var setting = ConnectionSettings.Create()
-                .SetDefaultUserCredentials(new UserCredentials("admin", "pass123"));
+                .SetDefaultUserCredentials(new UserCredentials("admin", "changeit"));
 
             var tcpEndPoint = new IPEndPoint(IPAddress.Loopback, 1113);
             IEventStoreConnection eventStoreConnection = EventStoreConnection

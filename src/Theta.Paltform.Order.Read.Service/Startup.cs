@@ -29,7 +29,7 @@ namespace Theta.Paltform.Order.Read.Service
         public void ConfigureServices(IServiceCollection services)
         {
             var setting = ConnectionSettings.Create()
-                .SetDefaultUserCredentials(new UserCredentials("admin", "pass123"));
+                .SetDefaultUserCredentials(new UserCredentials("admin", "changeit"));
 
             var tcpEndPoint = new IPEndPoint(IPAddress.Loopback, 1113);
             IEventStoreConnection eventStoreConnection = EventStoreConnection
