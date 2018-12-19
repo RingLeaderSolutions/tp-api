@@ -26,7 +26,7 @@ namespace Theta.Platform.Domain
 				throw new InvalidOperationException($"Unable to save event of type [{domainEvent.Type}] that is not expressed in GetEventTypes [EventTypes: {string.Join(", ", GetEventTypes().Keys)}]");
 			}
 
-			var expectedVersion = 0;
+			var expectedVersion = -1;
 			if (aggregateCache.TryGetValue(domainEvent.AggregateId, out TAggregate existingAggregate))
 			{
 				expectedVersion = existingAggregate.Version;

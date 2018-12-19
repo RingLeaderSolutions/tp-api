@@ -72,7 +72,8 @@ namespace Theta.Platform.Messaging.ServiceBus
 						try
 						{
 							var jsonBody = Encoding.UTF8.GetString(message.Body);
-                            var deserializedCommand = JsonConvert.DeserializeObject<Command>(jsonBody);
+                            var deserializedCommand = JsonConvert.DeserializeObject<Command>("{'Type':'CreateOrderCommand','ParentOrderId':null,'InstrumentId':'ecc416aa-2fbe-4c08-b677-f61c03bc40c1','OwnerId':'674386d7-3a34-4c8e-9dba-057c0a753924','OrderId':'VVVVVVV','Quantity':14414000.0,'OrderType':'Limit','LimitPrice':288.2828,'CurrencyCode':'NOK','MarkupUnit':'BasisPoints','MarkupValue':5.64,'GoodTillDate':'2018-12-20T13:54:14.5229176+00:00','TimeInForce':1,'Type':'CreateOrderCommand'}".Replace("VVVVVVV", Guid.NewGuid().ToString()));
+
 
                             if (!_commandTypeDictionary.TryGetValue(deserializedCommand.Type, out Type commandType))
                             {

@@ -11,28 +11,28 @@ using Theta.Platform.Messaging.EventStore.Factories;
 
 namespace Theta.Platform.Messaging.EventStore
 {
-	public sealed class EventStoreClient : IEventPersistenceClient, IEventStreamingClient
-	{
-		private readonly IEventStoreConnection _connection;
-		private bool _connected;
+    public sealed class EventStoreClient : IEventPersistenceClient, IEventStreamingClient
+    {
+        private readonly IEventStoreConnection _connection;
+        private bool _connected;
 
-		public EventStoreClient(IEventStoreConnectionFactory connectionFactory)
-		{
-			_connection = connectionFactory.Create();
-		}
+        public EventStoreClient(IEventStoreConnectionFactory connectionFactory)
+        {
+            _connection = connectionFactory.Create();
+        }
 
-		public async Task<IEvent[]> Retrieve(Type eventType)
-		{
-			// TODO: System projections must be enabled on the eventstore for this to work.
-			var streamName = $"$et-{eventType.Name}";
+        public async Task<IEvent[]> Retrieve(Type eventType)
+        {
+            // TODO: System projections must be enabled on the eventstore for this to work.
+            var streamName = $"$et-{eventType.Name}";
 
-			var sliceStart = 0L;
-			var deserializedEvents = new List<IEvent>();
-			StreamEventsSlice slice;
+            var sliceStart = 0L;
+            var deserializedEvents = new List<IEvent>();
+            StreamEventsSlice slice;
 
-			do
-			{
-				slice = await _connection.ReadStreamEventsForwardAsync(streamName, sliceStart, 200, true);
+            do
+            {
+                slice = await _connection.ReadStreamEventsForwardAsync(streamName, sliceStart, 200, true);
 
                 var events = slice.Events;
 
@@ -47,143 +47,147 @@ namespace Theta.Platform.Messaging.EventStore
                 }
 
                 //deserializedEvents.AddRange(events.Select(x => ));
-				sliceStart = slice.NextEventNumber;
-			} while (!slice.IsEndOfStream);
+                sliceStart = slice.NextEventNumber;
+            } while (!slice.IsEndOfStream);
 
-			return deserializedEvents.ToArray();
-		}
+            return deserializedEvents.ToArray();
+        }
 
-		public async Task<IEvent[]> RetrieveAll()
-		{
-			await EnsureConnected();
+        public async Task<IEvent[]> RetrieveAll()
+        {
+            await EnsureConnected();
 
-			var sliceStart = Position.Start;
-			var deserializedEvents = new List<IEvent>();
-			AllEventsSlice slice;
+            var sliceStart = Position.Start;
+            var deserializedEvents = new List<IEvent>();
+            AllEventsSlice slice;
 
-			do
-			{
-				slice = await _connection.ReadAllEventsForwardAsync(sliceStart, 200, true);
-				deserializedEvents.AddRange(slice.Events.Select(x => Deserialize<IEvent>(x.Event)));
-				sliceStart = slice.NextPosition;
-			} while (!slice.IsEndOfStream);
+            do
+            {
+                slice = await _connection.ReadAllEventsForwardAsync(sliceStart, 200, true);
+                deserializedEvents.AddRange(slice.Events.Select(x => Deserialize<IEvent>(x.Event)));
+                sliceStart = slice.NextPosition;
+            } while (!slice.IsEndOfStream);
 
-			return deserializedEvents.ToArray();
-		}
+            return deserializedEvents.ToArray();
+        }
 
-		public async Task<IEvent[]> Retrieve(string streamName)
-		{
-			await EnsureConnected();
+        public async Task<IEvent[]> Retrieve(string streamName)
+        {
+            await EnsureConnected();
 
-			var sliceStart = 0L;
-			var deserializedEvents = new List<IEvent>();
-			StreamEventsSlice slice;
+            var sliceStart = 0L;
+            var deserializedEvents = new List<IEvent>();
+            StreamEventsSlice slice;
 
-			do
-			{
-				slice = await _connection.ReadStreamEventsForwardAsync(streamName, sliceStart, 200, true);
-				deserializedEvents.AddRange(slice.Events.Select(x => Deserialize<IEvent>(x.Event)));
-				sliceStart = slice.NextEventNumber;
-			} while (!slice.IsEndOfStream);
+            do
+            {
+                slice = await _connection.ReadStreamEventsForwardAsync(streamName, sliceStart, 200, true);
+                deserializedEvents.AddRange(slice.Events.Select(x => Deserialize<IEvent>(x.Event)));
+                sliceStart = slice.NextEventNumber;
+            } while (!slice.IsEndOfStream);
 
-			return deserializedEvents.ToArray();
-		}
+            return deserializedEvents.ToArray();
+        }
 
-		public async Task Save(string streamName, int expectedVersion, IEvent domainEvent)
-		{
-			await EnsureConnected();
+        public async Task Save(string streamName, int expectedVersion, IEvent domainEvent)
+        {
+            await EnsureConnected();
 
-			var serializedEvent = Serialize(domainEvent);
-			var eventData = new EventData(Guid.NewGuid(), domainEvent.GetType().Name, true, serializedEvent, null);
+            var serializedEvent = Serialize(domainEvent);
+            var eventData = new EventData(Guid.NewGuid(), domainEvent.GetType().Name, true, serializedEvent, null);
 
-			await _connection.AppendToStreamAsync(streamName, expectedVersion, eventData);
-		}
+            await _connection.AppendToStreamAsync(streamName, expectedVersion, eventData);
+        }
 
-		public async Task<IObservable<IEvent>> SubscribeToAll()
-		{
-			await EnsureConnected();
+        public async Task<IObservable<IEvent>> SubscribeToAll()
+        {
+            await EnsureConnected();
 
-			return Observable.Create(
-				async (IObserver<IEvent> obs) =>
-				{
-					var onEventReceived = new Func<EventStoreSubscription, ResolvedEvent, Task>(
-						(subscription, ev) =>
-						{
-							var domainEvent = Deserialize<IEvent>(ev.Event);
+            return Observable.Create(
+                async (IObserver<IEvent> obs) =>
+                {
+                    var onEventReceived = new Func<EventStoreSubscription, ResolvedEvent, Task>(
+                        (subscription, ev) =>
+                        {
+                            var domainEvent = Deserialize<OrderCreatedEvent>(ev.Event);
 
                             if (domainEvent == null)
                                 return Task.CompletedTask;
 
-							obs.OnNext(domainEvent);
-							return Task.CompletedTask;
-						});
+                            obs.OnNext(domainEvent);
+                            return Task.CompletedTask;
+                        });
 
-					await _connection.SubscribeToAllAsync(true, onEventReceived);
-				});
-		}
+                    await _connection.SubscribeToAllAsync(true, onEventReceived);
+                });
+        }
 
-		public async Task<IObservable<TEvent>> Subscribe<TEvent>() where TEvent : IEvent
-		{
-			await EnsureConnected();
+        public async Task<IObservable<TEvent>> Subscribe<TEvent>() where TEvent : IEvent
+        {
+            await EnsureConnected();
 
-			// TODO: System projections must be enabled on the eventstore for this to work.
-			var streamName = $"$et-{typeof(TEvent).Name}";
+            // TODO: System projections must be enabled on the eventstore for this to work.
+            var streamName = $"$et-{typeof(TEvent).Name}";
 
-			return Observable.Create(
-				async (IObserver<TEvent> obs) =>
-				{
-					var onEventReceived = new Func<EventStoreSubscription, ResolvedEvent, Task>(
-						(subscription, ev) =>
-						{
-							var domainEvent = Deserialize<TEvent>(ev.Event);
-							obs.OnNext(domainEvent);
-							return Task.CompletedTask;
-						});
+            return Observable.Create(
+                async (IObserver<TEvent> obs) =>
+                {
+                    var onEventReceived = new Func<EventStoreSubscription, ResolvedEvent, Task>(
+                        (subscription, ev) =>
+                        {
+                            var domainEvent = Deserialize<TEvent>(ev.Event);
+                            obs.OnNext(domainEvent);
+                            return Task.CompletedTask;
+                        });
 
-					await _connection.SubscribeToStreamAsync(streamName, true, onEventReceived);
-				});
-		}
+                    await _connection.SubscribeToStreamAsync(streamName, true, onEventReceived);
+                });
+        }
 
-		public async Task<IObservable<IEvent>> Subscribe(string streamName)
-		{
-			await EnsureConnected();
+        public async Task<IObservable<IEvent>> Subscribe(string streamName)
+        {
+            await EnsureConnected();
 
-			return Observable.Create(
-				async (IObserver<IEvent> obs) =>
-				{
-					var onEventReceived = new Func<EventStoreSubscription, ResolvedEvent, Task>(
-						(subscription, ev) =>
-						{
-							var domainEvent = Deserialize<IEvent>(ev.Event);
-							obs.OnNext(domainEvent);
-							return Task.CompletedTask;
-						});
-					
-					await _connection.SubscribeToStreamAsync(streamName, true, onEventReceived);
-				});
-		}
+            return Observable.Create(
+                async (IObserver<IEvent> obs) =>
+                {
+                    var onEventReceived = new Func<EventStoreSubscription, ResolvedEvent, Task>(
+                        (subscription, ev) =>
+                        {
+                            var domainEvent = Deserialize<IEvent>(ev.Event);
+                            obs.OnNext(domainEvent);
+                            return Task.CompletedTask;
+                        });
 
-		public async Task Publish(IEvent domainEvent)
-		{
-			// Not needed for EventStore - the publish happens automatically after Save()
-			await Task.CompletedTask;
-		}
+                    await _connection.SubscribeToStreamAsync(streamName, true, onEventReceived);
+                });
+        }
 
-		private async Task EnsureConnected()
-		{
-			if (!_connected)
-			{
-				await _connection.ConnectAsync();
-				_connected = true;
-			}
-		}
+        public async Task Publish(IEvent domainEvent)
+        {
+            // Not needed for EventStore - the publish happens automatically after Save()
+            await Task.CompletedTask;
+        }
+
+        private async Task EnsureConnected()
+        {
+            if (!_connected)
+            {
+                await _connection.ConnectAsync();
+                _connected = true;
+            }
+        }
 
         private TEvent Deserialize<TEvent>(RecordedEvent recordedEvent) where TEvent : IEvent
         {
+
             if (recordedEvent == null)
                 return default(TEvent);
 
             if (!recordedEvent.IsJson)
+                return default(TEvent);
+
+            if (recordedEvent.EventType != "OrderCreatedEvent")
                 return default(TEvent);
 
             var data = Encoding.UTF8.GetString(recordedEvent.Data);
@@ -201,9 +205,9 @@ namespace Theta.Platform.Messaging.EventStore
         }
 
         private byte[] Serialize(IEvent evt)
-		{
-			return Encoding.UTF8.GetBytes(
-				JsonConvert.SerializeObject(evt, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Objects }));
-		}
-	}
+        {
+            return Encoding.UTF8.GetBytes(
+                JsonConvert.SerializeObject(evt, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Objects }));
+        }
+    }
 }
