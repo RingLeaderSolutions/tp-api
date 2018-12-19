@@ -50,7 +50,7 @@ namespace Theta.Platform.UI.Pricing.Streaming
 
             //app.UseAuthentication();
 
-
+            app.UseMvc();
 
             app.UseSignalR(routes =>
             {
