@@ -52,7 +52,7 @@ namespace Theta.Platform.UI.Orders.API
 
             services.AddHealthChecks()
                 .AddCheck("self", () => running ? HealthCheckResult.Healthy() : HealthCheckResult.Unhealthy())
-                .AddAsyncCheck("dummy-dependency", async () => { await Task.Delay(5000); return HealthCheckResult.Healthy(); }, new[] { "dependency" });
+                .AddAsyncCheck("dummy-dependency", async () => { await Task.Delay(2000); return HealthCheckResult.Healthy(); }, new[] { "dependency" });
         }
 
         private void ConfigureAuthService(IServiceCollection services)
