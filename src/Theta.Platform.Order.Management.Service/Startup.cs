@@ -1,10 +1,6 @@
-﻿using EventStore.ClientAPI;
-using EventStore.ClientAPI.SystemData;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.Management.ResourceManager.Fluent;
-using Microsoft.Azure.Management.ServiceBus.Fluent;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -12,8 +8,7 @@ using Swashbuckle.AspNetCore.Swagger;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Threading.Tasks;
+using System.Reflection;
 using Theta.Platform.Domain;
 using Theta.Platform.Messaging.Commands;
 using Theta.Platform.Messaging.Events;
@@ -41,28 +36,26 @@ namespace Theta.Platform.Order.Management.Service
 
         public void ConfigureServices(IServiceCollection services)
         {
+			// Configuration: ServiceBus
             var serviceBusConfiguration = new ServiceBusConfiguration();
             Configuration.GetSection("ServiceBus").Bind(serviceBusConfiguration);
 
             services.AddSingleton<IServiceBusConfiguration>(serviceBusConfiguration);
             services.AddSingleton<IServiceBusManagementConfiguration>(serviceBusConfiguration);
 
-            var nspace = GetNamespace(serviceBusConfiguration).Result;
+			// Configuration: EventStore
+			var eventStoreConfiguration = new EventStoreConfiguration();
+			Configuration.GetSection("EventStore").Bind(eventStoreConfiguration);
+			services.AddSingleton<IEventStoreConfiguration>(eventStoreConfiguration);
 
-            //services.AddSingleton<IServiceBusNamespace>(nspace);
-
-            var commandQueueClient = new ServiceBusCommandQueueClient(
+			// ServiceBus registration
+			var commandQueueClient = new ServiceBusCommandQueueClient(
 				CommandTypes,
                 new ServiceBusNamespaceFactory(serviceBusConfiguration),
                 new QueueClientFactory(serviceBusConfiguration));
-
 	        services.AddSingleton<ICommandQueueClient>(commandQueueClient);
 
-			// event store
-			var eventStoreConfiguration = new EventStoreConfiguration();
-	        Configuration.GetSection("EventStore").Bind(eventStoreConfiguration);
-	        services.AddSingleton<IEventStoreConfiguration>(eventStoreConfiguration);
-
+			// EventStore registration
 	        EventStoreConnectionFactory factory = new EventStoreConnectionFactory(eventStoreConfiguration);
 	        services.AddSingleton<IEventStoreConnectionFactory>(factory);
 
@@ -70,18 +63,19 @@ namespace Theta.Platform.Order.Management.Service
 	        services.AddSingleton<IEventStreamingClient>(eventStoreClient);
             services.AddSingleton<IEventPersistenceClient>(eventStoreClient);
 
-	        services.AddSingleton<IAggregateWriter<Domain.Order>, OrderAggregateWriter>();
-
-            services.AddTransient<ISubscriber<CompleteOrderCommand, OrderCompletedEvent>, CompleteOrderSubscriber>();
-            services.AddTransient<ISubscriber<CreateOrderCommand, OrderCreatedEvent>, CreateOrderSubscriber>();
-            services.AddTransient<ISubscriber<FillOrderCommand, OrderFilledEvent>, FillOrderSubscriber>();
-            services.AddTransient<ISubscriber<PickupOrderCommand, OrderPickedUpEvent>, PickupOrderSubscriber>();
-            services.AddTransient<ISubscriber<PutDownOrderCommand, OrderPutDownEvent>, PutDownOrderSubscriber>();
-            services.AddTransient<ISubscriber<RegisterSupplementaryEvidenceCommand, SupplementaryEvidenceReceivedEvent>, RegisterSupplementaryEvidenceSubscriber>();
-            services.AddTransient<ISubscriber<RejectOrderCommand, OrderRejectedEvent>, RejectOrderSubscriber>();
+			// Retrieve and register all implementations of ISubscriber<>
+			GetImplementations(typeof(ISubscriber<ICommand, IEvent>))
+				.ForEach(type =>
+				{
+					services.Add(new ServiceDescriptor(typeof(ISubscriber<ICommand, IEvent>), type, ServiceLifetime.Transient));
+				});
+			
+			// Register the OrderAggregateWriter
+			services.AddSingleton<IAggregateWriter<Domain.Order>, OrderAggregateWriter>();
             
             services.AddSingleton<IHostedService, OrderSubscriber>();
 
+			// ASP.NET addons
             services.AddCors(options =>
             {
                 options.AddPolicy("CorsPolicy",
@@ -91,30 +85,18 @@ namespace Theta.Platform.Order.Management.Service
                         .AllowAnyHeader()
                         .AllowCredentials());
             });
-
-            ConfigureAuthService(services);
-
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+			
+            services.AddMvc()
+	            .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new Info { Title = "Orders API", Version = "v1" });
             });
         }
-
-        private void ConfigureAuthService(IServiceCollection services)
-        {
-            // TODO: Implement authentication
-        }
 		
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(
-			IApplicationBuilder app,
-            Microsoft.AspNetCore.Hosting.IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, Microsoft.AspNetCore.Hosting.IHostingEnvironment env)
         {
-            
-            //SetupSubscribers(app, commandQueueClient).Wait();
-
             app.UseCors("CorsPolicy");
             if (env.IsDevelopment())
             {
@@ -125,7 +107,7 @@ namespace Theta.Platform.Order.Management.Service
                 app.UseHsts();
             }
 
-            //app.UseHttpsRedirection();
+            app.UseHttpsRedirection();
             app.UseMvc();
 
             app.UseSwagger();
@@ -135,7 +117,20 @@ namespace Theta.Platform.Order.Management.Service
             });
         }
 
-        public static Dictionary<string, Type> CommandTypes
+        private List<TypeInfo> GetImplementations(Type interfaceType)
+        {
+	        if (!interfaceType.IsInterface)
+	        {
+		        throw new InvalidOperationException($"Unable to get implementations: provided type [{interfaceType.Name}] is not an interface");
+	        }
+
+			// Retrieve all non-abstract implementations of the given interface type
+	        return Assembly.GetExecutingAssembly().DefinedTypes
+		        .Where(type => type.GetInterfaces().Contains(interfaceType) && !type.IsAbstract)
+		        .ToList();
+		}
+
+        private static Dictionary<string, Type> CommandTypes
         {
             get
             {
@@ -156,31 +151,6 @@ namespace Theta.Platform.Order.Management.Service
         private static void AddCommandType(Dictionary<string, Type> collection, Type type)
         {
             collection.Add(type.Name, type);
-        }
-
-        private async Task<IServiceBusNamespace> GetNamespace(IServiceBusManagementConfiguration config)
-        {
-            var credentials = SdkContext.AzureCredentialsFactory
-                .FromServicePrincipal(
-                    config.ClientId,
-                    config.ClientSecret,
-                    config.TenantId,
-                    AzureEnvironment.AzureGlobalCloud);
-
-            var manager = ServiceBusManager.Authenticate(
-                credentials,
-                config.SubscriptionId);
-
-            return await manager.Namespaces
-                .GetByResourceGroupAsync(
-                    config.ResourceGroup,
-                    config.ResourceName);
-        }
-
-        private List<ISubscriber<ICommand, IEvent>> GetSubscribers<T, V>(IApplicationBuilder app) where T : ICommand where V : IEvent
-        {
-            return app.ApplicationServices.GetServices<ISubscriber<T, V>>()
-                .Cast<ISubscriber<ICommand, IEvent>>().ToList();
         }
     }
 }

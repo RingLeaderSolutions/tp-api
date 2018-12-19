@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Theta.Platform.Domain;
 using Theta.Platform.Messaging.Commands;
@@ -7,33 +6,36 @@ using Theta.Platform.Messaging.Events;
 
 namespace Theta.Platform.Order.Management.Service.Messaging.Subscribers
 {
-    public abstract class Subscriber<T, V> : ISubscriber<ICommand, IEvent> where T : ICommand where V : IEvent
+    public abstract class Subscriber<TCommand, TEvent> : ISubscriber<ICommand, IEvent> 
+	    where TCommand : ICommand where TEvent : IEvent
     {
-        protected IAggregateWriter<Domain.Order> AggregateWriter;
+        protected readonly IAggregateWriter<Domain.Order> AggregateWriter;
 
-        public Subscriber(IAggregateWriter<Domain.Order> aggregateWriter)
+        protected Subscriber(IAggregateWriter<Domain.Order> aggregateWriter)
         {
             AggregateWriter = aggregateWriter;
         }
+
+        public Type CommandType => typeof(TCommand);
 
         public async Task HandleCommand(IActionableMessage<ICommand> command)
         {
             try
             {
-                var evnt = await Handle((T)command.ReceivedCommand);
+                var evt = await Handle((TCommand)command.ReceivedCommand);
 
-                // Atomicity a bit lost here 
-                await AggregateWriter.Save(evnt);
+                // TODO: Atomicity a bit lost here 
+                await AggregateWriter.Save(evt);
             }
             catch (Exception ex)
             {
-                // Log 
+                // TODO: Log 
                 await command.Reject("Exception", ex.Message);
             }
 
             await command.Complete();
         }
 
-        protected abstract Task<V> Handle(T command);
+        protected abstract Task<TEvent> Handle(TCommand command);
     }
 }
