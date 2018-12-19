@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Theta.Platform.Messaging.ServiceBus.Configuration;
+﻿using Theta.Platform.Messaging.ServiceBus.Configuration;
 
 namespace Theta.Platform.Order.Management.Service.Configuration
 {

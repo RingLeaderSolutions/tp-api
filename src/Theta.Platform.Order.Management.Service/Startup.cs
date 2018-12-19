@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using EventStore.ClientAPI;
 using Theta.Platform.Domain;
 using Theta.Platform.Messaging.Commands;
 using Theta.Platform.Messaging.Events;
@@ -55,13 +56,13 @@ namespace Theta.Platform.Order.Management.Service
                 new QueueClientFactory(serviceBusConfiguration));
 	        services.AddSingleton<ICommandQueueClient>(commandQueueClient);
 
-			// EventStore registration
-	        EventStoreConnectionFactory factory = new EventStoreConnectionFactory(eventStoreConfiguration);
-	        services.AddSingleton<IEventStoreConnectionFactory>(factory);
-
-            var eventStoreClient = new EventStoreClient(factory);
+			// EventStore registrations
+            var eventStoreClient = new EventStoreClient(
+	            new EventStoreConnectionFactory(eventStoreConfiguration));
 	        services.AddSingleton<IEventStreamingClient>(eventStoreClient);
             services.AddSingleton<IEventPersistenceClient>(eventStoreClient);
+
+            services.AddSingleton<IAggregateWriter<Domain.Order>, OrderAggregateWriter>();
 
 			// Retrieve and register all implementations of ISubscriber<>
 			GetImplementations(typeof(ISubscriber<ICommand, IEvent>))
@@ -70,8 +71,7 @@ namespace Theta.Platform.Order.Management.Service
 					services.Add(new ServiceDescriptor(typeof(ISubscriber<ICommand, IEvent>), type, ServiceLifetime.Transient));
 				});
 			
-			// Register the OrderAggregateWriter
-			services.AddSingleton<IAggregateWriter<Domain.Order>, OrderAggregateWriter>();
+			
             
             services.AddSingleton<IHostedService, OrderSubscriber>();
 
