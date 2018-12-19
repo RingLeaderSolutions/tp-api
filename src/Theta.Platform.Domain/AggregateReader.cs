@@ -12,14 +12,13 @@ namespace Theta.Platform.Domain
 	public abstract class AggregateReader<TAggregate> : IAggregateReader<TAggregate> where TAggregate : class, IAggregateRoot
 	{
 		private readonly SerialDisposable _eventSubscription = new SerialDisposable();
-		private readonly IEventPersistenceClient _eventPersistenceClient;
-		private readonly IEventStreamingClient _eventStreamingClient;
+		private readonly ConcurrentStack<IEvent> _bufferedEvents = new ConcurrentStack<IEvent>();
 
+		protected readonly IEventPersistenceClient _eventPersistenceClient;
+		protected readonly IEventStreamingClient _eventStreamingClient;
 		protected readonly Dictionary<Guid, TAggregate> aggregateCache = new Dictionary<Guid, TAggregate>();
 
-		private bool _retrievedStateOfTheWorld = false;
-
-		private readonly ConcurrentStack<IEvent> _bufferedEvents = new ConcurrentStack<IEvent>();
+		private bool _retrievedStateOfTheWorld;
 
 		protected AggregateReader(
 			IEventPersistenceClient eventPersistenceClient, 
@@ -43,10 +42,7 @@ namespace Theta.Platform.Domain
 
 					if (_retrievedStateOfTheWorld)
 					{
-						while (!_bufferedEvents.IsEmpty)
-						{
-							await ProcessEvent(e);
-						}
+						await ProcessBufferedEvents();
 					}
 				});
 
@@ -60,6 +56,7 @@ namespace Theta.Platform.Domain
 
 			events.ForEach(async e => await ProcessEvent(e));
 			_retrievedStateOfTheWorld = true;
+			await ProcessBufferedEvents();
 		}
 
 		public TAggregate GetById(Guid id)
@@ -72,6 +69,15 @@ namespace Theta.Platform.Domain
 			return aggregateCache.Values.ToArray();
 		}
 
+		private async Task ProcessBufferedEvents()
+		{
+			while (!_bufferedEvents.IsEmpty)
+			{
+				_bufferedEvents.TryPop(out IEvent ev);
+				await ProcessEvent(ev);
+			}
+		}
+
 		private Task ProcessEvent(IEvent evt)
 		{
 			if (!aggregateCache.TryGetValue(evt.AggregateId, out TAggregate aggregate))
@@ -79,6 +85,7 @@ namespace Theta.Platform.Domain
 				var aggregateRoot = (TAggregate)Activator.CreateInstance(typeof(TAggregate), true);
 				aggregateRoot.Apply(evt);
 
+				aggregateCache.Add(evt.AggregateId, aggregateRoot);
 				return Task.CompletedTask;
 			}
 

@@ -20,7 +20,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Theta.Platform.EventSourcing.Common\Theta.Platform.Messaging.csproj" />
     <ProjectReference Include="..\Theta.Platform.Messaging.ServiceBus\Theta.Platform.Messaging.ServiceBus.csproj" />
   </ItemGroup>
 

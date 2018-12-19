@@ -7,7 +7,6 @@ using Theta.Platform.Messaging.Events;
 
 namespace Theta.Paltform.Order.Read.Service.Domain
 {
-
     public class Order : AggregateRoot
     {
         public Order(

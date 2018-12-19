@@ -8,28 +8,23 @@ namespace Theta.Platform.Domain
 	{
 		readonly Dictionary<Type, Action<object>> _handlers = new Dictionary<Type, Action<object>>();
 
-		readonly List<object> _events = new List<object>();
+		readonly List<IEvent> _events = new List<IEvent>();
 
 		public Guid Id { get; protected set; }
 
 		public int Version { get; protected set; } = -1;
 
-        public List<object> GetEvents()
+        public List<IEvent> GetEvents()
 		{
 			return _events;
 		}
-
-        public void ClearEvents()
-		{
-			_events.Clear();
-		}
-
+		
 		protected void Register<T>(Action<T> when)
 		{
 			_handlers.Add(typeof(T), e => when((T)e));
 		}
 
-		protected void Raise(object e)
+		protected void Raise(IEvent e)
 		{
 			_handlers[e.GetType()](e);
 			_events.Add(e);

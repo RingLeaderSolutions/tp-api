@@ -1,17 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reactive.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using FakeItEasy;
-using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Azure.Management.ServiceBus.Fluent;
-using Microsoft.Azure.Management.ServiceBus.Fluent.Queue.Definition;
 using Microsoft.Azure.ServiceBus;
 using Newtonsoft.Json;
 using NUnit.Framework;
-using NUnit.Framework.Internal.Commands;
 using Theta.Platform.Messaging.Commands;
 using Theta.Platform.Messaging.ServiceBus.Factories;
 
@@ -159,7 +155,7 @@ namespace Theta.Platform.Messaging.ServiceBus.Tests.Unit
 				Foo = foo;
 			}
 
-			public string Foo { get; set; }
+			public string Foo { get; }
 		}
 	}
 }
