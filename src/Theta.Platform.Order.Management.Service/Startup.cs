@@ -61,7 +61,7 @@ namespace Theta.Platform.Order.Management.Service
 
             ConfigureAuthService(services);
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             services.AddSwaggerGen(c =>
             {

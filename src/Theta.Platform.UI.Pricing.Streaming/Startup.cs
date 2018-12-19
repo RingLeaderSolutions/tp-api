@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Theta.Platform.UI.Pricing.Streaming.Hubs;
 using Theta.Platform.UI.Pricing.Streaming.Services;
@@ -23,6 +24,8 @@ namespace Theta.Platform.UI.Pricing.Streaming
             });
 
             services.AddSignalR();
+
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             ConfigureAuthService(services);
 
