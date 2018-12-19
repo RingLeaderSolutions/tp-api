@@ -17,10 +17,15 @@ namespace Theta.Platform.UI.Pricing.Streaming
             {
                 options.AddPolicy("CorsPolicy",
                     builder => builder
-                        .AllowAnyOrigin()
+                        // TODO: Ben to investigate CORS issues after core 2.2 upgrade:
+                        // https://docs.microsoft.com/en-gb/aspnet/core/migration/21-to-22?view=aspnetcore-2.2&tabs=visual-studio#update-cors-policy
+                        .WithOrigins(
+                            "http://localhost:3000",
+                            "http://omega-ui.azurewebsites.net")
                         .AllowAnyMethod()
                         .AllowAnyHeader()
-                        .AllowCredentials());
+                        .AllowCredentials()
+                    );
             });
 
             services.AddSignalR();
