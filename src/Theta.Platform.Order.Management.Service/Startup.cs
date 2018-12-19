@@ -71,8 +71,6 @@ namespace Theta.Platform.Order.Management.Service
 					services.Add(new ServiceDescriptor(typeof(ISubscriber<ICommand, IEvent>), type, ServiceLifetime.Transient));
 				});
 			
-			
-            
             services.AddSingleton<IHostedService, OrderSubscriber>();
 
 			// ASP.NET addons

@@ -40,7 +40,8 @@ namespace Theta.Platform.Messaging.ServiceBus
 				return;
 			}
 
-			await ns.Queues.Define(queueName)
+			await ns.Queues
+				.Define(queueName)
 				.WithSizeInMB(1024)
 				.WithMessageMovedToDeadLetterQueueOnMaxDeliveryCount(5)
 				.WithDefaultMessageTTL(TimeSpan.FromDays(14))
@@ -56,7 +57,7 @@ namespace Theta.Platform.Messaging.ServiceBus
 				var exceptionHandler = new Func<ExceptionReceivedEventArgs, Task>(
 					exceptionArgs =>
 					{
-						// TODO: Logging
+						// TODO: Logging here
 						obs.OnError(exceptionArgs.Exception);
 						return Task.CompletedTask;
 					});
@@ -77,6 +78,7 @@ namespace Theta.Platform.Messaging.ServiceBus
 
                             if (!_commandTypeDictionary.TryGetValue(deserializedCommand.Type, out Type commandType))
                             {
+								// TODO: Logging here
                                 // TODO: Requeue? 
                                 throw new Exception($"Unknown command type: [${deserializedCommand.Type}]");
                             }
