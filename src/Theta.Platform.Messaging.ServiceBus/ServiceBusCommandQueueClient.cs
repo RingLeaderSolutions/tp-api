@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -13,13 +14,16 @@ namespace Theta.Platform.Messaging.ServiceBus
 {
 	public sealed class ServiceBusCommandQueueClient : ICommandQueueClient
 	{
+		private readonly Dictionary<string, Type> _commandTypeDictionary;
 		private readonly IServiceBusNamespaceFactory _serviceBusNamespaceFactory;
 		private readonly IQueueClientFactory _queueClientFactory;
 
 		public ServiceBusCommandQueueClient(
+			Dictionary<string, Type> commandTypeDictionary,
 			IServiceBusNamespaceFactory serviceBusNamespaceFactory,
 			IQueueClientFactory queueClientFactory)
 		{
+			_commandTypeDictionary = commandTypeDictionary;
 			_serviceBusNamespaceFactory = serviceBusNamespaceFactory;
 			_queueClientFactory = queueClientFactory;
 		}
@@ -43,11 +47,11 @@ namespace Theta.Platform.Messaging.ServiceBus
 				.CreateAsync();
 		}
 
-		public IObservable<IActionableMessage<TCommand>> Subscribe<TCommand>(string queueName)
+		public IObservable<IActionableMessage<ICommand>> Subscribe(string queueName)
 		{
 			var qc = _queueClientFactory.Create(queueName);
 
-			return Observable.Create((IObserver<IActionableMessage<TCommand>> obs) =>
+			return Observable.Create((IObserver<IActionableMessage<ICommand>> obs) =>
 			{
 				var exceptionHandler = new Func<ExceptionReceivedEventArgs, Task>(
 					exceptionArgs =>
@@ -68,8 +72,17 @@ namespace Theta.Platform.Messaging.ServiceBus
 						try
 						{
 							var jsonBody = Encoding.UTF8.GetString(message.Body);
-							var deserializedCommand = JsonConvert.DeserializeObject<TCommand>(jsonBody);
-							var messageWrapper = new ServiceBusActionableMessage<TCommand>(qc, message, deserializedCommand);
+							var deserializedCommand = JsonConvert.DeserializeObject<ICommand>(jsonBody);
+
+							if (!_commandTypeDictionary.TryGetValue(deserializedCommand.Type, out Type commandType))
+							{
+								// TODO: Requeue? 
+								throw new Exception($"Unknown command type: [${deserializedCommand.Type}]");
+							}
+
+							// TODO: Casting - is this an issue? Don't think so at this point.
+							var typedCommand = (ICommand)JsonConvert.DeserializeObject(jsonBody, commandType);
+							var messageWrapper = new ServiceBusActionableMessage<ICommand>(qc, message, typedCommand);
 
 							obs.OnNext(messageWrapper);
 						}

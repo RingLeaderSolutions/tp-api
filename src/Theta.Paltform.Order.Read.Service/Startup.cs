@@ -43,7 +43,6 @@ namespace Theta.Paltform.Order.Read.Service
             services.AddSingleton<IEventStoreConnectionFactory>(factory);
 
             var eventStoreClient = new EventStoreClient(factory);
-
             services.AddSingleton<IEventStreamingClient>(eventStoreClient);
             services.AddSingleton<IEventPersistenceClient>(eventStoreClient);
             services.AddSingleton<IOrderReader, OrderReader>();
@@ -51,8 +50,6 @@ namespace Theta.Paltform.Order.Read.Service
            
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
-
-
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public async void Configure(IApplicationBuilder app, IHostingEnvironment env, IOrderReader orderReader)

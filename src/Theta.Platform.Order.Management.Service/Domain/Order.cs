@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using Theta.Platform.Order.Management.Service.Framework;
+using Theta.Platform.Domain;
 
 namespace Theta.Platform.Order.Management.Service.Domain
 {
-
     public class Order : AggregateRoot
     {
         public Order(

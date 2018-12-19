@@ -9,15 +9,23 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Swashbuckle.AspNetCore.Swagger;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Theta.Platform.Domain;
 using Theta.Platform.Messaging.Commands;
+using Theta.Platform.Messaging.Events;
+using Theta.Platform.Messaging.EventStore;
+using Theta.Platform.Messaging.EventStore.Configuration;
+using Theta.Platform.Messaging.EventStore.Factories;
 using Theta.Platform.Messaging.ServiceBus;
 using Theta.Platform.Messaging.ServiceBus.Configuration;
 using Theta.Platform.Messaging.ServiceBus.Factories;
 using Theta.Platform.Order.Management.Service.Configuration;
-using Theta.Platform.Order.Management.Service.Framework;
+using Theta.Platform.Order.Management.Service.Domain;
 using Theta.Platform.Order.Management.Service.Messaging;
+using Theta.Platform.Order.Management.Service.Messaging.Subscribers;
 
 namespace Theta.Platform.Order.Management.Service
 {
@@ -39,34 +47,35 @@ namespace Theta.Platform.Order.Management.Service
 
             services.AddSingleton<IServiceBusConfiguration>(serviceBusConfiguration);
             services.AddSingleton<IServiceBusManagementConfiguration>(serviceBusConfiguration);
+			
+	        var commandTypeDictionary = new Dictionary<string, Type>();
+	        AddCommandType(commandTypeDictionary, typeof(CreateOrderCommand));
+	        AddCommandType(commandTypeDictionary, typeof(CompleteOrderCommand));
+	        AddCommandType(commandTypeDictionary, typeof(PickupOrderCommand));
+	        AddCommandType(commandTypeDictionary, typeof(PutDownOrderCommand));
+	        AddCommandType(commandTypeDictionary, typeof(RejectOrderCommand));
+	        AddCommandType(commandTypeDictionary, typeof(FillOrderCommand));
+	        AddCommandType(commandTypeDictionary, typeof(RegisterSupplementaryEvidenceCommand));
 
-            var serviceBusNamespace = await GetNamespace(serviceBusConfiguration);
-
-            var commandQueueClient = new ServiceBusCommandQueueClient(
+			var commandQueueClient = new ServiceBusCommandQueueClient(
+				commandTypeDictionary,
                 new ServiceBusNamespaceFactory(serviceBusConfiguration),
                 new QueueClientFactory(serviceBusConfiguration));
 
-            var setting = ConnectionSettings.Create()
-                .SetDefaultUserCredentials(new UserCredentials("admin", "changeit"));
+	        services.AddSingleton<ICommandQueueClient>(commandQueueClient);
 
-            var tcpEndPoint = new IPEndPoint(IPAddress.Loopback, 1113);
-            IEventStoreConnection eventStoreConnection = EventStoreConnection
-                .Create(setting, tcpEndPoint);
+			// event store
+			var eventStoreConfiguration = new EventStoreConfiguration();
+	        Configuration.GetSection("EventStore").Bind(eventStoreConfiguration);
+	        services.AddSingleton<IEventStoreConfiguration>(eventStoreConfiguration);
 
-            services.AddSingleton<IEventStoreConnection>(eventStoreConnection);
+	        EventStoreConnectionFactory factory = new EventStoreConnectionFactory(eventStoreConfiguration);
+	        services.AddSingleton<IEventStoreConnectionFactory>(factory);
+	        var eventStoreClient = new EventStoreClient(factory);
+	        services.AddSingleton<IEventStreamingClient>(eventStoreClient);
+	        services.AddSingleton<IEventPersistenceClient>(eventStoreClient);
 
-            services.AddTransient<IPubsubResourceManager, PubsubResourceManager>();
-            services.AddTransient<IAggregateRepository, AggregateRepository>();
-
-            services.AddSingleton<ICommandQueueClient, ServiceBusCommandQueueClient>();
-
-            //services.AddTransient<ISubscriber<CreateOrderCommand>, CreateOrderSubscriber>();
-            //services.AddTransient<ISubscriber<CompleteOrderCommand>, CompleteOrderSubscriber>();
-            //services.AddTransient<ISubscriber<PickupOrderCommand>, PickupOrderSubscriber>();
-            //services.AddTransient<ISubscriber<PutDownOrderCommand>, PutDownOrderSubscriber>();
-            //services.AddTransient<ISubscriber<RejectOrderCommand>, RejectOrderSubscriber>();
-            //services.AddTransient<ISubscriber<FillOrderCommand>, FillOrderSubscriber>();
-            //services.AddTransient<ISubscriber<RegisterSupplementaryEvidenceCommand>, RRegisterSupplementaryEvidenceCommandSubscriber>();
+	        services.AddSingleton<IAggregateWriter<Domain.Order>, OrderAggregateWriter>();
 
             services.AddCors(options =>
             {
@@ -93,42 +102,46 @@ namespace Theta.Platform.Order.Management.Service
             // TODO: Implement authentication
         }
 
+	    private List<ISubscriber<T>> GetSubscribers<T>(IApplicationBuilder app) where T : ICommand
+	    {
+		    return app.ApplicationServices.GetServices<ISubscriber<T>>()
+			    .ToList();
+	    }
+		
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public async void Configure(IApplicationBuilder app, IHostingEnvironment env, IEventStoreConnection eventStoreConnection, ServiceBusCommandQueueClient commandQueueClient)
+        public async void Configure(
+			IApplicationBuilder app, 
+			IHostingEnvironment env, 
+			IEventStoreConnection eventStoreConnection, 
+			ServiceBusCommandQueueClient commandQueueClient,
+			IAggregateWriter<Domain.Order> aggregateWriter)
         {
-            await commandQueueClient.CreateQueueIfNotExists("create-order");
+            await commandQueueClient.CreateQueueIfNotExists("order-service");
 
-            
+			// Connect to Eventstore
+			await eventStoreConnection.ConnectAsync();
 
-            commandQueueClient.Subscribe<CreateOrderCommand>("create-order");
+			var createSubscribers = GetSubscribers<CreateOrderCommand>(app);
 
-            // Connect to Eventstore
-            // await eventStoreConnection.ConnectAsync();
+			var subscriberDictionary = new Dictionary<string, List<ISubscriber<CreateOrderCommand>>>();
 
-            // Register the recievers
-            //app.ApplicationServices.GetServices<ISubscriber<CreateOrderCommand>>()
-            //    .ToList().ForEach(x => x.RegisterOnMessageHandlerAndReceiveMessages());
+			// TODO: register this instead
+			ISubscriber<CreateOrderCommand> createOrderSubscriber = new CreateOrderSubscriber(aggregateWriter);
 
-            //app.ApplicationServices.GetServices<ISubscriber<CompleteOrderCommand>>()
-            //    .ToList().ForEach(x => x.RegisterOnMessageHandlerAndReceiveMessages());
+			subscriberDictionary.Add(typeof(CreateOrderCommand).Name, new List<ISubscriber<CreateOrderCommand>>{ createOrderSubscriber });
 
-            //app.ApplicationServices.GetServices<ISubscriber<RejectOrderCommand>>()
-            //    .ToList().ForEach(x => x.RegisterOnMessageHandlerAndReceiveMessages());
+			var subscription = commandQueueClient.Subscribe("order-service")
+			 .Subscribe(
+			  command =>
+			  {
+				  if (subscriberDictionary.TryGetValue(command.ReceivedCommand.Type, out List<ISubscriber<CreateOrderCommand>> subscribers))
+				  {
+					  var strongCommand = (CreateOrderCommand) command.ReceivedCommand;
+					  subscribers.ForEach(s => s.Handle(strongCommand));
+				  }
+			  });
 
-            //app.ApplicationServices.GetServices<ISubscriber<PickupOrderCommand>>()
-            //    .ToList().ForEach(x => x.RegisterOnMessageHandlerAndReceiveMessages());
-
-            //app.ApplicationServices.GetServices<ISubscriber<PutDownOrderCommand>>()
-            //    .ToList().ForEach(x => x.RegisterOnMessageHandlerAndReceiveMessages());
-
-            //app.ApplicationServices.GetServices<ISubscriber<FillOrderCommand>>()
-            //    .ToList().ForEach(x => x.RegisterOnMessageHandlerAndReceiveMessages());
-
-            //app.ApplicationServices.GetServices<ISubscriber<RegisterSupplementaryEvidenceCommand>>()
-            //    .ToList().ForEach(x => x.RegisterOnMessageHandlerAndReceiveMessages());
-
-
-            app.UseCors("CorsPolicy");
+			app.UseCors("CorsPolicy");
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -166,5 +179,10 @@ namespace Theta.Platform.Order.Management.Service
                     config.ResourceGroup,
                     config.ResourceName);
         }
-    }
+
+	    private static void AddCommandType(Dictionary<string, Type> collection, Type type)
+	    {
+		    collection.Add(type.Name, type);
+	    }
+	}
 }
