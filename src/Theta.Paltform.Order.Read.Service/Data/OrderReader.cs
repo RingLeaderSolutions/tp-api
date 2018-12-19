@@ -1,47 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Theta.Platform.Domain;
 using Theta.Platform.Messaging.Events;
 
 namespace Theta.Paltform.Order.Read.Service.Data
 {
-    public interface IOrderReader
+	public class OrderReader : AggregateReader<Domain.Order>, IOrderReader
     {
-        Task StartAsync();
-
-        Domain.Order[] Get();
-
-        Domain.Order GetById(Guid id);
-    }
-
-    public class OrderReader : AggregateReader<Domain.Order>, IOrderReader
-    {
-        public OrderReader(IEventPersistenceClient eventPersistenceClient, IEventStreamingClient eventStreamingClient) 
+        public OrderReader(
+	        IEventPersistenceClient eventPersistenceClient, 
+	        IEventStreamingClient eventStreamingClient) 
             : base(eventPersistenceClient, eventStreamingClient)
         {
         }
 
-        public override Dictionary<string, Type> GetEventTypes()
+		protected override Dictionary<string, Type> SubscribedEventTypes { get; } = new List<KeyValuePair<string, Type>>
         {
-            var collection = new Dictionary<string, Type>();
+	        CreateEventNameToTypeMapping(typeof(OrderCreatedEvent)),
+	        CreateEventNameToTypeMapping(typeof(OrderCompletedEvent)),
+	        CreateEventNameToTypeMapping(typeof(OrderFilledEvent)),
+	        CreateEventNameToTypeMapping(typeof(OrderPickedUpEvent)),
+	        CreateEventNameToTypeMapping(typeof(OrderPickUpRejectedEvent)),
+	        CreateEventNameToTypeMapping(typeof(OrderPutDownEvent)),
+	        CreateEventNameToTypeMapping(typeof(OrderRejectedEvent)),
+	        CreateEventNameToTypeMapping(typeof(SupplementaryEvidenceReceivedEvent))
+        }.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
-            AddEventType(collection, typeof(OrderCompletedEvent));
-            AddEventType(collection, typeof(OrderCreatedEvent));
-            AddEventType(collection, typeof(OrderFilledEvent));
-            AddEventType(collection, typeof(OrderPickedUpEvent));
-            AddEventType(collection, typeof(OrderPickUpRejectedEvent));
-            AddEventType(collection, typeof(OrderPutDownEvent));
-            AddEventType(collection, typeof(OrderRejectedEvent));
-            AddEventType(collection, typeof(SupplementaryEvidenceReceivedEvent));
-
-            return collection;
-        }
-
-        private static void AddEventType(Dictionary<string, Type> collection, Type type)
+        private static KeyValuePair<string, Type> CreateEventNameToTypeMapping(Type type)
         {
-            collection.Add(type.Name, type);
+	        return new KeyValuePair<string, Type>(type.Name, type);
         }
-    }
+	}
 }

@@ -28,14 +28,14 @@ namespace Theta.Platform.Domain
 			_eventStreamingClient = eventStreamingClient;
 		}
 
-		public abstract Dictionary<string, Type> GetEventTypes();
+		protected abstract Dictionary<string, Type> SubscribedEventTypes { get; }
 
 		public async Task StartAsync()
 		{
 			var allEvents = await _eventStreamingClient.SubscribeToAll();
 
 			_eventSubscription.Disposable = allEvents
-				.Where(ev => GetEventTypes().ContainsKey(ev.Type))
+				.Where(ev => SubscribedEventTypes.ContainsKey(ev.Type))
 				.Subscribe(async e =>
 				{
 					_bufferedEvents.Push(e);
@@ -46,17 +46,26 @@ namespace Theta.Platform.Domain
 					}
 				});
 
-			var events = new List<IEvent>();
-			foreach (var eventkvp in GetEventTypes())
-			{
-				var type = eventkvp.Value;
-				var retrievedEvents = await _eventPersistenceClient.Retrieve(type);
-				events.AddRange(retrievedEvents);
-			}
-
+			var events = await RetrievePersistedEvents();
 			events.ForEach(async e => await ProcessEvent(e));
+
 			_retrievedStateOfTheWorld = true;
 			await ProcessBufferedEvents();
+		}
+
+		private async Task<List<IEvent>> RetrievePersistedEvents()
+		{
+			var retrievedEvents = await Task.WhenAll(
+				SubscribedEventTypes
+					.Select(async nameToTypeMapping =>
+					{
+						var type = nameToTypeMapping.Value;
+						return await _eventPersistenceClient.Retrieve(type);
+					}));
+
+			return retrievedEvents
+				.SelectMany(y => y)
+				.ToList();
 		}
 
 		public TAggregate GetById(Guid id)

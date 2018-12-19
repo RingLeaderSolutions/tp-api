@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Theta.Platform.Domain;
 using Theta.Platform.Messaging.Events;
 
 namespace Theta.Platform.Order.Management.Service.Domain
 {
-	public class OrderAggregateWriter : AggregateWriter<Order>
+	public sealed class OrderAggregateWriter : AggregateWriter<Order>
 	{
 		public OrderAggregateWriter(
 			IEventPersistenceClient eventPersistenceClient, 
@@ -14,25 +15,21 @@ namespace Theta.Platform.Order.Management.Service.Domain
 		{
 		}
 
-		public override Dictionary<string, Type> GetEventTypes()
+		protected override Dictionary<string, Type> SubscribedEventTypes { get; } = new List<KeyValuePair<string, Type>>
 		{
-			var collection = new Dictionary<string, Type>();
+			CreateEventNameToTypeMapping(typeof(OrderCreatedEvent)),
+			CreateEventNameToTypeMapping(typeof(OrderCompletedEvent)),
+			CreateEventNameToTypeMapping(typeof(OrderFilledEvent)),
+			CreateEventNameToTypeMapping(typeof(OrderPickedUpEvent)),
+			CreateEventNameToTypeMapping(typeof(OrderPickUpRejectedEvent)),
+			CreateEventNameToTypeMapping(typeof(OrderPutDownEvent)),
+			CreateEventNameToTypeMapping(typeof(OrderRejectedEvent)),
+			CreateEventNameToTypeMapping(typeof(SupplementaryEvidenceReceivedEvent))
+		}.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
-			AddEventType(collection, typeof(OrderCompletedEvent));
-			AddEventType(collection, typeof(OrderCreatedEvent));
-			AddEventType(collection, typeof(OrderFilledEvent));
-			AddEventType(collection, typeof(OrderPickedUpEvent));
-			AddEventType(collection, typeof(OrderPickUpRejectedEvent));
-			AddEventType(collection, typeof(OrderPutDownEvent));
-			AddEventType(collection, typeof(OrderRejectedEvent));
-			AddEventType(collection, typeof(SupplementaryEvidenceReceivedEvent));
-
-			return collection;
-		}
-
-		private static void AddEventType(Dictionary<string, Type> collection, Type type)
+		private static KeyValuePair<string, Type> CreateEventNameToTypeMapping(Type type)
 		{
-			collection.Add(type.Name, type);
+			return new KeyValuePair<string, Type>(type.Name, type);
 		}
 	}
 }

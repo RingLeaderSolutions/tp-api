@@ -13,6 +13,7 @@ namespace Theta.Platform.Domain
 		{
 		}
 
+		// ReSharper disable once MemberCanBePrivate.Global
 		protected string StreamName(Guid id)
 		{
 			return $"{typeof(TAggregate).Name}_{id}";
@@ -21,11 +22,13 @@ namespace Theta.Platform.Domain
 		public async Task Save(IEvent domainEvent)
 		{
 			// Ensure the type of the event that is being saved is also one that we are interested in
-			if (!GetEventTypes().ContainsKey(domainEvent.Type))
+			if (!SubscribedEventTypes.ContainsKey(domainEvent.Type))
 			{
-				throw new InvalidOperationException($"Unable to save event of type [{domainEvent.Type}] that is not expressed in GetEventTypes [EventTypes: {string.Join(", ", GetEventTypes().Keys)}]");
+				// TODO: Logging
+				throw new InvalidOperationException($"Unable to save event of type [{domainEvent.Type}] that is not expressed in GetEventTypes [EventTypes: {string.Join(", ", SubscribedEventTypes.Keys)}]");
 			}
 
+			// An expectedVersion of -1 indicates that the aggregate does not yet have any events associated with it
 			var expectedVersion = -1;
 			if (aggregateCache.TryGetValue(domainEvent.AggregateId, out TAggregate existingAggregate))
 			{

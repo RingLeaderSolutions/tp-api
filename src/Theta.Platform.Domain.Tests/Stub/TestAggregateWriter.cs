@@ -7,12 +7,6 @@ namespace Theta.Platform.Domain.Tests.Stub
 {
 	public sealed class TestAggregateWriter : AggregateWriter<TestAggregateRoot>
 	{
-		private readonly Dictionary<string, Type> _eventTypes = new Dictionary<string, Type>
-		{
-			{ typeof(TestAggregateCreatedEvent).Name, typeof(TestAggregateCreatedEvent) },
-			{ typeof(TestAggregateUpdatedEvent).Name, typeof(TestAggregateUpdatedEvent) }
-		};
-
 		public TestAggregateWriter(
 			IEventPersistenceClient eventPersistenceClient, 
 			IEventStreamingClient eventStreamingClient) : 
@@ -20,9 +14,10 @@ namespace Theta.Platform.Domain.Tests.Stub
 		{
 		}
 
-		public override Dictionary<string, Type> GetEventTypes()
+		protected override Dictionary<string, Type> SubscribedEventTypes { get; } = new Dictionary<string, Type>
 		{
-			return _eventTypes;
-		}
+			{ typeof(TestAggregateCreatedEvent).Name, typeof(TestAggregateCreatedEvent) },
+			{ typeof(TestAggregateUpdatedEvent).Name, typeof(TestAggregateUpdatedEvent) }
+		};
 	}
 }
