@@ -1,4 +1,6 @@
-﻿namespace Theta.Platform.Messaging.EventStore.Configuration
+﻿using System;
+
+namespace Theta.Platform.Messaging.EventStore.Configuration
 {
 	public interface IEventStoreConfiguration
 	{
@@ -6,6 +8,6 @@
 
 		string Password { get; }
 
-		string Endpoint { get; }
+		Uri Endpoint { get; }
 	}
 }

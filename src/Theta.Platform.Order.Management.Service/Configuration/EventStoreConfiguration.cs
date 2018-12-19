@@ -1,4 +1,5 @@
-﻿using Theta.Platform.Messaging.EventStore.Configuration;
+﻿using System;
+using Theta.Platform.Messaging.EventStore.Configuration;
 
 namespace Theta.Platform.Order.Management.Service.Configuration
 {
@@ -8,6 +9,6 @@ namespace Theta.Platform.Order.Management.Service.Configuration
 
         public string Password { get; set; }
 
-        public string Endpoint { get; set; }
+        public Uri Endpoint { get; set; }
     }
 }
