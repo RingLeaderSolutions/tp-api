@@ -2,7 +2,7 @@
 
 namespace Theta.Platform.Messaging.Commands
 {
-    public class CreateOrderCommand : ICommand
+    public class CreateOrderCommand : Command
     {
         public CreateOrderCommand(
                     Guid deskId,
@@ -59,7 +59,5 @@ namespace Theta.Platform.Messaging.Commands
         public DateTime? GoodTillDate { get; set; }
 
         public string TimeInForce { get; set; }
-
-		public string Type => this.GetType().Name;
 	}
 }

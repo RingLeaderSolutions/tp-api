@@ -5,9 +5,10 @@ using System.Threading.Tasks;
 
 namespace Theta.Platform.Messaging.Commands
 {
-    public class RejectOrderCommand
+    public class RejectOrderCommand : Command
     {
         public Guid OrderId { get; set; }
+
         public string Reason { get; set; }
     }
 }

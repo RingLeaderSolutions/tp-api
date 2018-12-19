@@ -5,9 +5,10 @@ using System.Threading.Tasks;
 
 namespace Theta.Platform.Messaging.Commands
 {
-    public class RegisterSupplementaryEvidenceCommand
+    public class RegisterSupplementaryEvidenceCommand : Command
     {
         public Guid OrderId { get; set; }
+
         public string SupplementaryEvidence { get; set; }
     }
 }

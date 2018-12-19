@@ -1,39 +1,25 @@
-﻿//using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Threading.Tasks;
-//using Theta.Platform.Order.Management.Service.Configuration;
-//using Theta.Platform.Order.Management.Service.Domain.Commands;
-//using Theta.Platform.Order.Management.Service.Framework;
+﻿using System.Threading.Tasks;
+using Theta.Platform.Domain;
+using Theta.Platform.Messaging.Commands;
+using Theta.Platform.Messaging.Events;
 
-//namespace Theta.Platform.Order.Management.Service.Messaging.Subscribers
-//{
-//    public class RejectOrderSubscriber : Subscriber<RejectOrderCommand>, ISubscriber<RejectOrderCommand>
-//    {
-//        protected override string SubscriptionName => "reject-order_order-management-service";
+namespace Theta.Platform.Order.Management.Service.Messaging.Subscribers
+{
+    public class RejectOrderSubscriber : Subscriber<RejectOrderCommand, OrderRejectedEvent>, ISubscriber<RejectOrderCommand, OrderRejectedEvent>
+    {
+        public RejectOrderSubscriber(IAggregateWriter<Domain.Order> aggregateWriter) : base(aggregateWriter)
+        {
+        }
 
-//        protected override Subscription Subscription => this.PubSubConfiguration.Subscriptions.FirstOrDefault(x => x.SubscriptionName == SubscriptionName);
+        protected override async Task<OrderRejectedEvent> Handle(RejectOrderCommand command)
+        {
+            var order = AggregateWriter.GetById(command.OrderId);
 
-//        public RejectOrderSubscriber(IPubsubResourceManager pubsubResourceManager, IPubSubConfiguration pubSubConfiguration, IAggregateRepository orderRepository)
-//            : base(pubsubResourceManager, pubSubConfiguration, orderRepository)
-//        {
-            
-//        }
+            // Check order state
 
-//        public override async Task ProcessMessageAsync(RejectOrderCommand completeOrderCommand, IAggregateRepository orderRepository)
-//        {
-//            Console.WriteLine("Recieved Message");
+            var orderRejectdEvent = new OrderRejectedEvent(command.OrderId, command.Reason);
 
-//            var order = await orderRepository.GetAsync<Domain.Order>(completeOrderCommand.OrderId);
-
-//            if (IsAggregateNull(order))
-//            {
-//                // IsNull Handle, Log, etc
-//            }
-
-//            order.Reject(completeOrderCommand.Reason);
-
-//            await orderRepository.Save(order);
-//        }
-//    }
-//}
+            return orderRejectdEvent;
+        }
+    }
+}

@@ -35,7 +35,8 @@ namespace Theta.Platform.Messaging.ServiceBus.Tests.Unit
 				.Returns(_queueClient);
 
 			_commandQueueClient = new ServiceBusCommandQueueClient(
-				serviceBusNamespaceFactory,
+                new Dictionary<string, Type>(),
+                serviceBusNamespaceFactory,
 				queueClientFactory);
 		}
 

@@ -12,14 +12,18 @@ namespace Theta.Platform.Messaging.ServiceBus.Factories
 			_serviceBusConnectionString = new ServiceBusConnectionStringBuilder
 			{
 				Endpoint = serviceBusConfiguration.Endpoint,
-				SasKeyName = serviceBusConfiguration.SharedAccessKeyName,
-				SasToken = serviceBusConfiguration.SharedAccessKeyToken
+				SasKeyName = serviceBusConfiguration.SharedAccessKeyName, 
+				SasKey = serviceBusConfiguration.SharedAccessKeyToken
 			}.GetNamespaceConnectionString();
 		}
 
 		public IQueueClient Create(string queueName)
 		{
-			return new QueueClient(_serviceBusConnectionString, queueName);
+
+            // TODO 
+			 return new QueueClient(_serviceBusConnectionString, queueName);
+
+            //return new 
 		}
 	}
 }

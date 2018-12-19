@@ -1,46 +1,25 @@
-﻿//using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Threading.Tasks;
-//using Theta.Platform.Order.Management.Service.Configuration;
-//using Theta.Platform.Order.Management.Service.Domain.Commands;
-//using Theta.Platform.Order.Management.Service.Framework;
+﻿using System.Threading.Tasks;
+using Theta.Platform.Domain;
+using Theta.Platform.Messaging.Commands;
+using Theta.Platform.Messaging.Events;
 
-//namespace Theta.Platform.Order.Management.Service.Messaging.Subscribers
-//{
-//    public class PutDownOrderSubscriber : Subscriber<PutDownOrderCommand>, ISubscriber<PutDownOrderCommand>
-//    {
-//        protected override string SubscriptionName => "putdown-order_order-management-service";
+namespace Theta.Platform.Order.Management.Service.Messaging.Subscribers
+{
+    public class PutDownOrderSubscriber : Subscriber<PutDownOrderCommand, OrderPutDownEvent>, ISubscriber<PutDownOrderCommand, OrderPutDownEvent>
+    {
+        public PutDownOrderSubscriber(IAggregateWriter<Domain.Order> aggregateWriter) : base(aggregateWriter)
+        {
+        }
 
-//        protected override Subscription Subscription => this.PubSubConfiguration.Subscriptions.FirstOrDefault(x => x.SubscriptionName == SubscriptionName);
+        protected override async Task<OrderPutDownEvent> Handle(PutDownOrderCommand command)
+        {
+            var order = AggregateWriter.GetById(command.OrderId);
 
-//        public PutDownOrderSubscriber(IPubsubResourceManager pubsubResourceManager, IPubSubConfiguration pubSubConfiguration, IAggregateRepository orderRepository)
-//            : base(pubsubResourceManager, pubSubConfiguration, orderRepository)
-//        {
-            
-//        }
+            // Check order state
 
-//        public override async Task ProcessMessageAsync(PutDownOrderCommand completeOrderCommand, IAggregateRepository orderRepository)
-//        {
-//            Console.WriteLine("Recieved Message");
+            var orderPutDowndEvent = new OrderPutDownEvent(command.OrderId);
 
-//            var order = await orderRepository.GetAsync<Domain.Order>(completeOrderCommand.OrderId);
-
-//            if (IsAggregateNull(order))
-//            {
-//                // IsNull Handle, Log, etc
-//            }
-
-//            if (order.Status != OrderStatus.Working)
-//            {
-//                order.RaiseInvalidRequestEvent("PutDown", "Order not in Working Status when PutDown requested");
-//                await orderRepository.Save(order);
-//                return;
-//            }
-
-//            order.PutDown();
-
-//            await orderRepository.Save(order);
-//        }
-//    }
-//}
+            return orderPutDowndEvent;
+        }
+    }
+}

@@ -72,17 +72,17 @@ namespace Theta.Platform.Messaging.ServiceBus
 						try
 						{
 							var jsonBody = Encoding.UTF8.GetString(message.Body);
-							var deserializedCommand = JsonConvert.DeserializeObject<ICommand>(jsonBody);
+                            var deserializedCommand = JsonConvert.DeserializeObject<Command>(jsonBody);
 
-							if (!_commandTypeDictionary.TryGetValue(deserializedCommand.Type, out Type commandType))
-							{
-								// TODO: Requeue? 
-								throw new Exception($"Unknown command type: [${deserializedCommand.Type}]");
-							}
+                            if (!_commandTypeDictionary.TryGetValue(deserializedCommand.Type, out Type commandType))
+                            {
+                                // TODO: Requeue? 
+                                throw new Exception($"Unknown command type: [${deserializedCommand.Type}]");
+                            }
 
-							// TODO: Casting - is this an issue? Don't think so at this point.
-							var typedCommand = (ICommand)JsonConvert.DeserializeObject(jsonBody, commandType);
-							var messageWrapper = new ServiceBusActionableMessage<ICommand>(qc, message, typedCommand);
+                            // TODO: Casting - is this an issue? Don't think so at this point.
+                            var typedCommand = JsonConvert.DeserializeObject(jsonBody, commandType);
+							var messageWrapper = new ServiceBusActionableMessage<ICommand>(qc, message, (ICommand)typedCommand);
 
 							obs.OnNext(messageWrapper);
 						}

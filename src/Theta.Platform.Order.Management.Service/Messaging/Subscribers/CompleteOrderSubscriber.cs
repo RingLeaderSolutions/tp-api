@@ -1,46 +1,24 @@
-﻿//using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Threading.Tasks;
-//using Theta.Platform.Messaging.Commands;
-//using Theta.Platform.Messaging.ServiceBus;
-//using Theta.Platform.Order.Management.Service.Configuration;
-//using Theta.Platform.Order.Management.Service.Framework;
+﻿using System.Threading.Tasks;
+using Theta.Platform.Domain;
+using Theta.Platform.Messaging.Commands;
+using Theta.Platform.Messaging.Events;
+using Theta.Platform.Order.Management.Service.Domain;
 
-//namespace Theta.Platform.Order.Management.Service.Messaging.Subscribers
-//{
-//	public class CompleteOrderSubscriber : Subscriber<ServiceBusActionableMessage<CreateOrderCommand>>
-//	{
-//		protected override string SubscriptionName => "complete-order_order-management-service";
+namespace Theta.Platform.Order.Management.Service.Messaging.Subscribers
+{
+    public class CompleteOrderSubscriber : Subscriber<CompleteOrderCommand, OrderCompletedEvent>, ISubscriber<CompleteOrderCommand, OrderCompletedEvent>
+    {
+        public CompleteOrderSubscriber(IAggregateWriter<Domain.Order> aggregateWriter) : base(aggregateWriter)
+        {
+        }
 
-//		protected override Subscription Subscription => this.PubSubConfiguration.Subscriptions.FirstOrDefault(x => x.SubscriptionName == SubscriptionName);
+        protected override async Task<OrderCompletedEvent> Handle(CompleteOrderCommand command)
+        {
+            var order = AggregateWriter.GetById(command.OrderId);
 
-//		public CompleteOrderSubscriber(IPubsubResourceManager pubsubResourceManager, IPubSubConfiguration pubSubConfiguration, IAggregateRepository orderRepository)
-//			: base(pubsubResourceManager, pubSubConfiguration, orderRepository)
-//		{
+            var orderCompletedEvent = new OrderCompletedEvent(order.Id);
 
-//		}
-
-//		public override async Task ProcessMessageAsync(ServiceBusActionableMessage<CreateOrderCommand> createOrderCommand, IAggregateRepository orderRepository)
-//		{
-//			Console.WriteLine("Recieved Message");
-
-//			var order = await orderRepository.GetAsync<Domain.Order>(createOrderCommand.ReceivedCommand.OrderId);
-
-
-//			if (IsAggregateNull(order))
-//			{
-//				// IsNull Handle, Log, etc
-//			}
-
-//			if (order.Status != OrderStatus.Filled)
-//			{
-//				await createOrderCommand.Reject("Complete", "Order not in Filled Status when Complete requested");
-//				await orderRepository.Save(order);
-//				return;
-//			}
-//			order.Complete();
-//			await orderRepository.Save(order);
-//		}
-//	}
-//}
+            return orderCompletedEvent;
+        }
+    }
+}

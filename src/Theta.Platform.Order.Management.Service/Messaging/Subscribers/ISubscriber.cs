@@ -1,10 +1,11 @@
 ﻿using System.Threading.Tasks;
 using Theta.Platform.Messaging.Commands;
+using Theta.Platform.Messaging.Events;
 
 namespace Theta.Platform.Order.Management.Service.Messaging.Subscribers
 {
-    public interface ISubscriber<in T> where T : ICommand
+    public interface ISubscriber<T, V> where T : ICommand where V : IEvent
     {
-	    Task Handle(T command);
+        Task HandleCommand(IActionableMessage<ICommand> command);
     }
 }

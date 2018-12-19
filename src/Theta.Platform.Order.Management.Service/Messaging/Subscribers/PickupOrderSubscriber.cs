@@ -1,46 +1,25 @@
-﻿//using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Threading.Tasks;
-//using Theta.Platform.Order.Management.Service.Configuration;
-//using Theta.Platform.Order.Management.Service.Domain.Commands;
-//using Theta.Platform.Order.Management.Service.Framework;
+﻿using System.Threading.Tasks;
+using Theta.Platform.Domain;
+using Theta.Platform.Messaging.Commands;
+using Theta.Platform.Messaging.Events;
 
-//namespace Theta.Platform.Order.Management.Service.Messaging.Subscribers
-//{
-//    public class PickupOrderSubscriber : Subscriber<PickupOrderCommand>, ISubscriber<PickupOrderCommand>
-//    {
-//        protected override string SubscriptionName => "pickup-order_order-management-service";
+namespace Theta.Platform.Order.Management.Service.Messaging.Subscribers
+{
+    public class PickupOrderSubscriber : Subscriber<PickupOrderCommand, OrderPickedUpEvent>, ISubscriber<PickupOrderCommand, OrderPickedUpEvent>
+    {
+        public PickupOrderSubscriber(IAggregateWriter<Domain.Order> aggregateWriter) : base(aggregateWriter)
+        {
+        }
 
-//        protected override Subscription Subscription => this.PubSubConfiguration.Subscriptions.FirstOrDefault(x => x.SubscriptionName == SubscriptionName);
+        protected override async Task<OrderPickedUpEvent> Handle(PickupOrderCommand command)
+        {
+            var order = AggregateWriter.GetById(command.OrderId);
 
-//        public PickupOrderSubscriber(IPubsubResourceManager pubsubResourceManager, IPubSubConfiguration pubSubConfiguration, IAggregateRepository orderRepository)
-//            : base(pubsubResourceManager, pubSubConfiguration, orderRepository)
-//        {
-//           //var order =  orderRepository.GetAsync<Domain.Order>(new Guid("24a287a2-f359-4a1f-91ed-989983f4990a")).Result;
-//        }
+            // Check order state
 
-//        public override async Task ProcessMessageAsync(PickupOrderCommand completeOrderCommand, IAggregateRepository orderRepository)
-//        {
-//            Console.WriteLine("Recieved Message");
+            var orderPickupdEvent = new OrderPickedUpEvent(command.OrderId, command.OwnerId);
 
-//            var order = await orderRepository.GetAsync<Domain.Order>(completeOrderCommand.OrderId);
-
-//            if (IsAggregateNull(order))
-//            {
-//                // IsNull Handle, Log, etc
-//            }
-
-//            if (order.Status != OrderStatus.Pending)
-//            {
-//                order.RaiseInvalidRequestEvent("Pickup", "Order not in Pending Status when Pickup requested");
-//                await orderRepository.Save(order);
-//                return;
-//            }
-
-//            order.Pickup(completeOrderCommand.OwnerId);
-
-//            await orderRepository.Save(order);
-//        }
-//    }
-//}
+            return orderPickupdEvent;
+        }
+    }
+}

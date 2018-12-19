@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
@@ -24,7 +25,8 @@ namespace Theta.Platform.Messaging.ServiceBus.Tests
 			_serviceBusNamespace = await GetNamespace(_configuration);
 
 			_commandQueueClient = new ServiceBusCommandQueueClient(
-				new ServiceBusNamespaceFactory(_configuration), 
+                new Dictionary<string, Type>(),
+                new ServiceBusNamespaceFactory(_configuration), 
 				new QueueClientFactory(_configuration));
 		}
 

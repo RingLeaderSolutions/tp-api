@@ -34,21 +34,26 @@ namespace Theta.Paltform.Order.Read.Service
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var eventStoreConfiguration = new EventStoreConfiguration();
-            Configuration.GetSection("EventStore").Bind(eventStoreConfiguration);
+            IEventStoreConfiguration eventStoreConfiguration = GetEventStoreConfiguration();
             services.AddSingleton<IEventStoreConfiguration>(eventStoreConfiguration);
 
-            EventStoreConnectionFactory factory = new EventStoreConnectionFactory(eventStoreConfiguration);
-
+            IEventStoreConnectionFactory factory = new EventStoreConnectionFactory(eventStoreConfiguration);
             services.AddSingleton<IEventStoreConnectionFactory>(factory);
 
             var eventStoreClient = new EventStoreClient(factory);
             services.AddSingleton<IEventStreamingClient>(eventStoreClient);
             services.AddSingleton<IEventPersistenceClient>(eventStoreClient);
+
             services.AddSingleton<IOrderReader, OrderReader>();
 
-           
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+        }
+
+        private IEventStoreConfiguration GetEventStoreConfiguration()
+        {
+            var eventStoreConfiguration = new EventStoreConfiguration();
+            Configuration.GetSection("EventStore").Bind(eventStoreConfiguration);
+            return eventStoreConfiguration;
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

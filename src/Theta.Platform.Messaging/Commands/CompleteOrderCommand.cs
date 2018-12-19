@@ -5,8 +5,9 @@ using System.Threading.Tasks;
 
 namespace Theta.Platform.Messaging.Commands
 {
-    public class CompleteOrderCommand
+    public class CompleteOrderCommand : Command
     {
         public Guid OrderId { get; set; }
+
     }
 }

@@ -1,46 +1,25 @@
-﻿//using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Threading.Tasks;
-//using Theta.Platform.Order.Management.Service.Configuration;
-//using Theta.Platform.Order.Management.Service.Domain.Commands;
-//using Theta.Platform.Order.Management.Service.Framework;
+﻿using System.Threading.Tasks;
+using Theta.Platform.Domain;
+using Theta.Platform.Messaging.Commands;
+using Theta.Platform.Messaging.Events;
 
-//namespace Theta.Platform.Order.Management.Service.Messaging.Subscribers
-//{
-//    public class RRegisterSupplementaryEvidenceCommandSubscriber : Subscriber<RegisterSupplementaryEvidenceCommand>, ISubscriber<RegisterSupplementaryEvidenceCommand>
-//    {
-//        protected override string SubscriptionName => "rse-order_order-management-service";
+namespace Theta.Platform.Order.Management.Service.Messaging.Subscribers
+{
+    public class RegisterSupplementaryEvidenceSubscriber : Subscriber<RegisterSupplementaryEvidenceCommand, SupplementaryEvidenceReceivedEvent>, ISubscriber<RegisterSupplementaryEvidenceCommand, SupplementaryEvidenceReceivedEvent>
+    {
+        public RegisterSupplementaryEvidenceSubscriber(IAggregateWriter<Domain.Order> aggregateWriter) : base(aggregateWriter)
+        {
+        }
 
-//        protected override Subscription Subscription => this.PubSubConfiguration.Subscriptions.FirstOrDefault(x => x.SubscriptionName == SubscriptionName);
+        protected override async Task<SupplementaryEvidenceReceivedEvent> Handle(RegisterSupplementaryEvidenceCommand command)
+        {
+            var order = AggregateWriter.GetById(command.OrderId);
 
-//        public RRegisterSupplementaryEvidenceCommandSubscriber(IPubsubResourceManager pubsubResourceManager, IPubSubConfiguration pubSubConfiguration, IAggregateRepository orderRepository)
-//            : base(pubsubResourceManager, pubSubConfiguration, orderRepository)
-//        {
-            
-//        }
+            // Check order state
 
-//        public override async Task ProcessMessageAsync(RegisterSupplementaryEvidenceCommand completeOrderCommand, IAggregateRepository orderRepository)
-//        {
-//            Console.WriteLine("Recieved Message");
+            var supplementaryEvidenceReceivedEvent = new SupplementaryEvidenceReceivedEvent(command.OrderId, command.SupplementaryEvidence);
 
-//            var order = await orderRepository.GetAsync<Domain.Order>(completeOrderCommand.OrderId);
-
-//            if (IsAggregateNull(order))
-//            {
-//                // IsNull Handle, Log, etc
-//            }
-
-//            if (order != null)
-//            {
-//                order.RaiseInvalidRequestEvent("RegisterSupplementaryEvidence", "Order not in Complete Status when RegisterSupplementaryEvidence requested");
-//                await orderRepository.Save(order);
-//                return;
-//            }
-
-//            order.RecordSupplementaryEvidence(completeOrderCommand.SupplementaryEvidence);
-
-//            await orderRepository.Save(order);
-//        }
-//    }
-//}
+            return supplementaryEvidenceReceivedEvent;
+        }
+    }
+}

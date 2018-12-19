@@ -38,6 +38,7 @@ namespace Theta.Platform.Messaging.ServiceBus.Tests.Unit
 				.Returns(_queueClient);
 
 			_commandQueueClient = new ServiceBusCommandQueueClient(
+                new Dictionary<string, Type>(),
 				serviceBusNamespaceFactory,
 				queueClientFactory);
 
@@ -50,9 +51,9 @@ namespace Theta.Platform.Messaging.ServiceBus.Tests.Unit
 		[Test]
 		public async Task SubscribePumpsNewObservableMessagesFromMessageHandler()
 		{
-			var receivedMessages = new List<IActionableMessage<TestingCommand>>();
+			var receivedMessages = new List<IActionableMessage<ICommand>>();
 			_commandQueueClient
-				.Subscribe<TestingCommand>("test-queue")
+				.Subscribe("test-queue")
 				.Subscribe(message => receivedMessages.Add(message));
 
 			A.CallTo(() => _queueClient.RegisterMessageHandler(
@@ -66,15 +67,15 @@ namespace Theta.Platform.Messaging.ServiceBus.Tests.Unit
 			await SimulateCommandDelivery(command);
 
 			Assert.AreEqual(1, receivedMessages.Count);
-			Assert.AreEqual(command.Foo, receivedMessages[0].ReceivedCommand.Foo);
+			Assert.AreEqual(command.Foo, ((TestingCommand)receivedMessages[0].ReceivedCommand).Foo);
 		}
 
 		[Test]
 		public void DisposingSubscriptionClosesQueueClientConnection()
 		{
-			var receivedMessages = new List<IActionableMessage<TestingCommand>>();
+			var receivedMessages = new List<IActionableMessage<ICommand>>();
 			var subscription = _commandQueueClient
-				.Subscribe<TestingCommand>("test-queue")
+				.Subscribe("test-queue")
 				.Subscribe(message => receivedMessages.Add(message));
 
 			A.CallTo(() => _queueClient.CloseAsync())
@@ -89,11 +90,11 @@ namespace Theta.Platform.Messaging.ServiceBus.Tests.Unit
 		[Test]
 		public async Task FailureToDeserializeCommandDeadLettersMessageAndDoesNotOnErrorStream()
 		{
-			var receivedMessages = new List<IActionableMessage<TestingCommand>>();
+			var receivedMessages = new List<IActionableMessage<ICommand>>();
 			var receivedErrors = new List<Exception>();
 
 			_commandQueueClient
-				.Subscribe<TestingCommand>("test-queue")
+				.Subscribe("test-queue")
 				.Subscribe(
 					message => receivedMessages.Add(message),
 					error => receivedErrors.Add(error));
@@ -157,6 +158,8 @@ namespace Theta.Platform.Messaging.ServiceBus.Tests.Unit
 			}
 
 			public string Foo { get; }
-		}
+
+            public string Type => this.GetType().Name;
+        }
 	}
 }
