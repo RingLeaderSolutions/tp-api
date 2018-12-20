@@ -1,7 +1,7 @@
 ﻿using System;
 using Theta.Platform.Messaging.EventStore.Configuration;
 
-namespace Theta.Paltform.Order.Read.Service.Configuration
+namespace Theta.Platform.Order.Read.Service.Configuration
 {
     public class EventStoreConfiguration : IEventStoreConfiguration
     {

@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace Theta.Paltform.Order.Read.Service
+namespace Theta.Platform.Order.Read.Service.Domain
 {
     [JsonConverter(typeof(StringEnumConverter))]
     public enum MarkupUnit

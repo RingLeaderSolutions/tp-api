@@ -1,8 +1,8 @@
 ﻿using System;
 using Microsoft.AspNetCore.Mvc;
-using Theta.Paltform.Order.Read.Service.Data;
+using Theta.Platform.Order.Read.Service.Data;
 
-namespace Theta.Paltform.Order.Read.Service.Controllers
+namespace Theta.Platform.Order.Read.Service.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

@@ -1,7 +1,7 @@
 ﻿using System;
 using Theta.Platform.Messaging.Events;
 
-namespace Theta.Paltform.Order.Read.Service.Domain.Events
+namespace Theta.Platform.Order.Read.Service.Domain.Events
 {
     public class SupplementaryEvidenceReceivedEvent : Event
     {

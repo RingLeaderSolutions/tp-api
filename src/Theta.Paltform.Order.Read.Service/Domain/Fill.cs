@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Theta.Paltform.Order.Read.Service.Domain
+namespace Theta.Platform.Order.Read.Service.Domain
 {
     public class Fill
     {

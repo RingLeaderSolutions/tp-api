@@ -7,15 +7,15 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Swashbuckle.AspNetCore.Swagger;
-using Theta.Paltform.Order.Read.Service.Configuration;
-using Theta.Paltform.Order.Read.Service.Data;
-using Theta.Paltform.Order.Read.Service.Domain.Events;
 using Theta.Platform.Messaging.Events;
 using Theta.Platform.Messaging.EventStore;
 using Theta.Platform.Messaging.EventStore.Configuration;
 using Theta.Platform.Messaging.EventStore.Factories;
+using Theta.Platform.Order.Read.Service.Configuration;
+using Theta.Platform.Order.Read.Service.Data;
+using Theta.Platform.Order.Read.Service.Domain.Events;
 
-namespace Theta.Paltform.Order.Read.Service
+namespace Theta.Platform.Order.Read.Service
 {
     public class Startup
     {

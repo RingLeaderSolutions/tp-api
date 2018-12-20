@@ -25,7 +25,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Theta.Platform.Order.Manage
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Theta.Platform.Order.Management.Service.Tests", "Theta.Platform.Order.Management.Service.Tests\Theta.Platform.Order.Management.Service.Tests.csproj", "{C8B89621-54E8-4B13-A646-37F5C4545512}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Theta.Paltform.Order.Read.Service", "Theta.Paltform.Order.Read.Service\Theta.Paltform.Order.Read.Service.csproj", "{D3AFF549-D82E-4F2D-8F2D-6F436AC25A65}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Theta.Platform.Order.Read.Service", "Theta.Paltform.Order.Read.Service\Theta.Platform.Order.Read.Service.csproj", "{D3AFF549-D82E-4F2D-8F2D-6F436AC25A65}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Theta.Platform.Order.Seed.Console", "Theta.Platform.Order.Seed.Console\Theta.Platform.Order.Seed.Console.csproj", "{B390F4FD-B34F-45B8-803E-99845EC0BAD1}"
 EndProject

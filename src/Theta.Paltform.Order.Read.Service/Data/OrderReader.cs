@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Theta.Paltform.Order.Read.Service.Domain.Events;
 using Theta.Platform.Domain;
 using Theta.Platform.Messaging.Events;
+using Theta.Platform.Order.Read.Service.Domain.Events;
 
-namespace Theta.Paltform.Order.Read.Service.Data
+namespace Theta.Platform.Order.Read.Service.Data
 {
 	public class OrderReader : AggregateReader<Domain.Order>, IOrderReader
     {

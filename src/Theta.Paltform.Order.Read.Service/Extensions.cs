@@ -1,12 +1,9 @@
-﻿using EventStore.ClientAPI;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System;
 using System.Text;
-using System.Threading.Tasks;
+using EventStore.ClientAPI;
+using Newtonsoft.Json;
 
-namespace Theta.Paltform.Order.Read.Service
+namespace Theta.Platform.Order.Read.Service
 {
     public static class Extensions
     {

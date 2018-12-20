@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace Theta.Paltform.Order.Read.Service.Data
+namespace Theta.Platform.Order.Read.Service.Data
 {
 	public interface IOrderReader
 	{
