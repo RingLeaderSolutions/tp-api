@@ -1,78 +1,41 @@
-﻿using Microsoft.Azure.ServiceBus;
-using Newtonsoft.Json;
-using System;
-using System.Linq;
-using System.Text;
-using System.Threading;
+﻿using System;
 using System.Threading.Tasks;
-using Theta.Platform.Order.Management.Service.Configuration;
-using Theta.Platform.Order.Management.Service.Data;
+using Theta.Platform.Domain;
+using Theta.Platform.Messaging.Commands;
+using Theta.Platform.Messaging.Events;
 
 namespace Theta.Platform.Order.Management.Service.Messaging.Subscribers
 {
-    public abstract class Subscriber<T, V>
+    public abstract class Subscriber<TCommand, TEvent> : ISubscriber<ICommand, IEvent> 
+	    where TCommand : ICommand where TEvent : IEvent
     {
-        private readonly IPubsubResourceManager _pubsubResourceManager;
-        private readonly IOrderRepository _orderRepository;
-        private readonly ISubscriptionClient _subscriptionClient;
-        private readonly IPublisher _eventPublisher;
+        protected readonly IAggregateWriter<Domain.Order> AggregateWriter;
 
-        protected abstract string SubscriptionName { get; }
-        protected abstract Subscription Subscription { get; }
-
-        public IPubSubConfiguration PubSubConfiguration { get; }
-
-        protected Subscriber(IPubsubResourceManager pubsubResourceManager, IPubSubConfiguration pubSubConfiguration, IOrderRepository orderRepository)
+        protected Subscriber(IAggregateWriter<Domain.Order> aggregateWriter)
         {
-            PubSubConfiguration = pubSubConfiguration;
-
-            _pubsubResourceManager = pubsubResourceManager;
-            _orderRepository = orderRepository;
-
-            // Ensure the event topic exists
-            _pubsubResourceManager.EnsureTopicExists(Subscription.EventTopicName);
-
-            _eventPublisher = new Publisher(PubSubConfiguration, Subscription.EventTopicName);
-
-            // Ensure the Command topic and subscription exist
-            _pubsubResourceManager.EnsureTopicSubscriptionExists(Subscription.TopicName, Subscription.SubscriptionName);
-
-            _subscriptionClient = new SubscriptionClient(PubSubConfiguration.ConnectionString, Subscription.TopicName, Subscription.SubscriptionName);
+            AggregateWriter = aggregateWriter;
         }
 
-        public void RegisterOnMessageHandlerAndReceiveMessages()
+        public Type CommandType => typeof(TCommand);
+
+        public async Task HandleCommand(IActionableMessage<ICommand> command)
         {
-            var messageHandlerOptions = new MessageHandlerOptions(ExceptionReceivedHandler)
+            try
             {
-                MaxConcurrentCalls = 10,
-                AutoComplete = false
-            };
-            
-            _subscriptionClient.RegisterMessageHandler(ProcessMessagesAsync, messageHandlerOptions);
+                var evt = await Handle((TCommand)command.ReceivedCommand);
+
+                // TODO: Atomicity a bit lost here - saving of event and completion of queue message should be atomic
+                await AggregateWriter.Save(evt);
+            }
+            catch (Exception ex)
+            {
+                // TODO: Log here
+                await command.Reject("Exception", ex.Message);
+            }
+
+            await command.Complete();
         }
 
-        private async Task ProcessMessagesAsync(Message message, CancellationToken token)
-        {
-            Console.WriteLine($"Processing message: {message.MessageId}");
-
-            var messageText = Encoding.UTF8.GetString(message.Body);
-
-            var entity = JsonConvert.DeserializeObject<T>(messageText);
-
-            var evt = await this.ProcessMessageAsync(entity, message.MessageId, _orderRepository);
-
-            await _eventPublisher.PublishAsync(evt);
-
-            await _subscriptionClient.CompleteAsync(message.SystemProperties.LockToken);
-        }
-
-        public abstract Task<V> ProcessMessageAsync(T obj, string messageId, IOrderRepository orderRepository);
-
-        static Task ExceptionReceivedHandler(ExceptionReceivedEventArgs exceptionReceivedEventArgs)
-        {
-            var context = exceptionReceivedEventArgs.ExceptionReceivedContext;
-            // Log - Handle - Retry
-            return Task.CompletedTask;
-        }
+        protected abstract Task<TEvent> Handle(TCommand command);
     }
 }

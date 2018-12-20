@@ -1,15 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using Theta.Platform.Order.Management.Service.Data;
+using Theta.Platform.Messaging.Commands;
+using Theta.Platform.Messaging.Events;
 
 namespace Theta.Platform.Order.Management.Service.Messaging.Subscribers
 {
-    public interface ISubscriber<T, V>
+    public interface ISubscriber<T, V> where T : ICommand where V : IEvent
     {
-        void RegisterOnMessageHandlerAndReceiveMessages();
+		Type CommandType { get; }
 
-        Task<V> ProcessMessageAsync(T obj, string messageId, IOrderRepository orderRepository);
+        Task HandleCommand(IActionableMessage<ICommand> command);
     }
 }

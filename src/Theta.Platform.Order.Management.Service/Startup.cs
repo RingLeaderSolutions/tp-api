@@ -1,25 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Microsoft.WindowsAzure.Storage;
+using Microsoft.Extensions.Hosting;
 using Swashbuckle.AspNetCore.Swagger;
-using Microsoft.WindowsAzure.Storage.Table;
-using Theta.Platform.Order.Management.Service.Data;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using Theta.Platform.Domain;
+using Theta.Platform.Messaging.Commands;
+using Theta.Platform.Messaging.Events;
+using Theta.Platform.Messaging.EventStore;
+using Theta.Platform.Messaging.EventStore.Configuration;
+using Theta.Platform.Messaging.EventStore.Factories;
+using Theta.Platform.Messaging.ServiceBus;
+using Theta.Platform.Messaging.ServiceBus.Configuration;
+using Theta.Platform.Messaging.ServiceBus.Factories;
 using Theta.Platform.Order.Management.Service.Configuration;
-using Theta.Platform.Order.Management.Service.Messaging.Subscribers;
-using Theta.Platform.Order.Management.Service.Messaging.MessageContracts;
-using Microsoft.Azure.Management.ResourceManager.Fluent;
-using Microsoft.Azure.Management.ServiceBus.Fluent;
+using Theta.Platform.Order.Management.Service.Domain;
+using Theta.Platform.Order.Management.Service.Domain.Commands;
+using Theta.Platform.Order.Management.Service.Domain.Events;
 using Theta.Platform.Order.Management.Service.Messaging;
+using Theta.Platform.Order.Management.Service.Messaging.Subscribers;
 
 namespace Theta.Platform.Order.Management.Service
 {
@@ -32,23 +36,49 @@ namespace Theta.Platform.Order.Management.Service
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var datastorageConfiguration = new DatastorageConfiguration();
-            Configuration.GetSection("Datastorage").Bind(datastorageConfiguration);
-            services.AddSingleton<IDatastorageConfiguration>(datastorageConfiguration);
+			// Configuration: ServiceBus
+            var serviceBusConfiguration = new ServiceBusConfiguration();
+            Configuration.GetSection("ServiceBus").Bind(serviceBusConfiguration);
 
-            var pubSubConfiguration = new PubSubConfiguration();
-            Configuration.GetSection("PubSub").Bind(pubSubConfiguration);
-            services.AddSingleton<IPubSubConfiguration>(pubSubConfiguration);
+            services.AddSingleton<IServiceBusConfiguration>(serviceBusConfiguration);
+            services.AddSingleton<IServiceBusManagementConfiguration>(serviceBusConfiguration);
 
-            services.AddTransient<IPubsubResourceManager, PubsubResourceManager>();
-            services.AddTransient<ISubscriber<Order, OrderCreatedEvent>, CreateOrderSubscriber>();
-            services.AddSingleton<IAzureStorageResourceManager, AzureStorageResourceManager>();
-            services.AddTransient<IOrderRepository, OrderRepository>();
+			// Configuration: EventStore
+			var eventStoreConfiguration = new EventStoreConfiguration();
+			Configuration.GetSection("EventStore").Bind(eventStoreConfiguration);
+			services.AddSingleton<IEventStoreConfiguration>(eventStoreConfiguration);
 
+			// ServiceBus registration
+			var commandQueueClient = new ServiceBusCommandQueueClient(
+				CommandTypes,
+                new ServiceBusNamespaceFactory(serviceBusConfiguration),
+                new QueueClientFactory(serviceBusConfiguration));
+	        services.AddSingleton<ICommandQueueClient>(commandQueueClient);
 
+			// EventStore registrations
+            var eventStoreClient = new EventStoreClient(
+				EventTypes,
+	            new EventStoreConnectionFactory(eventStoreConfiguration));
+	        services.AddSingleton<IEventStreamingClient>(eventStoreClient);
+            services.AddSingleton<IEventPersistenceClient>(eventStoreClient);
+
+			// Register the AggregateWriter as the implementation of both IAggregateWriter and IAggregateReader
+            services.AddSingleton<OrderAggregateWriter>();
+            services.AddSingleton<IAggregateWriter<Domain.Order>>(i => i.GetService<OrderAggregateWriter>());
+            services.AddSingleton<IAggregateReader<Domain.Order>>(i => i.GetService<OrderAggregateWriter>());
+
+            // Retrieve and register all implementations of ISubscriber<>
+			GetImplementations(typeof(ISubscriber<ICommand, IEvent>))
+				.ForEach(type =>
+				{
+					services.Add(new ServiceDescriptor(typeof(ISubscriber<ICommand, IEvent>), type, ServiceLifetime.Transient));
+				});
+			
+            services.AddSingleton<IHostedService, OrderSubscriber>();
+
+			// ASP.NET addons
             services.AddCors(options =>
             {
                 options.AddPolicy("CorsPolicy",
@@ -58,32 +88,18 @@ namespace Theta.Platform.Order.Management.Service
                         .AllowAnyHeader()
                         .AllowCredentials());
             });
-
-            ConfigureAuthService(services);
-
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+			
+            services.AddMvc()
+	            .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new Info { Title = "Orders API", Version = "v1" });
+                c.SwaggerDoc("v1", new Info { Title = "Order Management Service API", Version = "v1" });
             });
         }
-
-        private void ConfigureAuthService(IServiceCollection services)
+		
+        public void Configure(IApplicationBuilder app, Microsoft.AspNetCore.Hosting.IHostingEnvironment env)
         {
-            // TODO: Implement authentication
-        }
-
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public async void Configure(IApplicationBuilder app, IHostingEnvironment env, IAzureStorageResourceManager azureStorageResourceManager)
-        {
-            // Setup the cloud storage table
-            await azureStorageResourceManager.CreateOrdersTableAsync();
-
-            // Register the recievers
-            app.ApplicationServices.GetServices<ISubscriber<Order, OrderCreatedEvent>>()
-                .ToList().ForEach(x => x.RegisterOnMessageHandlerAndReceiveMessages());
-
             app.UseCors("CorsPolicy");
             if (env.IsDevelopment())
             {
@@ -94,7 +110,7 @@ namespace Theta.Platform.Order.Management.Service
                 app.UseHsts();
             }
 
-            //app.UseHttpsRedirection();
+            app.UseHttpsRedirection();
             app.UseMvc();
 
             app.UseSwagger();
@@ -103,5 +119,46 @@ namespace Theta.Platform.Order.Management.Service
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Orders API V1");
             });
         }
-    }
+
+        private List<TypeInfo> GetImplementations(Type interfaceType)
+        {
+	        if (!interfaceType.IsInterface)
+	        {
+		        throw new InvalidOperationException($"Unable to get implementations: provided type [{interfaceType.Name}] is not an interface");
+	        }
+
+			// Retrieve all non-abstract implementations of the given interface type
+	        return Assembly.GetExecutingAssembly().DefinedTypes
+		        .Where(type => type.GetInterfaces().Contains(interfaceType) && !type.IsAbstract)
+		        .ToList();
+		}
+
+        private static Dictionary<string, Type> EventTypes { get; } = new List<KeyValuePair<string, Type>>
+        {
+	        CreateEventNameToTypeMapping(typeof(OrderCreatedEvent)),
+	        CreateEventNameToTypeMapping(typeof(OrderCompletedEvent)),
+	        CreateEventNameToTypeMapping(typeof(OrderFilledEvent)),
+	        CreateEventNameToTypeMapping(typeof(OrderPickedUpEvent)),
+	        CreateEventNameToTypeMapping(typeof(OrderPickUpRejectedEvent)),
+	        CreateEventNameToTypeMapping(typeof(OrderPutDownEvent)),
+	        CreateEventNameToTypeMapping(typeof(OrderRejectedEvent)),
+	        CreateEventNameToTypeMapping(typeof(SupplementaryEvidenceReceivedEvent))
+        }.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+        private static Dictionary<string, Type> CommandTypes { get; } = new List<KeyValuePair<string, Type>>
+        {
+	        CreateEventNameToTypeMapping(typeof(CreateOrderCommand)),
+	        CreateEventNameToTypeMapping(typeof(CompleteOrderCommand)),
+	        CreateEventNameToTypeMapping(typeof(PickupOrderCommand)),
+	        CreateEventNameToTypeMapping(typeof(PutDownOrderCommand)),
+	        CreateEventNameToTypeMapping(typeof(RejectOrderCommand)),
+	        CreateEventNameToTypeMapping(typeof(FillOrderCommand)),
+	        CreateEventNameToTypeMapping(typeof(RegisterSupplementaryEvidenceCommand))
+        }.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+        private static KeyValuePair<string, Type> CreateEventNameToTypeMapping(Type type)
+        {
+	        return new KeyValuePair<string, Type>(type.Name, type);
+        }
+	}
 }
