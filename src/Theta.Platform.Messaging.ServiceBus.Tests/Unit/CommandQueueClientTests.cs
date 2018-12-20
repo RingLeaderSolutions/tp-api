@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reactive.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,7 +19,7 @@ namespace Theta.Platform.Messaging.ServiceBus.Tests.Unit
 		private ServiceBusCommandQueueClient _commandQueueClient;
 		private IQueueClient _queueClient;
 		private IServiceBusNamespace _serviceBusNamespace;
-		private Func<Message, CancellationToken, Task> _messageHandler = null;
+		private Func<Message, CancellationToken, Task> _messageHandler;
 
 		[SetUp]
 		public void Setup()
@@ -38,7 +37,10 @@ namespace Theta.Platform.Messaging.ServiceBus.Tests.Unit
 				.Returns(_queueClient);
 
 			_commandQueueClient = new ServiceBusCommandQueueClient(
-                new Dictionary<string, Type>(),
+                new Dictionary<string, Type>()
+                {
+	                { typeof(TestingCommand).Name, typeof(TestingCommand) }
+				},
 				serviceBusNamespaceFactory,
 				queueClientFactory);
 
@@ -156,7 +158,7 @@ namespace Theta.Platform.Messaging.ServiceBus.Tests.Unit
 			await _messageHandler(new Message(bytes), CancellationToken.None);
 		}
 
-		private class TestingCommand : ICommand
+		private class TestingCommand : Command
 		{
 			public TestingCommand(string foo)
 			{
@@ -164,8 +166,11 @@ namespace Theta.Platform.Messaging.ServiceBus.Tests.Unit
 			}
 
 			public string Foo { get; }
-
-            public string Type => this.GetType().Name;
         }
+
+		private class NullTypeCommand : ICommand
+		{
+			public string Type => null;
+		}
 	}
 }

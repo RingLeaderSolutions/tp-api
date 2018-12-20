@@ -26,6 +26,9 @@ namespace Theta.Platform.Domain.Tests
 
 			A.CallTo(() => _streamingClient.GetAllEventsStream())
 				.Returns(_allEventsSubject.AsObservable());
+
+			A.CallTo(() => _streamingClient.ConnectionStateChanged)
+				.Returns(Observable.Return(StreamingConnectionState.Connected));
 		}
 
 		[Test]
