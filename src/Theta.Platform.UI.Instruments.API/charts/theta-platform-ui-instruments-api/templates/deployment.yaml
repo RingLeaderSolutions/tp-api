@@ -34,3 +34,18 @@ spec:
             value: Development
           - name: theta-environment
             value: {{ .Values.theta.environment }}
+        livenessProbe:
+          httpGet:
+            path: /health/live
+            port: 80
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 15
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: 80
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 15
+

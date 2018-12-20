@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Theta.Platform.UI.Pricing.Streaming.Hubs;
 using Theta.Platform.UI.Pricing.Streaming.Services;
 
@@ -34,6 +36,10 @@ namespace Theta.Platform.UI.Pricing.Streaming
 
             ConfigureAuthService(services);
 
+            services.AddHealthChecks()
+                .AddCheck("self", () => HealthCheckResult.Healthy());
+            // TODO - add any dependency health checks here with the tag "dependency"
+
             services.AddSingleton<RandomPriceGenerator>();
             services.AddSingleton<RandomNotificationGenerator>();
         }
@@ -63,6 +69,16 @@ namespace Theta.Platform.UI.Pricing.Streaming
                     options.Transports = Microsoft.AspNetCore.Http.Connections.HttpTransports.All);
                 routes.MapHub<NotificationsHub>("/hubNotifications", options =>
                     options.Transports = Microsoft.AspNetCore.Http.Connections.HttpTransports.All);
+            });
+
+            app.UseHealthChecks("/health/live", new HealthCheckOptions
+            {
+                Predicate = r => r.Name.Contains("self")
+            });
+
+            app.UseHealthChecks("/health/ready", new HealthCheckOptions
+            {
+                Predicate = r => r.Name.Contains("self") || r.Tags.Contains("dependency")
             });
 
             app.ApplicationServices.GetService<RandomPriceGenerator>()

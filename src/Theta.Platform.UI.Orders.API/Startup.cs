@@ -89,7 +89,7 @@ namespace Theta.Platform.UI.Orders.API
 
             app.UseHealthChecks("/health/ready", new HealthCheckOptions
             {
-                Predicate = r => r.Tags.Contains("dependency")
+                Predicate = r => r.Name.Contains("self") || r.Tags.Contains("dependency")
             });
 
             // TODO: Remove this temporary method used to prove health checks work with k8s
