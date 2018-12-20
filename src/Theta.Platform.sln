@@ -25,8 +25,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Theta.Platform.Order.Manage
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Theta.Platform.Order.Management.Service.Tests", "Theta.Platform.Order.Management.Service.Tests\Theta.Platform.Order.Management.Service.Tests.csproj", "{C8B89621-54E8-4B13-A646-37F5C4545512}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Theta.Platform.Order.Read.Service", "Theta.Paltform.Order.Read.Service\Theta.Platform.Order.Read.Service.csproj", "{D3AFF549-D82E-4F2D-8F2D-6F436AC25A65}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Theta.Platform.Order.Seed.Console", "Theta.Platform.Order.Seed.Console\Theta.Platform.Order.Seed.Console.csproj", "{B390F4FD-B34F-45B8-803E-99845EC0BAD1}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "1_New", "1_New", "{15B67CC8-55F9-4380-9571-9F7C929C2981}"
@@ -49,6 +47,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "0_Scripts", "0_Scripts", "{
 	ProjectSection(SolutionItems) = preProject
 		..\scripts\start-event-store-memdb.ps1 = ..\scripts\start-event-store-memdb.ps1
 	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Theta.Platform.Order.Read.Service", "Theta.Platform.Order.Read.Service\Theta.Platform.Order.Read.Service.csproj", "{8039BFAF-AC1B-4D96-8EF6-A26578006523}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -92,10 +92,6 @@ Global
 		{C8B89621-54E8-4B13-A646-37F5C4545512}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C8B89621-54E8-4B13-A646-37F5C4545512}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C8B89621-54E8-4B13-A646-37F5C4545512}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D3AFF549-D82E-4F2D-8F2D-6F436AC25A65}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D3AFF549-D82E-4F2D-8F2D-6F436AC25A65}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D3AFF549-D82E-4F2D-8F2D-6F436AC25A65}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D3AFF549-D82E-4F2D-8F2D-6F436AC25A65}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B390F4FD-B34F-45B8-803E-99845EC0BAD1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B390F4FD-B34F-45B8-803E-99845EC0BAD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B390F4FD-B34F-45B8-803E-99845EC0BAD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -128,6 +124,10 @@ Global
 		{F576C353-CF39-4554-A6B2-09B3DC7D8C79}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F576C353-CF39-4554-A6B2-09B3DC7D8C79}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F576C353-CF39-4554-A6B2-09B3DC7D8C79}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8039BFAF-AC1B-4D96-8EF6-A26578006523}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8039BFAF-AC1B-4D96-8EF6-A26578006523}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8039BFAF-AC1B-4D96-8EF6-A26578006523}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8039BFAF-AC1B-4D96-8EF6-A26578006523}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
