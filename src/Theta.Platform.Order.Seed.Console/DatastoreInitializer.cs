@@ -18,48 +18,51 @@ namespace Theta.Platform.Order.Seed.Console
 
         public async Task Seed()
         {
-			var instrumentIds = new[] { Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid() };
-			var markupUnitValues = new[] { "PercentageOfWhole", "BasisPoints", "ActualValue" };
-			var orderTypeValues = new[] { "Market", "Limit" };
-			var currencies = new[] { "GBP", "USD", "NOK" };
+	        while (true)
+	        {
+		        var instrumentIds = new[] { Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid() };
+		        var markupUnitValues = new[] { "PercentageOfWhole", "BasisPoints", "ActualValue" };
+		        var orderTypeValues = new[] { "Market", "Limit" };
+		        var currencies = new[] { "GBP", "USD", "NOK" };
 
-			for (int i = 0; i < 1; i++)
-			{
-				var deskId = Guid.NewGuid();
-				var ownerIds = new[] { Guid.NewGuid() };
+		        for (int i = 0; i < 1; i++)
+		        {
+			        var deskId = Guid.NewGuid();
+			        var ownerIds = new[] { Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid() };
 
-				foreach (var ownerId in ownerIds)
-				{
-					for (int x = 0; x < 1; x++)
-					{
-						var instrumentId = instrumentIds.OrderBy(inst => Guid.NewGuid()).First();
-						var markUpUnit = markupUnitValues.OrderBy(mku => Guid.NewGuid()).First();
-						var orderType = orderTypeValues.OrderBy(ot => Guid.NewGuid()).First();
-						var currency = currencies.OrderBy(curr => Guid.NewGuid()).First();
+			        foreach (var ownerId in ownerIds)
+			        {
+				        for (int x = 0; x < 1; x++)
+				        {
+					        var instrumentId = instrumentIds.OrderBy(inst => Guid.NewGuid()).First();
+					        var markUpUnit = markupUnitValues.OrderBy(mku => Guid.NewGuid()).First();
+					        var orderType = orderTypeValues.OrderBy(ot => Guid.NewGuid()).First();
+					        var currency = currencies.OrderBy(curr => Guid.NewGuid()).First();
 
-						var orderId = Guid.NewGuid();
+					        var orderId = Guid.NewGuid();
 
-						var quantity = RandomQuantity();
-						var randomLimitPrice = RandomDecimal(15.71M, 312.78M);
-						var randomMarkupValue = RandomDecimal(2.1M, 12.9M);
-						var randomExpiration = GetGTDExpiration();
+					        var quantity = RandomQuantity();
+					        var randomLimitPrice = RandomDecimal(15.71M, 312.78M);
+					        var randomMarkupValue = RandomDecimal(2.1M, 12.9M);
+					        var randomExpiration = GetGTDExpiration();
 
-						var timeInForce = "GoodTillCancel";
+					        var timeInForce = "GoodTillCancel";
 
-						if (randomExpiration.HasValue)
-						{
-							if (randomExpiration.Value.Hour == 0 && randomExpiration.Value.Month == 0)
-								timeInForce = "GoodTillDay";
-							else
-								timeInForce = "GoodTillDate";
-						}
+					        if (randomExpiration.HasValue)
+					        {
+						        if (randomExpiration.Value.Hour == 0 && randomExpiration.Value.Month == 0)
+							        timeInForce = "GoodTillDay";
+						        else
+							        timeInForce = "GoodTillDate";
+					        }
 
-						await SeedOrder(
-							instrumentId, currency, quantity, randomLimitPrice,
-							randomMarkupValue, orderId, deskId, ownerId, markUpUnit,
-							orderType, randomExpiration, timeInForce);
-					}
-				}
+					        await SeedOrder(
+						        instrumentId, currency, quantity, randomLimitPrice,
+						        randomMarkupValue, orderId, deskId, ownerId, markUpUnit,
+						        orderType, randomExpiration, timeInForce);
+				        }
+			        }
+		        }
 			}
 		}
 
@@ -73,31 +76,30 @@ namespace Theta.Platform.Order.Seed.Console
 
             await DispatchCommand(createOrderCommand);
 			System.Console.WriteLine($"Sent CreateOrderCommand, OrderId=[{orderId}]");
-
 			System.Console.ReadKey();
 
 			var pickupOrderCommand = new PickupOrderCommand() { OrderId = orderId, OwnerId = Guid.NewGuid() };
 			await DispatchCommand(pickupOrderCommand);
+			System.Console.WriteLine($"Sent PickupOrderCommand (1), OrderId=[{orderId}]");
+			System.Console.ReadKey();
 
+			var putdownOrderCommand = new PutDownOrderCommand() { OrderId = orderId };
+			await DispatchCommand(putdownOrderCommand);
+			System.Console.WriteLine($"Sent PutDownOrderCommand, OrderId=[{orderId}]");
+			System.Console.ReadKey();
 
-			//         await Task.Delay(15);
+			var pickupOrderCommand2 = new PickupOrderCommand() { OrderId = orderId, OwnerId = Guid.NewGuid() };
+			await DispatchCommand(pickupOrderCommand2);
+			System.Console.WriteLine($"Sent PickupOrderCommand (2), OrderId=[{orderId}]");
+			System.Console.ReadKey();
 
+			await Fill(orderId, createOrderCommand);
 
-			//         await Task.Delay(15);
+			var completeOrderCommand = new CompleteOrderCommand() { OrderId = orderId };
 
-			//var putdownOrderCommand = new PutDownOrderCommand() { OrderId = orderId };
-			//         await DispatchCommand(putdownOrderCommand);
-			//         await Task.Delay(15);
-
-			//         var pickupOrderCommand2 = new PickupOrderCommand() { OrderId = orderId, OwnerId = Guid.NewGuid() };
-			//         await DispatchCommand(pickupOrderCommand2);
-			//         await Task.Delay(15);
-
-			//         await Fill(orderId, createOrderCommand);
-
-			//         var completeOrderCommand = new CompleteOrderCommand() { OrderId = orderId };
-
-			//         await DispatchCommand(completeOrderCommand);
+			await DispatchCommand(completeOrderCommand);
+			System.Console.WriteLine($"Sent CompleteOrderCommand, OrderId=[{orderId}]");
+			System.Console.ReadKey();
 		}
 
 		private async Task Fill(Guid orderId, CreateOrderCommand createOrderCommand)
@@ -109,20 +111,23 @@ namespace Theta.Platform.Order.Seed.Console
                 var fillOrderCommand = new FillOrderCommand() { OrderId = orderId, RFQId = Guid.NewGuid(), Price = price, Quantity = createOrderCommand.Quantity };
 
                 await DispatchCommand(fillOrderCommand);
-                await Task.Delay(15);
-                return;
+				System.Console.WriteLine($"Sent FillOrderCommand (0%->100%), OrderId=[{orderId}]");
+				System.Console.ReadKey();
+				return;
             }
 
             var fillOrderCommand1 = new FillOrderCommand() { OrderId = orderId, RFQId = Guid.NewGuid(), Price = price, Quantity = (createOrderCommand.Quantity / 2) };
-
             await DispatchCommand(fillOrderCommand1);
-            await Task.Delay(15);
-
+			System.Console.WriteLine($"Sent FillOrderCommand (0%->50%), OrderId=[{orderId}]");
+            System.Console.ReadKey();
+			
+            
             var fillOrderCommand2 = new FillOrderCommand() { OrderId = orderId, RFQId = Guid.NewGuid(), Price = price, Quantity = createOrderCommand.Quantity - fillOrderCommand1.Quantity };
 
             await DispatchCommand(fillOrderCommand2);
-            await Task.Delay(15);
-        }
+			System.Console.WriteLine($"Sent FillOrderCommand (50%->100%), OrderId=[{orderId}]");
+			System.Console.ReadKey();
+		}
 
         private async Task DispatchCommand(ICommand command)
         {
