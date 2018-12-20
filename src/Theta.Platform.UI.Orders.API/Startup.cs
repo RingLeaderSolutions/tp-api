@@ -1,15 +1,23 @@
 ﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Swagger;
+using System;
+using System.Threading.Tasks;
+using Theta.Platform.Common.SecretManagement;
 
 namespace Theta.Platform.UI.Orders.API
 {
     public class Startup
     {
+        bool running = true;
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -20,6 +28,9 @@ namespace Theta.Platform.UI.Orders.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // TODO - vault name automatically determined via convention + detection of environment name
+            services.AddTransient<IVault, Vault>(x => new Vault("theta-dev-platform-vault"));
+
             services.AddCors(options =>
             {
                 options.AddPolicy("CorsPolicy",
@@ -32,12 +43,16 @@ namespace Theta.Platform.UI.Orders.API
 
             ConfigureAuthService(services);
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new Info { Title = "Orders API", Version = "v1" });
             });
+
+            services.AddHealthChecks()
+                .AddCheck("self", () => running ? HealthCheckResult.Healthy() : HealthCheckResult.Unhealthy())
+                .AddAsyncCheck("dummy-dependency", async () => { await Task.Delay(2000); return HealthCheckResult.Healthy(); }, new[] { "dependency" });
         }
 
         private void ConfigureAuthService(IServiceCollection services)
@@ -65,6 +80,26 @@ namespace Theta.Platform.UI.Orders.API
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Orders API V1");
+            });
+
+            app.UseHealthChecks("/health/live", new HealthCheckOptions
+            {
+                Predicate = r => r.Name.Contains("self")
+            });
+
+            app.UseHealthChecks("/health/ready", new HealthCheckOptions
+            {
+                Predicate = r => r.Name.Contains("self") || r.Tags.Contains("dependency")
+            });
+
+            // TODO: Remove this temporary method used to prove health checks work with k8s
+            app.Map("/switch", appBuilder =>
+            {
+                appBuilder.Run(async context =>
+                {
+                    running = !running;
+                    await context.Response.WriteAsync($"{Environment.MachineName} running {running}");
+                });
             });
         }
     }

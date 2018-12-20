@@ -50,6 +50,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "0_Scripts", "0_Scripts", "{
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Theta.Platform.Order.Read.Service", "Theta.Platform.Order.Read.Service\Theta.Platform.Order.Read.Service.csproj", "{8039BFAF-AC1B-4D96-8EF6-A26578006523}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Theta.Platform.Common", "Theta.Platform.Common\Theta.Platform.Common.csproj", "{ED0A1058-184C-4D0D-A23B-AF18FA668A0F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -128,6 +130,10 @@ Global
 		{8039BFAF-AC1B-4D96-8EF6-A26578006523}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8039BFAF-AC1B-4D96-8EF6-A26578006523}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8039BFAF-AC1B-4D96-8EF6-A26578006523}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED0A1058-184C-4D0D-A23B-AF18FA668A0F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED0A1058-184C-4D0D-A23B-AF18FA668A0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED0A1058-184C-4D0D-A23B-AF18FA668A0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED0A1058-184C-4D0D-A23B-AF18FA668A0F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.Swagger;
@@ -38,12 +40,16 @@ namespace Theta.Platform.UI.Instruments.API
             });
 
             ConfigureAuthService(services);
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new Info { Title = "Instrument API", Version = "v1" });
             });
+
+            services.AddHealthChecks()
+                .AddCheck("self", () => HealthCheckResult.Healthy());
+            // TODO - add any dependency health checks here with the tag "dependency"
         }
 
         private void ConfigureAuthService(IServiceCollection services)
@@ -72,6 +78,16 @@ namespace Theta.Platform.UI.Instruments.API
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Orders API V1");
+            });
+
+            app.UseHealthChecks("/health/live", new HealthCheckOptions
+            {
+                Predicate = r => r.Name.Contains("self")
+            });
+
+            app.UseHealthChecks("/health/ready", new HealthCheckOptions
+            {
+                Predicate = r => r.Name.Contains("self") || r.Tags.Contains("dependency")
             });
         }
     }

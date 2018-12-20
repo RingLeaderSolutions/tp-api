@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reactive.Linq;
 using Microsoft.AspNetCore.SignalR;
+using Theta.Platform.UI.Pricing.Streaming.Domain.Notifications;
 using Theta.Platform.UI.Pricing.Streaming.Hubs;
 
 namespace Theta.Platform.UI.Pricing.Streaming.Services
@@ -34,11 +35,11 @@ namespace Theta.Platform.UI.Pricing.Streaming.Services
         }
 
 
-        private List<OrderNotification> Notifications = new List<OrderNotification>
+        private List<Notification> Notifications = new List<Notification>
         {
             new OrderNotification
             {
-                Type = "PICKED_UP",
+                Type = NotificationType.ORDER_PICKED_UP,
                 OrderId = "0123456711",
                 Event = "Order Picked-up",
                 Time = "28/09/2018",
@@ -47,7 +48,7 @@ namespace Theta.Platform.UI.Pricing.Streaming.Services
             },
             new OrderNotification
             {
-                Type = "AMENDED",
+                Type = NotificationType.ORDER_AMENDED,
                 OrderId = "0123456789",
                 Event = "Order Amended",
                 Time = "3/08/2018",
@@ -57,32 +58,19 @@ namespace Theta.Platform.UI.Pricing.Streaming.Services
             },
             new OrderNotification
             {
-                Type = "CANCELLED",
+                Type = NotificationType.ORDER_CANCELLED,
                 OrderId = "0123456789",
                 Event = "Order Cancelled",
                 Time = "3/08/2018",
                 Operation = "Buy, 12000, VODAFONE GROUP, PLC 5.90%",
                 ReceivedAt = "11:26:34.421556 GMT",
                 AuditInfo = "NTS 26/11/32, Limit, FOK, Citi"
+            },
+            new SystemNotification
+            {
+                Message = "Instruments service is down, please contact support.",
+                ReceivedAt = $"{DateTime.Now:G}"
             }
         };
-
-
-        private class OrderNotification
-        {
-            public string Type { get; set; }
-
-            public string OrderId { get; set; }
-
-            public string Event { get; set; }
-
-            public string Time { get; set; }
-
-            public string Operation { get; set; }
-
-            public string ReceivedAt { get; set; }
-
-            public string AuditInfo { get; set; }
-        }
     }
 }

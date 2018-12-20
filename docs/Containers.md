@@ -14,12 +14,6 @@ Note in development environments to save cost:
 - The ACR is created with the Basic SKU, so will require periodic cleaning of unused containers
 - The AKS is created using 1 `Standard B2s` node (~£26.12/month), rather than the default 3 `DS2 v2` nodes (3 * ~£74.00/month).
 
-## Resource naming conventions
-
-Having a consitent naming convention for all resources makes automation, building tooling and management of resources easier.
-
-This is still to be decided, but lots of considerations [here](https://docs.microsoft.com/en-us/azure/architecture/best-practices/naming-conventions).
-
 ## Deployment
 
 Each of the microservices that makes up the Platform is deployed in a container to a Kubernetes cluster hosted and managed in Azure. We've taken this [tutorial](https://cloudblogs.microsoft.com/opensource/2018/11/27/tutorial-azure-devops-setup-cicd-pipeline-kubernetes-docker-helm/) as inspiration.

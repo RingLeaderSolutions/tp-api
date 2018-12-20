@@ -9,7 +9,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using EventStore.ClientAPI;
 using Theta.Platform.Domain;
 using Theta.Platform.Messaging.Commands;
 using Theta.Platform.Messaging.Events;
