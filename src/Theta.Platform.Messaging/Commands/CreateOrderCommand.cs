@@ -4,6 +4,7 @@ namespace Theta.Platform.Messaging.Commands
 {
     public class CreateOrderCommand : Command
     {
+		// TODO: Reinstate enums when commands moved out of Theta.Platform.Messaging project.
         public CreateOrderCommand(
                     Guid deskId,
                     Guid orderId,

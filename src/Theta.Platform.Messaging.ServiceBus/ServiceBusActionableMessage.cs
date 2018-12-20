@@ -20,16 +20,19 @@ namespace Theta.Platform.Messaging.ServiceBus
 
 		public async Task Complete()
 		{
+			// TODO: Logging here
 			await _queueClient.CompleteAsync(this._message.SystemProperties.LockToken);
 		}
 
 		public async Task Abandon()
 		{
+			// TODO: Logging here
 			await _queueClient.AbandonAsync(this._message.SystemProperties.LockToken);
 		}
 
 		public async Task Reject(string reason, string additionalDescription)
 		{
+			// TODO: Logging here
 			await _queueClient.DeadLetterAsync(this._message.SystemProperties.LockToken, reason, additionalDescription);
 		}
 	}

@@ -17,7 +17,7 @@ namespace Theta.Platform.Order.Management.Service.Controllers
         }
 
         [HttpGet("{orderId}")]
-        public async Task<IActionResult> Get(Guid orderId)
+        public IActionResult Get(Guid orderId)
         {
             var order = _aggregateReader.GetById(orderId);
 
@@ -28,5 +28,13 @@ namespace Theta.Platform.Order.Management.Service.Controllers
 
             return Ok(order);
         }
-    }
+
+        [HttpGet]
+        public IActionResult Get()
+        {
+	        var orders = _aggregateReader.Get();
+
+	        return Ok(orders);
+        }
+	}
 }

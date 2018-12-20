@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -30,7 +33,7 @@ namespace Theta.Paltform.Order.Read.Service
             IEventStoreConnectionFactory factory = new EventStoreConnectionFactory(eventStoreConfiguration);
             services.AddSingleton<IEventStoreConnectionFactory>(factory);
 
-            var eventStoreClient = new EventStoreClient(factory);
+            var eventStoreClient = new EventStoreClient(SubscribedEventTypes, factory);
             services.AddSingleton<IEventStreamingClient>(eventStoreClient);
             services.AddSingleton<IEventPersistenceClient>(eventStoreClient);
 
@@ -64,5 +67,22 @@ namespace Theta.Paltform.Order.Read.Service
             app.UseHttpsRedirection();
             app.UseMvc();
         }
-    }
+
+        private Dictionary<string, Type> SubscribedEventTypes { get; } = new List<KeyValuePair<string, Type>>
+        {
+	        CreateEventNameToTypeMapping(typeof(OrderCreatedEvent)),
+	        CreateEventNameToTypeMapping(typeof(OrderCompletedEvent)),
+	        CreateEventNameToTypeMapping(typeof(OrderFilledEvent)),
+	        CreateEventNameToTypeMapping(typeof(OrderPickedUpEvent)),
+	        CreateEventNameToTypeMapping(typeof(OrderPickUpRejectedEvent)),
+	        CreateEventNameToTypeMapping(typeof(OrderPutDownEvent)),
+	        CreateEventNameToTypeMapping(typeof(OrderRejectedEvent)),
+	        CreateEventNameToTypeMapping(typeof(SupplementaryEvidenceReceivedEvent))
+        }.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+        private static KeyValuePair<string, Type> CreateEventNameToTypeMapping(Type type)
+        {
+	        return new KeyValuePair<string, Type>(type.Name, type);
+        }
+	}
 }

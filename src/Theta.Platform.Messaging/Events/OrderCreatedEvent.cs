@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Theta.Platform.Messaging.Events;
 
 namespace Theta.Platform.Messaging.Events
 {
-    public class OrderCreatedEvent : IEvent
+    public class OrderCreatedEvent : Event
     {
         public OrderCreatedEvent(
             Guid deskId,
@@ -19,10 +15,9 @@ namespace Theta.Platform.Messaging.Events
             decimal limitPrice,
             string currencyCode,
             string markupUnit,
-            decimal markupValue)
+            decimal markupValue) : base (orderId)
         {
             DeskId = deskId;
-            OrderId = orderId;
             ParentOrderId = parentOrderId;
             InstrumentId = instrumentId;
             OwnerId = ownerId;
@@ -42,22 +37,20 @@ namespace Theta.Platform.Messaging.Events
 
         public Guid OwnerId { get; set; }
 
-        public Guid OrderId { get; set; }
+		public Guid OrderId => AggregateId;
 
-        public decimal Quantity { get; set; }
+		public decimal Quantity { get; set; }
 
+		// TODO: Change this back to use the OrderType enum when moved out of the Theta.Platform.Messaging project
         public string OrderType { get; set; }
 
         public decimal LimitPrice { get; set; }
 
         public string CurrencyCode { get; set; }
 
-        public string MarkupUnit { get; set; }
+		// TODO: Change this back to use the MarkupUnit enum when moved out of the Theta.Platform.Messaging project
+		public string MarkupUnit { get; set; }
 
         public decimal MarkupValue { get; set; }
-
-        public Guid AggregateId => OrderId;
-
-        public string Type => this.GetType().Name;
     }
 }

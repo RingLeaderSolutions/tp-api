@@ -1,8 +1,8 @@
 ﻿namespace Theta.Platform.Messaging.Commands
 {
-    public class Command : ICommand
+    public abstract class Command : ICommand
     {
-        public string Type { get; set; }
+	    public string Type => this.GetType().Name;
     }
 
 	public interface ICommand

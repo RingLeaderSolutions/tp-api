@@ -71,6 +71,12 @@ namespace Theta.Platform.Messaging.ServiceBus.Tests.Unit
 		}
 
 		[Test]
+		public void ReceivingCommandWithNullTypeDeadLettersMessage()
+		{
+			throw new NotImplementedException();
+		}
+
+		[Test]
 		public void DisposingSubscriptionClosesQueueClientConnection()
 		{
 			var receivedMessages = new List<IActionableMessage<ICommand>>();

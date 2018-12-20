@@ -24,12 +24,12 @@ namespace Theta.Platform.Order.Management.Service.Messaging.Subscribers
             {
                 var evt = await Handle((TCommand)command.ReceivedCommand);
 
-                // TODO: Atomicity a bit lost here 
+                // TODO: Atomicity a bit lost here - saving of event and completion of queue message should be atomic
                 await AggregateWriter.Save(evt);
             }
             catch (Exception ex)
             {
-                // TODO: Log 
+                // TODO: Log here
                 await command.Reject("Exception", ex.Message);
             }
 

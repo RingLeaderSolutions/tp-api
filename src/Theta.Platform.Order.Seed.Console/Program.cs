@@ -1,42 +1,48 @@
 ﻿using Microsoft.Extensions.Configuration;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using Theta.Platform.Messaging.Commands;
+using Theta.Platform.Messaging.ServiceBus;
+using Theta.Platform.Messaging.ServiceBus.Factories;
 using Theta.Platform.Order.Seed.Console.Configuration;
-using Theta.Platform.Order.Seed.Console.Messaging;
 
 namespace Theta.Platform.Order.Seed.Console
 {
-    class Program
+	// ReSharper disable once ClassNeverInstantiated.Global
+	public class Program
     {
         static void Main(string[] args)
         {
-            System.Console.WriteLine("Press any key to seed!");
-            System.Console.ReadKey();
-
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
 
             IConfigurationRoot configuration = builder.Build();
 
-            var pubSubConfiguration = new PubSubConfiguration();
-            var section = configuration.GetSection("PubSub");
-            section.Bind(pubSubConfiguration);
+            var serviceBusConfiguration = new ServiceBusConfiguration();
+            var section = configuration.GetSection("ServiceBus");
+            section.Bind(serviceBusConfiguration);
 
-            TopicClientProvider topicClientProvider = new TopicClientProvider(pubSubConfiguration);
+            var commandQueueClient = new ServiceBusCommandQueueClient(
+	            new Dictionary<string, Type>(), 
+	            new ServiceBusNamespaceFactory(serviceBusConfiguration),
+	            new QueueClientFactory(serviceBusConfiguration));
 
-            MainAsync(topicClientProvider).GetAwaiter().GetResult();
+			MainAsync(commandQueueClient).GetAwaiter().GetResult();
         }
 
-        static async Task MainAsync(TopicClientProvider topicClientProvider)
+        static async Task MainAsync(ICommandQueueClient commandQueueClient)
         {
-            DatastoreInitializer initializer = new DatastoreInitializer(topicClientProvider);
+            DatastoreInitializer initializer = new DatastoreInitializer("order-service", commandQueueClient);
 
-            await initializer.Seed();
+            System.Console.WriteLine("Press any key to seed!");
+            System.Console.ReadKey();
 
-            System.Console.WriteLine("Seeded!");
+			await initializer.Seed();
 
+            System.Console.WriteLine("Seeded! Press any key to exit.");
             System.Console.ReadKey();
         }
     }

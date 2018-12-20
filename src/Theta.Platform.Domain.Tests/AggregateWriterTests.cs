@@ -24,7 +24,7 @@ namespace Theta.Platform.Domain.Tests
 			_persistenceClient = A.Fake<IEventPersistenceClient>();
 			_streamingClient = A.Fake<IEventStreamingClient>();
 
-			A.CallTo(() => _streamingClient.SubscribeToAll())
+			A.CallTo(() => _streamingClient.GetAllEventsStream())
 				.Returns(_allEventsSubject.AsObservable());
 		}
 

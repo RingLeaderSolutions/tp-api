@@ -16,7 +16,7 @@ namespace Theta.Platform.Domain
 
 		protected readonly IEventPersistenceClient _eventPersistenceClient;
 		protected readonly IEventStreamingClient _eventStreamingClient;
-		protected readonly Dictionary<Guid, TAggregate> aggregateCache = new Dictionary<Guid, TAggregate>();
+		protected readonly ConcurrentDictionary<Guid, TAggregate> aggregateCache = new ConcurrentDictionary<Guid, TAggregate>();
 
 		private bool _retrievedStateOfTheWorld;
 
@@ -32,9 +32,20 @@ namespace Theta.Platform.Domain
 
 		public async Task StartAsync()
 		{
-			var allEvents = await _eventStreamingClient.SubscribeToAll();
+			await _eventStreamingClient.Connect();
 
-			_eventSubscription.Disposable = allEvents
+			// Wait for the event streaming client to report itself as fully connected before
+			// continuing with retrieving persisted events & initializing the streaming subscription.
+			_eventStreamingClient.ConnectionStateChanged
+				.Where(state => state == StreamingConnectionState.Connected)
+				.Take(1)
+				.Subscribe(async _ => await Initialize());
+		}
+
+		private async Task Initialize()
+		{
+			// Initialize the streaming subscription
+			_eventSubscription.Disposable = _eventStreamingClient.GetAllEventsStream()
 				.Where(ev => SubscribedEventTypes.ContainsKey(ev.Type))
 				.Subscribe(async e =>
 				{
@@ -46,9 +57,11 @@ namespace Theta.Platform.Domain
 					}
 				});
 
+			// Retrieve the state of the world & process its events
 			var events = await RetrievePersistedEvents();
 			events.ForEach(async e => await ProcessEvent(e));
 
+			// Process any streamed events that were buffered meanwhile
 			_retrievedStateOfTheWorld = true;
 			await ProcessBufferedEvents();
 		}
@@ -94,7 +107,13 @@ namespace Theta.Platform.Domain
 				var aggregateRoot = (TAggregate)Activator.CreateInstance(typeof(TAggregate), true);
 				aggregateRoot.Apply(evt);
 
-				aggregateCache.Add(evt.AggregateId, aggregateRoot);
+				if (!aggregateCache.TryAdd(evt.AggregateId, aggregateRoot))
+				{
+					// TODO: Logging here
+					// TODO: Should we retry in this case? Out-of-order event considerations?
+					throw new Exception($"Failed to add a new aggregate to in memory cache [Id={evt.AggregateId}, EventType={evt.Type}]");
+				}
+
 				return Task.CompletedTask;
 			}
 

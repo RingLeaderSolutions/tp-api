@@ -15,11 +15,16 @@ namespace Theta.Platform.Messaging.EventStore.Factories
 
 		public IEventStoreConnection Create()
 		{
-            var setting = ConnectionSettings.Create().SetDefaultUserCredentials(
-                new UserCredentials(_configuration.Username, _configuration.Password));
+            var connectionSettings = ConnectionSettings.Create()
+	            .SetDefaultUserCredentials(new UserCredentials(_configuration.Username, _configuration.Password))
+				// TODO: Plug in logging
+	            //.UseCustomLogger()
+				// TODO: Review the below options
+	            .KeepRetrying()
+	            .KeepReconnecting();
 
             var eventStoreConnection = EventStoreConnection
-                .Create(setting, _configuration.Endpoint);
+                .Create(connectionSettings, _configuration.Endpoint);
 
             return eventStoreConnection;
         }

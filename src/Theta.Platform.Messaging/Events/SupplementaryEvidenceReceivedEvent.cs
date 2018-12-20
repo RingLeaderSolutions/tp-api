@@ -1,25 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Theta.Platform.Messaging.Events;
 
 namespace Theta.Platform.Messaging.Events
 {
-    public class SupplementaryEvidenceReceivedEvent : IEvent
+    public class SupplementaryEvidenceReceivedEvent : Event
     {
         public SupplementaryEvidenceReceivedEvent(Guid orderId, string supplementaryEvidence)
+			: base(orderId)
         {
-            OrderId = orderId;
             SupplementaryEvidence = supplementaryEvidence;
         }
 
-        public Guid OrderId { get; }
+		public Guid OrderId => AggregateId;
 
-        public string SupplementaryEvidence { get; }
-
-        public Guid AggregateId => OrderId;
-
-        public string Type => this.GetType().Name;
+		public string SupplementaryEvidence { get; }
     }
 }

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Theta.Platform.Domain;
 using Theta.Platform.Messaging.Commands;
 using Theta.Platform.Messaging.Events;
 using Theta.Platform.Order.Management.Service.Messaging.Subscribers;
@@ -15,26 +16,32 @@ namespace Theta.Platform.Order.Management.Service.Messaging
         private const string QueueName = "order-service";
 
         private readonly ICommandQueueClient _commandQueueClient;
+        private readonly IAggregateReader<Domain.Order> _aggregateReader;
         private readonly Dictionary<string, List<ISubscriber<ICommand, IEvent>>> _commandToSubscriberDictionary;
 
-        private IDisposable _subscription;
+        private IDisposable _commandSubscription;
 
         public OrderSubscriber(
-	        ICommandQueueClient commandQueueClient, 
-	        IEnumerable<ISubscriber<ICommand, IEvent>> subscribers)
+	        ICommandQueueClient commandQueueClient,
+			IAggregateReader<Domain.Order> aggregateReader,
+			IEnumerable<ISubscriber<ICommand, IEvent>> subscribers)
         {
             _commandQueueClient = commandQueueClient;
+            _aggregateReader = aggregateReader;
 
-			_commandToSubscriberDictionary = subscribers
+            _commandToSubscriberDictionary = subscribers
 				.GroupBy(s => s.CommandType)
 				.ToDictionary(s => s.Key.Name, s => s.ToList());
         }
 
-        public async Task StartAsync(CancellationToken cancellationToken)
+        // TODO: An exception here is indicative of a fatal messaging communication exception, meaning the application should probably crash
+		public async Task StartAsync(CancellationToken cancellationToken)
         {
+	        await _aggregateReader.StartAsync();
+
 	        await _commandQueueClient.CreateQueueIfNotExists(QueueName);
 
-	        _subscription = _commandQueueClient.Subscribe(QueueName)
+	        _commandSubscription = _commandQueueClient.Subscribe(QueueName)
 		        .Subscribe(message =>
 		        {
 			        if (_commandToSubscriberDictionary.TryGetValue(message.ReceivedCommand.Type, out var commandSubscribers))
@@ -56,7 +63,8 @@ namespace Theta.Platform.Order.Management.Service.Messaging
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
-	        _subscription.Dispose();
+	        _commandSubscription.Dispose();
+	        _aggregateReader.Dispose();
 
             return Task.CompletedTask;
         }

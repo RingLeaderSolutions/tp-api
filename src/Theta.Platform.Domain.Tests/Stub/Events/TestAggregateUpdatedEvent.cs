@@ -3,17 +3,15 @@ using Theta.Platform.Messaging.Events;
 
 namespace Theta.Platform.Domain.Tests.Stub.Events
 {
-	public sealed class TestAggregateUpdatedEvent : IEvent
+	public sealed class TestAggregateUpdatedEvent : Event
 	{
 		public TestAggregateUpdatedEvent(Guid aggregateId, string foo)
+			: base(aggregateId)
 		{
-			AggregateId = aggregateId;
 			Foo = foo;
+			EventId = Guid.NewGuid();
 		}
 
 		public string Foo { get; }
-
-		public Guid AggregateId { get; }
-		public string Type => this.GetType().Name;
 	}
 }

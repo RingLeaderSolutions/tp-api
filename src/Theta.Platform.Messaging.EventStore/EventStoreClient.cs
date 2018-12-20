@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Text;
 using System.Threading.Tasks;
 using EventStore.ClientAPI;
@@ -11,203 +14,195 @@ using Theta.Platform.Messaging.EventStore.Factories;
 
 namespace Theta.Platform.Messaging.EventStore
 {
-    public sealed class EventStoreClient : IEventPersistenceClient, IEventStreamingClient
-    {
-        private readonly IEventStoreConnection _connection;
-        private bool _connected;
+	public sealed class EventStoreClient : IEventPersistenceClient, IEventStreamingClient
+	{
+		private readonly Dictionary<string, Type> _eventTypeDictionary;
+		private readonly IEventStoreConnection _connection;
+		private readonly Subject<Unit> _connectingSubject = new Subject<Unit>();
 
-        public EventStoreClient(IEventStoreConnectionFactory connectionFactory)
-        {
-            _connection = connectionFactory.Create();
-        }
+		private readonly IDisposable _connectionStateSubscription;
+		private readonly SerialDisposable _allEventsSubscription = new SerialDisposable();
 
-        public async Task<IEvent[]> Retrieve(Type eventType)
-        {
-            // TODO: System projections must be enabled on the eventstore for this to work.
-            var streamName = $"$et-{eventType.Name}";
+		public EventStoreClient(
+			Dictionary<string, Type> eventTypeDictionary, 
+			IEventStoreConnectionFactory connectionFactory)
+		{
+			_eventTypeDictionary = eventTypeDictionary;
+			_connection = connectionFactory.Create();
+			_connectionStateSubscription = CreateConnectionStateChangedStream()
+				.Subscribe(cs => this.ConnectionState = cs);
+		}
 
-            var sliceStart = 0L;
-            var deserializedEvents = new List<IEvent>();
-            StreamEventsSlice slice;
+		public async Task Connect()
+		{
+			_connectingSubject.OnNext(Unit.Default);
+			await _connection.ConnectAsync();
+		}
 
-            do
-            {
-                slice = await _connection.ReadStreamEventsForwardAsync(streamName, sliceStart, 200, true);
+		public async Task<IEvent[]> Retrieve(Type eventType)
+		{
+			EnsureConnected();
 
-                var events = slice.Events;
+			var streamName = $"$et-{eventType.Name}";
 
-                foreach (var evt in events)
-                {
-                    var item = Deserialize<IEvent>(evt.Event);
+			var sliceStart = 0L;
+			var deserializedEvents = new List<IEvent>();
+			StreamEventsSlice slice;
 
-                    if (item != null)
-                    {
-                        deserializedEvents.Add(item);
-                    }
-                }
+			do
+			{
+				slice = await _connection.ReadStreamEventsForwardAsync(streamName, sliceStart, 200, true);
+				
+				slice.Events
+					.ToList()
+					.ForEach(evt => ProcessReceivedEvent(evt, deserializedEvents.Add));
 
-                //deserializedEvents.AddRange(events.Select(x => ));
-                sliceStart = slice.NextEventNumber;
-            } while (!slice.IsEndOfStream);
+				sliceStart = slice.NextEventNumber;
+			} while (!slice.IsEndOfStream);
 
-            return deserializedEvents.ToArray();
-        }
+			return deserializedEvents.ToArray();
+		}
 
-        public async Task<IEvent[]> RetrieveAll()
-        {
-            await EnsureConnected();
+		private void EnsureConnected()
+		{
+			if (this.ConnectionState != StreamingConnectionState.Connected)
+			{
+				throw new InvalidOperationException(
+					$"Unable to perform action as underlying EventStoreConnection is not connected. [ConnectionState={ConnectionState.ToString()}");
+			}
+		}
 
-            var sliceStart = Position.Start;
-            var deserializedEvents = new List<IEvent>();
-            AllEventsSlice slice;
+		public async Task Save(string streamName, int expectedVersion, IEvent domainEvent)
+		{
+			EnsureConnected();
 
-            do
-            {
-                slice = await _connection.ReadAllEventsForwardAsync(sliceStart, 200, true);
-                deserializedEvents.AddRange(slice.Events.Select(x => Deserialize<IEvent>(x.Event)));
-                sliceStart = slice.NextPosition;
-            } while (!slice.IsEndOfStream);
+			var serializedJson = JsonConvert.SerializeObject(domainEvent);
+			var encodedEvent = Encoding.UTF8.GetBytes(serializedJson);
+			var eventData = new EventData(Guid.NewGuid(), domainEvent.GetType().Name, true, encodedEvent, null);
 
-            return deserializedEvents.ToArray();
-        }
+			await _connection.AppendToStreamAsync(streamName, expectedVersion, eventData);
+		}
 
-        public async Task<IEvent[]> Retrieve(string streamName)
-        {
-            await EnsureConnected();
+		public IObservable<IEvent> GetAllEventsStream()
+		{
+			return Observable.Create(
+				async (IObserver<IEvent> obs) =>
+				{
+					_allEventsSubscription.Disposable = await SubscribeToAllEvents(obs.OnNext, obs.OnError);
+					return _allEventsSubscription;
+				});
+		}
 
-            var sliceStart = 0L;
-            var deserializedEvents = new List<IEvent>();
-            StreamEventsSlice slice;
+		public async Task Publish(IEvent domainEvent)
+		{
+			// Not needed for EventStore - the publish happens automatically after Save()
+			await Task.CompletedTask;
+		}
 
-            do
-            {
-                slice = await _connection.ReadStreamEventsForwardAsync(streamName, sliceStart, 200, true);
-                deserializedEvents.AddRange(slice.Events.Select(x => Deserialize<IEvent>(x.Event)));
-                sliceStart = slice.NextEventNumber;
-            } while (!slice.IsEndOfStream);
+		public StreamingConnectionState ConnectionState { get; private set; } = StreamingConnectionState.Idle;
 
-            return deserializedEvents.ToArray();
-        }
+		public IObservable<StreamingConnectionState> ConnectionStateChanged => CreateConnectionStateChangedStream();
 
-        public async Task Save(string streamName, int expectedVersion, IEvent domainEvent)
-        {
-            await EnsureConnected();
+		private async Task<EventStoreSubscription> SubscribeToAllEvents(Action<IEvent> pumpEvent, Action<Exception> pumpError)
+		{
+			return await _connection.SubscribeToAllAsync(
+				true, 
+				(subscription, ev) =>
+				{
+					try
+					{
+						ProcessReceivedEvent(ev, pumpEvent);
+					}
+					catch (Exception ex)
+					{
+						pumpError(ex);
+					}
+				}, 
+				(subscription, reason, ex) => OnSubscriptionDropped(reason, ex, pumpError, pumpEvent));
+		}
 
-            var serializedEvent = Serialize(domainEvent);
-            var eventData = new EventData(Guid.NewGuid(), domainEvent.GetType().Name, true, serializedEvent, null);
+		private void OnSubscriptionDropped(SubscriptionDropReason dropReason, Exception ex, Action<Exception> pumpError, Action<IEvent> pumpEvent)
+		{
+			// If the drop reasons indicate that this was something straightforward, we should recreate the subscription
+			if (dropReason == SubscriptionDropReason.UserInitiated ||
+			    dropReason == SubscriptionDropReason.EventHandlerException)
+			{
+				// Wait for the ConnectionState == Connected before recreating
+				CreateConnectionStateChangedStream()
+					.Where(state => state == StreamingConnectionState.Connected)
+					.Take(1)
+					.Subscribe(async _ =>
+					{
+						_allEventsSubscription.Disposable = await SubscribeToAllEvents(pumpEvent, pumpError);
+					});
 
-            await _connection.AppendToStreamAsync(streamName, expectedVersion, eventData);
-        }
+				return;
+			}
 
-        public async Task<IObservable<IEvent>> SubscribeToAll()
-        {
-            await EnsureConnected();
+			// If the connection was dropped for another reason, don't recreate and instead pump an exception to the consumer
+			// TODO: Logging here
+			pumpError(ex);
+		}
 
-            return Observable.Create(
-                async (IObserver<IEvent> obs) =>
-                {
-                    var onEventReceived = new Func<EventStoreSubscription, ResolvedEvent, Task>(
-                        (subscription, ev) =>
-                        {
-                            var domainEvent = Deserialize<OrderCreatedEvent>(ev.Event);
+		private void ProcessReceivedEvent(ResolvedEvent ev, Action<IEvent> onProcessSuccessful)
+		{
+			// If we aren't interested in this event type, disregard it
+			if (!_eventTypeDictionary.TryGetValue(ev.Event.EventType, out Type eventType))
+			{
+				// TODO: Logging here
+				return;
+			}
 
-                            if (domainEvent == null)
-                                return Task.CompletedTask;
+			try
+			{
+				var jsonBody = Encoding.UTF8.GetString(ev.Event.Data);
+				var typedEvent = (IEvent)JsonConvert.DeserializeObject(jsonBody, eventType);
 
-                            obs.OnNext(domainEvent);
-                            return Task.CompletedTask;
-                        });
+				typedEvent.EventId = ev.Event.EventId;
 
-                    await _connection.SubscribeToAllAsync(true, onEventReceived);
-                });
-        }
+				onProcessSuccessful(typedEvent);
+			}
+			catch (Exception ex)
+			{
+				// TODO: Logging here
+				// Ensure that the exception bubbles up appropriately
+				throw new JsonException($"Failed to deserialize event: [Type={ev.Event.EventType}, EventId={ev.Event.EventId}]", ex);
+			}
+		}
 
-        public async Task<IObservable<TEvent>> Subscribe<TEvent>() where TEvent : IEvent
-        {
-            await EnsureConnected();
+		private IObservable<StreamingConnectionState> CreateConnectionStateChangedStream()
+		{
+			return Observable.Create(
+				(IObserver<StreamingConnectionState> obs) =>
+				{
+					var connecting = _connectingSubject
+						.Subscribe(_ => obs.OnNext(StreamingConnectionState.Connecting));
 
-            // TODO: System projections must be enabled on the eventstore for this to work.
-            var streamName = $"$et-{typeof(TEvent).Name}";
+					var connected = EventStoreHelpers.GetConnectedStream(_connection)
+						 .Subscribe(_ => obs.OnNext(StreamingConnectionState.Connected));
 
-            return Observable.Create(
-                async (IObserver<TEvent> obs) =>
-                {
-                    var onEventReceived = new Func<EventStoreSubscription, ResolvedEvent, Task>(
-                        (subscription, ev) =>
-                        {
-                            var domainEvent = Deserialize<TEvent>(ev.Event);
-                            obs.OnNext(domainEvent);
-                            return Task.CompletedTask;
-                        });
+					var disconnected = EventStoreHelpers.GetDisconnectedStream(_connection)
+						.Subscribe(_ => obs.OnNext(StreamingConnectionState.Disconnected));
 
-                    await _connection.SubscribeToStreamAsync(streamName, true, onEventReceived);
-                });
-        }
+					var reconnecting = EventStoreHelpers.GetReconnectingStream(_connection)
+						.Subscribe(_ => obs.OnNext(StreamingConnectionState.Reconnecting));
 
-        public async Task<IObservable<IEvent>> Subscribe(string streamName)
-        {
-            await EnsureConnected();
+					var closed = EventStoreHelpers.GetReconnectingStream(_connection)
+						.Subscribe(_ => obs.OnNext(StreamingConnectionState.Closed));
 
-            return Observable.Create(
-                async (IObserver<IEvent> obs) =>
-                {
-                    var onEventReceived = new Func<EventStoreSubscription, ResolvedEvent, Task>(
-                        (subscription, ev) =>
-                        {
-                            var domainEvent = Deserialize<IEvent>(ev.Event);
-                            obs.OnNext(domainEvent);
-                            return Task.CompletedTask;
-                        });
+					var authFailed = EventStoreHelpers.GetReconnectingStream(_connection)
+						.Subscribe(_ => obs.OnNext(StreamingConnectionState.AuthenticationFailed));
 
-                    await _connection.SubscribeToStreamAsync(streamName, true, onEventReceived);
-                });
-        }
+					return new CompositeDisposable(connecting, connected, disconnected, reconnecting, closed, authFailed);
+				})
+				.StartWith(ConnectionState);
+		}
 
-        public async Task Publish(IEvent domainEvent)
-        {
-            // Not needed for EventStore - the publish happens automatically after Save()
-            await Task.CompletedTask;
-        }
-
-        private async Task EnsureConnected()
-        {
-            if (!_connected)
-            {
-                await _connection.ConnectAsync();
-                _connected = true;
-            }
-        }
-
-        private TEvent Deserialize<TEvent>(RecordedEvent recordedEvent) where TEvent : IEvent
-        {
-
-            if (recordedEvent == null)
-                return default(TEvent);
-
-            if (!recordedEvent.IsJson)
-                return default(TEvent);
-
-            if (recordedEvent.EventType != "OrderCreatedEvent")
-                return default(TEvent);
-
-            var data = Encoding.UTF8.GetString(recordedEvent.Data);
-
-            try
-            {
-                return JsonConvert
-                    .DeserializeObject<TEvent>(data, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Objects });
-            }
-            catch (Exception ex)
-            {
-                // TODO Handle
-                return default(TEvent);
-            }
-        }
-
-        private byte[] Serialize(IEvent evt)
-        {
-            return Encoding.UTF8.GetBytes(
-                JsonConvert.SerializeObject(evt, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Objects }));
-        }
-    }
+		public void Dispose()
+		{
+			_connection?.Close();
+			_connectionStateSubscription.Dispose();
+			_connection?.Dispose();
+		}
+	}
 }

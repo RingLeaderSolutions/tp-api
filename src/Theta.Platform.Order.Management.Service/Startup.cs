@@ -58,13 +58,17 @@ namespace Theta.Platform.Order.Management.Service
 
 			// EventStore registrations
             var eventStoreClient = new EventStoreClient(
+				EventTypes,
 	            new EventStoreConnectionFactory(eventStoreConfiguration));
 	        services.AddSingleton<IEventStreamingClient>(eventStoreClient);
             services.AddSingleton<IEventPersistenceClient>(eventStoreClient);
 
-            services.AddSingleton<IAggregateWriter<Domain.Order>, OrderAggregateWriter>();
+			// Register the AggregateWriter as the implementation of both IAggregateWriter and IAggregateReader
+            services.AddSingleton<OrderAggregateWriter>();
+            services.AddSingleton<IAggregateWriter<Domain.Order>>(i => i.GetService<OrderAggregateWriter>());
+            services.AddSingleton<IAggregateReader<Domain.Order>>(i => i.GetService<OrderAggregateWriter>());
 
-			// Retrieve and register all implementations of ISubscriber<>
+            // Retrieve and register all implementations of ISubscriber<>
 			GetImplementations(typeof(ISubscriber<ICommand, IEvent>))
 				.ForEach(type =>
 				{
@@ -128,27 +132,32 @@ namespace Theta.Platform.Order.Management.Service
 		        .ToList();
 		}
 
-        private static Dictionary<string, Type> CommandTypes
+        private static Dictionary<string, Type> EventTypes { get; } = new List<KeyValuePair<string, Type>>
         {
-            get
-            {
-                Dictionary<string, Type> commandTypeDictionary = new Dictionary<string, Type>();
+	        CreateEventNameToTypeMapping(typeof(OrderCreatedEvent)),
+	        CreateEventNameToTypeMapping(typeof(OrderCompletedEvent)),
+	        CreateEventNameToTypeMapping(typeof(OrderFilledEvent)),
+	        CreateEventNameToTypeMapping(typeof(OrderPickedUpEvent)),
+	        CreateEventNameToTypeMapping(typeof(OrderPickUpRejectedEvent)),
+	        CreateEventNameToTypeMapping(typeof(OrderPutDownEvent)),
+	        CreateEventNameToTypeMapping(typeof(OrderRejectedEvent)),
+	        CreateEventNameToTypeMapping(typeof(SupplementaryEvidenceReceivedEvent))
+        }.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
-                AddCommandType(commandTypeDictionary, typeof(CreateOrderCommand));
-                AddCommandType(commandTypeDictionary, typeof(CompleteOrderCommand));
-                AddCommandType(commandTypeDictionary, typeof(PickupOrderCommand));
-                AddCommandType(commandTypeDictionary, typeof(PutDownOrderCommand));
-                AddCommandType(commandTypeDictionary, typeof(RejectOrderCommand));
-                AddCommandType(commandTypeDictionary, typeof(FillOrderCommand));
-                AddCommandType(commandTypeDictionary, typeof(RegisterSupplementaryEvidenceCommand));
-
-                return commandTypeDictionary;
-            }
-        }
-
-        private static void AddCommandType(Dictionary<string, Type> collection, Type type)
+        private static Dictionary<string, Type> CommandTypes { get; } = new List<KeyValuePair<string, Type>>
         {
-            collection.Add(type.Name, type);
+	        CreateEventNameToTypeMapping(typeof(CreateOrderCommand)),
+	        CreateEventNameToTypeMapping(typeof(CompleteOrderCommand)),
+	        CreateEventNameToTypeMapping(typeof(PickupOrderCommand)),
+	        CreateEventNameToTypeMapping(typeof(PutDownOrderCommand)),
+	        CreateEventNameToTypeMapping(typeof(RejectOrderCommand)),
+	        CreateEventNameToTypeMapping(typeof(FillOrderCommand)),
+	        CreateEventNameToTypeMapping(typeof(RegisterSupplementaryEvidenceCommand))
+        }.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+        private static KeyValuePair<string, Type> CreateEventNameToTypeMapping(Type type)
+        {
+	        return new KeyValuePair<string, Type>(type.Name, type);
         }
-    }
+	}
 }

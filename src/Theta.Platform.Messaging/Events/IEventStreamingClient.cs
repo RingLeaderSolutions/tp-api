@@ -3,11 +3,12 @@ using System.Threading.Tasks;
 
 namespace Theta.Platform.Messaging.Events
 {
-	public interface IEventStreamingClient
+	public interface IEventStreamingClient : IDisposable
 	{
-		Task<IObservable<IEvent>> SubscribeToAll();
-		Task<IObservable<TEvent>> Subscribe<TEvent>() where TEvent : IEvent;
-		Task<IObservable<IEvent>> Subscribe(string streamName);
+		Task Connect();
+		IObservable<IEvent> GetAllEventsStream();
 		Task Publish(IEvent domainEvent);
+		StreamingConnectionState ConnectionState { get; }
+		IObservable<StreamingConnectionState> ConnectionStateChanged { get; }
 	}
 }
