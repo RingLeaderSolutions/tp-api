@@ -49,7 +49,7 @@ namespace Theta.Platform.Messaging.ServiceBus
 				.CreateAsync();
 		}
 
-		public IObservable<IActionableMessage<ICommand>> Subscribe(string queueName)
+		public IObservable<IActionableMessage<ICommand>> GetCommandQueueStream(string queueName)
 		{
 			var qc = _queueClientFactory.Create(queueName);
 

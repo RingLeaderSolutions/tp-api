@@ -41,7 +41,7 @@ namespace Theta.Platform.Order.Management.Service.Messaging
 
 	        await _commandQueueClient.CreateQueueIfNotExists(QueueName);
 
-	        _commandSubscription = _commandQueueClient.Subscribe(QueueName)
+	        _commandSubscription = _commandQueueClient.GetCommandQueueStream(QueueName)
 		        .Subscribe(message =>
 		        {
 			        if (_commandToSubscriberDictionary.TryGetValue(message.ReceivedCommand.Type, out var commandSubscribers))

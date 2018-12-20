@@ -55,7 +55,7 @@ namespace Theta.Platform.Messaging.ServiceBus.Tests.Unit
 		{
 			var receivedMessages = new List<IActionableMessage<ICommand>>();
 			_commandQueueClient
-				.Subscribe("test-queue")
+				.GetCommandQueueStream("test-queue")
 				.Subscribe(message => receivedMessages.Add(message));
 
 			A.CallTo(() => _queueClient.RegisterMessageHandler(
@@ -83,7 +83,7 @@ namespace Theta.Platform.Messaging.ServiceBus.Tests.Unit
 		{
 			var receivedMessages = new List<IActionableMessage<ICommand>>();
 			var subscription = _commandQueueClient
-				.Subscribe("test-queue")
+				.GetCommandQueueStream("test-queue")
 				.Subscribe(message => receivedMessages.Add(message));
 
 			A.CallTo(() => _queueClient.CloseAsync())
@@ -102,7 +102,7 @@ namespace Theta.Platform.Messaging.ServiceBus.Tests.Unit
 			var receivedErrors = new List<Exception>();
 
 			_commandQueueClient
-				.Subscribe("test-queue")
+				.GetCommandQueueStream("test-queue")
 				.Subscribe(
 					message => receivedMessages.Add(message),
 					error => receivedErrors.Add(error));
