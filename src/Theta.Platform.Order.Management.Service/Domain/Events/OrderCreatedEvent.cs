@@ -1,6 +1,7 @@
 ﻿using System;
+using Theta.Platform.Messaging.Events;
 
-namespace Theta.Platform.Messaging.Events
+namespace Theta.Platform.Order.Management.Service.Domain.Events
 {
     public class OrderCreatedEvent : Event
     {

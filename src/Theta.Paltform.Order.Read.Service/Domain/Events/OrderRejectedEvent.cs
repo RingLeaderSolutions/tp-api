@@ -1,6 +1,7 @@
 ﻿using System;
+using Theta.Platform.Messaging.Events;
 
-namespace Theta.Platform.Messaging.Events
+namespace Theta.Paltform.Order.Read.Service.Domain.Events
 {
     public class OrderRejectedEvent : Event
     {

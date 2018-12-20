@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Theta.Platform.Messaging.Commands;
 
-namespace Theta.Platform.Messaging.Commands
+namespace Theta.Platform.Order.Seed.Console.Commands
 {
     public class PickupOrderCommand : Command
     {

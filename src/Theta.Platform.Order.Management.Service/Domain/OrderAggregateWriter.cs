@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Theta.Platform.Domain;
 using Theta.Platform.Messaging.Events;
+using Theta.Platform.Order.Management.Service.Domain.Events;
 
 namespace Theta.Platform.Order.Management.Service.Domain
 {

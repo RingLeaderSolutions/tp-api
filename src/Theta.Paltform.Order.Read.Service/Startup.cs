@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Swashbuckle.AspNetCore.Swagger;
 using Theta.Paltform.Order.Read.Service.Configuration;
 using Theta.Paltform.Order.Read.Service.Data;
+using Theta.Paltform.Order.Read.Service.Domain.Events;
 using Theta.Platform.Messaging.Events;
 using Theta.Platform.Messaging.EventStore;
 using Theta.Platform.Messaging.EventStore.Configuration;

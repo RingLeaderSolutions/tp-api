@@ -21,6 +21,8 @@ using Theta.Platform.Messaging.ServiceBus.Configuration;
 using Theta.Platform.Messaging.ServiceBus.Factories;
 using Theta.Platform.Order.Management.Service.Configuration;
 using Theta.Platform.Order.Management.Service.Domain;
+using Theta.Platform.Order.Management.Service.Domain.Commands;
+using Theta.Platform.Order.Management.Service.Domain.Events;
 using Theta.Platform.Order.Management.Service.Messaging;
 using Theta.Platform.Order.Management.Service.Messaging.Subscribers;
 

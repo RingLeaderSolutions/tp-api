@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Theta.Platform.Messaging.Commands;
+using Theta.Platform.Order.Seed.Console.Commands;
 
 namespace Theta.Platform.Order.Seed.Console
 {

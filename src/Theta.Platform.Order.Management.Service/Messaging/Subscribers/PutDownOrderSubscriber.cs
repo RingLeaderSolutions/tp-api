@@ -2,6 +2,8 @@
 using Theta.Platform.Domain;
 using Theta.Platform.Messaging.Commands;
 using Theta.Platform.Messaging.Events;
+using Theta.Platform.Order.Management.Service.Domain.Commands;
+using Theta.Platform.Order.Management.Service.Domain.Events;
 
 namespace Theta.Platform.Order.Management.Service.Messaging.Subscribers
 {
