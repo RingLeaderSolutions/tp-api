@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Swashbuckle.AspNetCore.Swagger;
 using Theta.Paltform.Order.Read.Service.Configuration;
 using Theta.Paltform.Order.Read.Service.Data;
 using Theta.Platform.Messaging.Events;
@@ -39,8 +40,23 @@ namespace Theta.Paltform.Order.Read.Service
 
             services.AddSingleton<IOrderReader, OrderReader>();
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-        }
+            services.AddCors(options =>
+            {
+	            options.AddPolicy("CorsPolicy",
+		            builder => builder
+			            .AllowAnyOrigin()
+			            .AllowAnyMethod()
+			            .AllowAnyHeader()
+			            .AllowCredentials());
+            });
+
+			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+
+            services.AddSwaggerGen(c =>
+            {
+	            c.SwaggerDoc("v1", new Info { Title = "Orders API", Version = "v1" });
+            });
+		}
 
         private IEventStoreConfiguration GetEventStoreConfiguration()
         {
@@ -52,7 +68,7 @@ namespace Theta.Paltform.Order.Read.Service
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public async void Configure(IApplicationBuilder app, IHostingEnvironment env, IOrderReader orderReader)
         {
-            await orderReader.StartAsync();
+	        app.UseCors("CorsPolicy");
 
             if (env.IsDevelopment())
             {
@@ -66,7 +82,15 @@ namespace Theta.Paltform.Order.Read.Service
 
             app.UseHttpsRedirection();
             app.UseMvc();
-        }
+
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+	            c.SwaggerEndpoint("/swagger/v1/swagger.json", "Order Read Service API V1");
+            });
+
+            await orderReader.StartAsync();
+		}
 
         private Dictionary<string, Type> SubscribedEventTypes { get; } = new List<KeyValuePair<string, Type>>
         {

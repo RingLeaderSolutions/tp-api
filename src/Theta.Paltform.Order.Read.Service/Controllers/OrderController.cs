@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Caching.Memory;
 using Theta.Paltform.Order.Read.Service.Data;
 
 namespace Theta.Paltform.Order.Read.Service.Controllers
@@ -19,8 +15,8 @@ namespace Theta.Paltform.Order.Read.Service.Controllers
             _orderReader = orderReader;
         }
 
-        [HttpGet]
-        public ActionResult<Domain.Order> Get(Guid orderId)
+		[HttpGet("{orderId}")]
+		public ActionResult<Domain.Order> Get(Guid orderId)
         {
             var order = _orderReader.GetById(orderId);
 
@@ -29,5 +25,13 @@ namespace Theta.Paltform.Order.Read.Service.Controllers
 
             return Ok(order);
         }
-    }
+
+        [HttpGet]
+        public IActionResult Get()
+        {
+	        var orders = _orderReader.Get();
+
+	        return Ok(orders);
+        }
+	}
 }
