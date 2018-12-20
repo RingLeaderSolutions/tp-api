@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Theta.Platform.Messaging.Commands;
@@ -8,13 +9,11 @@ namespace Theta.Platform.Order.Seed.Console
 {
     public class DatastoreInitializer
     {
-	    private readonly string _queueName;
-	    private readonly ICommandQueueClient _commandQueueClient;
+        private readonly Dictionary<string, ICommandQueueClient> cqcs;
 
-        public DatastoreInitializer(string queueName, ICommandQueueClient commandQueueClient)
+        public DatastoreInitializer(Dictionary<string, ICommandQueueClient> cqcs)
         {
-	        _queueName = queueName;
-	        _commandQueueClient = commandQueueClient;
+            this.cqcs = cqcs;
         }
 
         public async Task Seed()
@@ -75,35 +74,44 @@ namespace Theta.Platform.Order.Seed.Console
 		        deskId, orderId, null, instrumentId, ownerId, quantity, orderType, limitPrice, currency,
 		        markupUnit, markupValue, expiration, timeInForce);
 
-            await DispatchCommand(createOrderCommand);
+            var orderServiceCqc = cqcs.First(x => x.Key == "order-service");
+            var rfqServiceCqc = cqcs.First(x => x.Key == "rfq-service");
+
+            await DispatchCommand(createOrderCommand, orderServiceCqc);
 			System.Console.WriteLine($"Sent CreateOrderCommand, OrderId=[{orderId}]");
 			System.Console.ReadKey();
 
 			var pickupOrderCommand = new PickupOrderCommand() { OrderId = orderId, OwnerId = Guid.NewGuid() };
-			await DispatchCommand(pickupOrderCommand);
+			await DispatchCommand(pickupOrderCommand, orderServiceCqc);
 			System.Console.WriteLine($"Sent PickupOrderCommand (1), OrderId=[{orderId}]");
 			System.Console.ReadKey();
 
 			var putdownOrderCommand = new PutDownOrderCommand() { OrderId = orderId };
-			await DispatchCommand(putdownOrderCommand);
+			await DispatchCommand(putdownOrderCommand, orderServiceCqc);
 			System.Console.WriteLine($"Sent PutDownOrderCommand, OrderId=[{orderId}]");
 			System.Console.ReadKey();
 
 			var pickupOrderCommand2 = new PickupOrderCommand() { OrderId = orderId, OwnerId = Guid.NewGuid() };
-			await DispatchCommand(pickupOrderCommand2);
+			await DispatchCommand(pickupOrderCommand2, orderServiceCqc);
 			System.Console.WriteLine($"Sent PickupOrderCommand (2), OrderId=[{orderId}]");
 			System.Console.ReadKey();
 
-			await Fill(orderId, createOrderCommand);
+            List<string> counterParties = new List<string>() { "Barclays", "ABN Amro", "DNB", "Nordea", "VR-Bank", "Deutche Bank", "RBS" };
 
-			var completeOrderCommand = new CompleteOrderCommand() { OrderId = orderId };
+            var rfqCommand = new RaiseRFQCommand() { CounterParties = counterParties, Instrument = instrumentId, OrderId = orderId, RFQIdentitier = Guid.NewGuid(), Requested = DateTimeOffset.Now };
 
-			await DispatchCommand(completeOrderCommand);
-			System.Console.WriteLine($"Sent CompleteOrderCommand, OrderId=[{orderId}]");
-			System.Console.ReadKey();
+            await DispatchCommand(rfqCommand, rfqServiceCqc);
+
+            //await Fill(orderId, createOrderCommand);
+
+            //var completeOrderCommand = new CompleteOrderCommand() { OrderId = orderId };
+
+            //await DispatchCommand(completeOrderCommand);
+            //System.Console.WriteLine($"Sent CompleteOrderCommand, OrderId=[{orderId}]");
+            System.Console.ReadKey();
 		}
 
-		private async Task Fill(Guid orderId, CreateOrderCommand createOrderCommand)
+		private async Task Fill(Guid orderId, CreateOrderCommand createOrderCommand, KeyValuePair<string, ICommandQueueClient> orderServiceCqc)
         {
             var price = RandomDecimal(0.1M, 3.25M);
 
@@ -111,28 +119,28 @@ namespace Theta.Platform.Order.Seed.Console
             {
                 var fillOrderCommand = new FillOrderCommand() { OrderId = orderId, RFQId = Guid.NewGuid(), Price = price, Quantity = createOrderCommand.Quantity };
 
-                await DispatchCommand(fillOrderCommand);
+                await DispatchCommand(fillOrderCommand, orderServiceCqc);
 				System.Console.WriteLine($"Sent FillOrderCommand (0%->100%), OrderId=[{orderId}]");
 				System.Console.ReadKey();
 				return;
             }
 
             var fillOrderCommand1 = new FillOrderCommand() { OrderId = orderId, RFQId = Guid.NewGuid(), Price = price, Quantity = (createOrderCommand.Quantity / 2) };
-            await DispatchCommand(fillOrderCommand1);
+            await DispatchCommand(fillOrderCommand1, orderServiceCqc);
 			System.Console.WriteLine($"Sent FillOrderCommand (0%->50%), OrderId=[{orderId}]");
             System.Console.ReadKey();
 			
             
             var fillOrderCommand2 = new FillOrderCommand() { OrderId = orderId, RFQId = Guid.NewGuid(), Price = price, Quantity = createOrderCommand.Quantity - fillOrderCommand1.Quantity };
 
-            await DispatchCommand(fillOrderCommand2);
+            await DispatchCommand(fillOrderCommand2, orderServiceCqc);
 			System.Console.WriteLine($"Sent FillOrderCommand (50%->100%), OrderId=[{orderId}]");
 			System.Console.ReadKey();
 		}
 
-        private async Task DispatchCommand(ICommand command)
+        private async Task DispatchCommand(ICommand command, KeyValuePair<string, ICommandQueueClient> queueClient)
         {
-            await _commandQueueClient.Send(_queueName, command);
+            await queueClient.Value.Send(queueClient.Key, command);
         }
 
         private bool FillPartial()
