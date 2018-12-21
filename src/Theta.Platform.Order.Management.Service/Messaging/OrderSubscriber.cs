@@ -16,14 +16,14 @@ namespace Theta.Platform.Order.Management.Service.Messaging
         private const string QueueName = "order-service";
 
         private readonly ICommandQueueClient _commandQueueClient;
-        private readonly IAggregateReader<Domain.Order> _aggregateReader;
+        private readonly IAggregateReader<Domain.Aggregate.Order> _aggregateReader;
         private readonly Dictionary<string, List<ISubscriber<ICommand, IEvent>>> _commandToSubscriberDictionary;
 
         private IDisposable _commandSubscription;
 
         public OrderSubscriber(
 	        ICommandQueueClient commandQueueClient,
-			IAggregateReader<Domain.Order> aggregateReader,
+			IAggregateReader<Domain.Aggregate.Order> aggregateReader,
 			IEnumerable<ISubscriber<ICommand, IEvent>> subscribers)
         {
             _commandQueueClient = commandQueueClient;

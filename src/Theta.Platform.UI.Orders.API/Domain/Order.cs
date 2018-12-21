@@ -33,6 +33,8 @@ namespace Theta.Platform.UI.Orders.API.Domain
 
 		public decimal Quantity { get; set; }
 
+		public Side Side { get; set; }
+
 		public OrderType Type { get; set; }
 
 		public decimal LimitPrice { get; set; }
@@ -64,6 +66,7 @@ namespace Theta.Platform.UI.Orders.API.Domain
 			OwnerId = evt.OwnerId;
 			Status = OrderStatus.Pending;
 			Quantity = evt.Quantity;
+			Side = evt.Side;
 			// TODO: Remove enum parsing when OrderCreatedEvent moved out of the Theta.Platform.Messaging project
 			Type = Enum.Parse<OrderType>(evt.OrderType);
 			LimitPrice = evt.LimitPrice;

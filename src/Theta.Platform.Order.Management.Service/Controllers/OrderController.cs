@@ -9,9 +9,9 @@ namespace Theta.Platform.Order.Management.Service.Controllers
     [ApiController]
     public class OrderController : ControllerBase
     {
-        private readonly IAggregateReader<Domain.Order> _aggregateReader;
+        private readonly IAggregateReader<Domain.Aggregate.Order> _aggregateReader;
 
-        public OrderController(IAggregateReader<Domain.Order> aggregateReader)
+        public OrderController(IAggregateReader<Domain.Aggregate.Order> aggregateReader)
         {
             this._aggregateReader = aggregateReader;
         }

@@ -1,7 +1,7 @@
-﻿using System;
+﻿// ReSharper disable ClassNeverInstantiated.Global
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Theta.Platform.Domain;
 using Theta.Platform.RFQ.Management.Service.Domain.Events;
 

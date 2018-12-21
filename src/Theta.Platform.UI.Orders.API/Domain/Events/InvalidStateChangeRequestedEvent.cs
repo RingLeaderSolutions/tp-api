@@ -1,9 +1,12 @@
-﻿using System;
+﻿// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable UnusedMember.Global
+
+using System;
 using Theta.Platform.Messaging.Events;
 
 namespace Theta.Platform.UI.Orders.API.Domain.Events
 {
-    public class InvalidStateChangeRequestedEvent : Event
+    public sealed class InvalidStateChangeRequestedEvent : Event
     {
         public InvalidStateChangeRequestedEvent(Guid orderId, string eventType, string reason)
 			: base(orderId)

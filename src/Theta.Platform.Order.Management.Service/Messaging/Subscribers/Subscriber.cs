@@ -9,9 +9,9 @@ namespace Theta.Platform.Order.Management.Service.Messaging.Subscribers
     public abstract class Subscriber<TCommand, TEvent> : ISubscriber<ICommand, IEvent> 
 	    where TCommand : ICommand where TEvent : IEvent
     {
-        protected readonly IAggregateWriter<Domain.Order> AggregateWriter;
+        protected readonly IAggregateWriter<Domain.Aggregate.Order> AggregateWriter;
 
-        protected Subscriber(IAggregateWriter<Domain.Order> aggregateWriter)
+        protected Subscriber(IAggregateWriter<Domain.Aggregate.Order> aggregateWriter)
         {
             AggregateWriter = aggregateWriter;
         }

@@ -1,9 +1,11 @@
-﻿using System;
+﻿// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable UnusedAutoPropertyAccessor.Global
+using System;
 using Theta.Platform.Messaging.Commands;
 
 namespace Theta.Platform.UI.Orders.API.Domain.Commands
 {
-    public class CreateOrderCommand : Command
+    public sealed class CreateOrderCommand : Command
     {
 		// TODO: Reinstate enums when commands moved out of Theta.Platform.Messaging project.
         public CreateOrderCommand(
@@ -13,6 +15,7 @@ namespace Theta.Platform.UI.Orders.API.Domain.Commands
                     Guid instrumentId,
                     Guid ownerId,
                     decimal quantity,
+					Side side,
                     string orderType,
                     decimal limitPrice,
                     string currencyCode,
@@ -27,6 +30,7 @@ namespace Theta.Platform.UI.Orders.API.Domain.Commands
             InstrumentId = instrumentId;
             OwnerId = ownerId;
             Quantity = quantity;
+            Side = side;
             OrderType = orderType;
             LimitPrice = limitPrice;
             CurrencyCode = currencyCode;
@@ -36,30 +40,32 @@ namespace Theta.Platform.UI.Orders.API.Domain.Commands
             TimeInForce = timeInForce;
         }
 
-        public Guid DeskId { get; set; }
+        public Guid DeskId { get; }
 
-        public Guid? ParentOrderId { get; set; }
+        public Guid? ParentOrderId { get; }
 
-        public Guid InstrumentId { get; set; }
+        public Guid InstrumentId { get; }
 
-        public Guid OwnerId { get; set; }
+        public Guid OwnerId { get; }
 
-        public Guid OrderId { get; set; }
+        public Guid OrderId { get; }
 
-        public decimal Quantity { get; set; }
+        public decimal Quantity { get; }
 
-        public string OrderType { get; set; }
+		public Side Side { get; }
 
-        public decimal LimitPrice { get; set; }
+        public string OrderType { get; }
 
-        public string CurrencyCode { get; set; }
+        public decimal LimitPrice { get; }
 
-        public string MarkupUnit { get; set; }
+        public string CurrencyCode { get; }
 
-        public decimal MarkupValue { get; set; }
+        public string MarkupUnit { get; }
 
-        public DateTime? GoodTillDate { get; set; }
+        public decimal MarkupValue { get; }
 
-        public string TimeInForce { get; set; }
+        public DateTime? GoodTillDate { get; }
+
+        public string TimeInForce { get; }
 	}
 }

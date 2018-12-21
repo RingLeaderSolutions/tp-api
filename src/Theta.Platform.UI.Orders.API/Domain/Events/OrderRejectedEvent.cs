@@ -1,9 +1,13 @@
-﻿using System;
+﻿// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable UnusedMember.Global
+
+using System;
 using Theta.Platform.Messaging.Events;
 
 namespace Theta.Platform.UI.Orders.API.Domain.Events
 {
-    public class OrderRejectedEvent : Event
+    public sealed class OrderRejectedEvent : Event
     {
         public OrderRejectedEvent(Guid orderId, string reason) : base(orderId)
         {
@@ -12,6 +16,6 @@ namespace Theta.Platform.UI.Orders.API.Domain.Events
 
 		public Guid OrderId => AggregateId;
 
-		public string Reason { get; }
+		public string Reason { get; set; }
     }
 }

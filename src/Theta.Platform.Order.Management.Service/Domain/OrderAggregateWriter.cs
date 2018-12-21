@@ -7,7 +7,7 @@ using Theta.Platform.Order.Management.Service.Domain.Events;
 
 namespace Theta.Platform.Order.Management.Service.Domain
 {
-	public sealed class OrderAggregateWriter : AggregateWriter<Order>
+	public sealed class OrderAggregateWriter : AggregateWriter<Aggregate.Order>
 	{
 		public OrderAggregateWriter(
 			IEventPersistenceClient eventPersistenceClient, 

@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿// ReSharper disable UnusedMember.Global
+using System;
 using Theta.Platform.Messaging.Events;
 
 namespace Theta.Platform.RFQ.Management.Service.Domain.Events
 {
-    public class RFQCancelledEvent : Event
+    public sealed class RFQCancelledEvent : Event
     {
         public RFQCancelledEvent(Guid rFQIdentitier) : base(rFQIdentitier)
-        {
-            
+        {   
         }
 
         public Guid RFQIdentitier => AggregateId;

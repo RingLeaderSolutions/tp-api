@@ -1,16 +1,26 @@
-﻿using System;
+﻿// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable UnusedAutoPropertyAccessor.Global
+using System;
 using Theta.Platform.Messaging.Commands;
 
 namespace Theta.Platform.Order.Seed.Console.Commands
 {
-    public class FillOrderCommand : Command
+    public sealed class FillOrderCommand : Command
     {
-        public Guid OrderId { get; set; }
+	    public FillOrderCommand(Guid orderId, Guid rfqId, decimal quantity, decimal price)
+	    {
+		    OrderId = orderId;
+		    RFQId = rfqId;
+		    Quantity = quantity;
+		    Price = price;
+	    }
 
-        public Guid RFQId { get; set; }
+	    public Guid OrderId { get; }
 
-        public decimal Quantity { get; set; }
+        public Guid RFQId { get; }
 
-        public decimal Price { get; set; }
+        public decimal Quantity { get; }
+
+        public decimal Price { get; }
     }
 }

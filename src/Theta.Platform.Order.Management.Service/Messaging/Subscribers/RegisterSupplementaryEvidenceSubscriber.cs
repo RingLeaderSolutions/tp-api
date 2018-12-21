@@ -9,7 +9,7 @@ namespace Theta.Platform.Order.Management.Service.Messaging.Subscribers
 {
     public class RegisterSupplementaryEvidenceSubscriber : Subscriber<RegisterSupplementaryEvidenceCommand, SupplementaryEvidenceReceivedEvent>, ISubscriber<RegisterSupplementaryEvidenceCommand, SupplementaryEvidenceReceivedEvent>
     {
-        public RegisterSupplementaryEvidenceSubscriber(IAggregateWriter<Domain.Order> aggregateWriter) : base(aggregateWriter)
+        public RegisterSupplementaryEvidenceSubscriber(IAggregateWriter<Domain.Aggregate.Order> aggregateWriter) : base(aggregateWriter)
         {
         }
 

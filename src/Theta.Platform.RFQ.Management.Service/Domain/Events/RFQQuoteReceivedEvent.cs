@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable UnusedAutoPropertyAccessor.Global
+// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
+// ReSharper disable UnusedMember.Global
+using System;
 using Theta.Platform.Messaging.Events;
 
 namespace Theta.Platform.RFQ.Management.Service.Domain.Events
 {
-    public class RFQQuoteReceivedEvent : Event
+    public sealed class RFQQuoteReceivedEvent : Event
     {
         public RFQQuoteReceivedEvent(Guid instrument, Guid rFQIdentitier, Guid quoteIdentifier, string counterParty, DateTimeOffset validUntil, decimal price) : base(rFQIdentitier)
         {

@@ -64,6 +64,7 @@ namespace Theta.Platform.UI.Orders.API.Controllers
 				request.Instrument, 
 				Guid.NewGuid(),
 				request.Quantity,
+				request.Side,
 				request.Type.ToString(),
 				request.LimitPrice,
 				"GBP",

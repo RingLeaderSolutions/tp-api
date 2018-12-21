@@ -1,12 +1,20 @@
-﻿using System;
+﻿// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable UnusedAutoPropertyAccessor.Global
+using System;
 using Theta.Platform.Messaging.Commands;
 
 namespace Theta.Platform.Order.Seed.Console.Commands
 {
-    public class RegisterSupplementaryEvidenceCommand : Command
+    public sealed class RegisterSupplementaryEvidenceCommand : Command
     {
-        public Guid OrderId { get; set; }
+	    public RegisterSupplementaryEvidenceCommand(Guid orderId, string supplementaryEvidence)
+	    {
+		    OrderId = orderId;
+		    SupplementaryEvidence = supplementaryEvidence;
+	    }
 
-        public string SupplementaryEvidence { get; set; }
+	    public Guid OrderId { get; }
+
+        public string SupplementaryEvidence { get; }
     }
 }

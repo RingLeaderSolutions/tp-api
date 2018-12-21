@@ -1,12 +1,13 @@
-﻿using System;
+﻿// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable ClassNeverInstantiated.Global
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Theta.Platform.Domain;
 using Theta.Platform.Order.Management.Service.Domain.Events;
 
-namespace Theta.Platform.Order.Management.Service.Domain
+namespace Theta.Platform.Order.Management.Service.Domain.Aggregate
 {
-	// ReSharper disable once ClassNeverInstantiated.Global
 	public sealed class Order : AggregateRoot
     {
         private Order()
@@ -32,6 +33,8 @@ namespace Theta.Platform.Order.Management.Service.Domain
         public OrderStatus Status { get; private set; }
 
         public decimal Quantity { get; set; }
+
+		public Side Side { get; set; }
 
         public OrderType Type { get; set; }
 
@@ -64,6 +67,7 @@ namespace Theta.Platform.Order.Management.Service.Domain
 			OwnerId = evt.OwnerId;
 			Status = OrderStatus.Pending;
 			Quantity = evt.Quantity;
+			Side = evt.Side;
 			// TODO: Remove enum parsing when OrderCreatedEvent moved out of the Theta.Platform.Messaging project
 			Type = Enum.Parse<OrderType>(evt.OrderType);
 			LimitPrice = evt.LimitPrice;
