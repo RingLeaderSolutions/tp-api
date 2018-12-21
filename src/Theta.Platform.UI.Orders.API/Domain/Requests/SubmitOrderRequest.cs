@@ -32,6 +32,6 @@ namespace Theta.Platform.UI.Orders.API.Domain.Requests
 	{
 		public TimeInForce Type { get; set; }
 
-		public DateTime? GoodTillDate { get; set; }
+		public DateTimeOffset? GoodTillDate { get; set; }
 	}
 }

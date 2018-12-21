@@ -22,8 +22,8 @@ namespace Theta.Platform.Order.Seed.Console
 	        while (true)
 	        {
 		        var instrumentIds = new[] { Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid() };
-		        var markupUnitValues = new[] { "PercentageOfWhole", "BasisPoints", "ActualValue" };
-		        var orderTypeValues = new[] { "Market", "Limit" };
+		        var markupUnitValues = new[] { MarkupUnit.ActualValue, MarkupUnit.BasisPoints, MarkupUnit.PercentageOfWhole };
+		        var orderTypeValues = new[] { OrderType.Limit, OrderType.Market };
 		        var currencies = new[] { "GBP", "USD", "NOK" };
 
 		        for (int i = 0; i < 1; i++)
@@ -47,14 +47,14 @@ namespace Theta.Platform.Order.Seed.Console
 					        var randomMarkupValue = RandomDecimal(2.1M, 12.9M);
 					        var randomExpiration = GetGTDExpiration();
 
-					        var timeInForce = "GoodTillCancel";
+					        var timeInForce = TimeInForce.GoodTillCancel;
 
 					        if (randomExpiration.HasValue)
 					        {
 						        if (randomExpiration.Value.Hour == 0 && randomExpiration.Value.Month == 0)
-							        timeInForce = "GoodTillDay";
+							        timeInForce = TimeInForce.GoodTillDay;
 						        else
-							        timeInForce = "GoodTillDate";
+							        timeInForce = TimeInForce.GoodTillDate;
 					        }
 
 					        await SeedOrder(
@@ -69,7 +69,7 @@ namespace Theta.Platform.Order.Seed.Console
 
         private async Task SeedOrder(Guid instrumentId, string currency, decimal quantity, decimal limitPrice,
             decimal markupValue, Guid orderId, Guid deskId, Guid ownerId,
-            string markupUnit, string orderType, DateTime? expiration, string timeInForce)
+            MarkupUnit markupUnit, OrderType orderType, DateTimeOffset? expiration, TimeInForce timeInForce)
         {
 	        var side = new Random().Next() % 2 == 0 ? Side.Buy : Side.Sell;
  	        var createOrderCommand = new CreateOrderCommand(
@@ -157,7 +157,7 @@ namespace Theta.Platform.Order.Seed.Console
 	        return true;
         }
 
-        private DateTime? GetGTDExpiration()
+        private DateTimeOffset? GetGTDExpiration()
         {
 	        Random gen = new Random();
 	        int prob = gen.Next(100);
@@ -169,10 +169,10 @@ namespace Theta.Platform.Order.Seed.Console
 
 	        if (prob < 30)
 	        {
-		        return new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+		        return new DateTimeOffset(DateTime.Today);
 	        }
 
-	        return DateTime.Now.AddDays(1);
+	        return DateTimeOffset.Now.AddDays(1);
         }
 
 		private static decimal RandomQuantity()

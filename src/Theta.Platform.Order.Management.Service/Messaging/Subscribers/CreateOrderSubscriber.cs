@@ -25,7 +25,9 @@ namespace Theta.Platform.Order.Management.Service.Messaging.Subscribers
 	            command.LimitPrice, 
 	            command.CurrencyCode, 
 	            command.MarkupUnit, 
-	            command.MarkupValue);
+	            command.MarkupValue,
+	            command.GoodTillDate,
+	            command.TimeInForce);
 
             return Task.FromResult(orderCreatedEvent);
         }

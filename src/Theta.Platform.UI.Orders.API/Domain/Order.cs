@@ -47,6 +47,10 @@ namespace Theta.Platform.UI.Orders.API.Domain
 
 		public string SupplementaryEvidence { get; set; }
 
+		public DateTimeOffset? GoodTillDate { get; set; }
+
+		public TimeInForce TimeInForce { get; set; }
+
 		public decimal OustandingQuantity
 		{
 			get
@@ -67,13 +71,13 @@ namespace Theta.Platform.UI.Orders.API.Domain
 			Status = OrderStatus.Pending;
 			Quantity = evt.Quantity;
 			Side = evt.Side;
-			// TODO: Remove enum parsing when OrderCreatedEvent moved out of the Theta.Platform.Messaging project
-			Type = Enum.Parse<OrderType>(evt.OrderType);
+			Type = evt.OrderType;
 			LimitPrice = evt.LimitPrice;
 			CurrencyCode = evt.CurrencyCode;
-			// TODO: Remove enum parsing when OrderCreatedEvent moved out of the Theta.Platform.Messaging project
-			MarkupUnit = Enum.Parse<MarkupUnit>(evt.MarkupUnit);
+			MarkupUnit = evt.MarkupUnit;
 			MarkupValue = evt.MarkupValue;
+			GoodTillDate = evt.GoodTillDate;
+			TimeInForce = evt.TimeInForce;
 			Fills = new List<Fill>();
 		}
 

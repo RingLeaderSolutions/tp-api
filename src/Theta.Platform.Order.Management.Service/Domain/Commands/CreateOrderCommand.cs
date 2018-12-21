@@ -21,18 +21,18 @@ namespace Theta.Platform.Order.Management.Service.Domain.Commands
 
 		public Side Side { get; set; }
 
-        public string OrderType { get; set; }
+        public OrderType OrderType { get; set; }
 
         public decimal LimitPrice { get; set; }
 
         public string CurrencyCode { get; set; }
 
-        public string MarkupUnit { get; set; }
+        public MarkupUnit MarkupUnit { get; set; }
 
         public decimal MarkupValue { get; set; }
 
-        public DateTime? GoodTillDate { get; set; }
+        public DateTimeOffset? GoodTillDate { get; set; }
 
-        public string TimeInForce { get; set; }
+        public TimeInForce TimeInForce { get; set; }
 	}
 }
