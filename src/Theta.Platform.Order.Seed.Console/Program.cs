@@ -25,17 +25,28 @@ namespace Theta.Platform.Order.Seed.Console
             var section = configuration.GetSection("ServiceBus");
             section.Bind(serviceBusConfiguration);
 
-            var commandQueueClient = new ServiceBusCommandQueueClient(
+            var orderQueueClient = new ServiceBusCommandQueueClient(
 	            new Dictionary<string, Type>(), 
 	            new ServiceBusNamespaceFactory(serviceBusConfiguration),
 	            new QueueClientFactory(serviceBusConfiguration));
 
-			MainAsync(commandQueueClient).GetAwaiter().GetResult();
+            var rfqQueueClient = new ServiceBusCommandQueueClient(
+                new Dictionary<string, Type>(),
+                new ServiceBusNamespaceFactory(serviceBusConfiguration),
+                new QueueClientFactory(serviceBusConfiguration));
+
+            Dictionary<string, ICommandQueueClient> ccqs = new Dictionary<string, ICommandQueueClient>
+            {
+                { "order-service", orderQueueClient },
+                { "rfq-service", rfqQueueClient }
+            };
+
+            MainAsync(ccqs).GetAwaiter().GetResult();
         }
 
-        static async Task MainAsync(ICommandQueueClient commandQueueClient)
+        static async Task MainAsync(Dictionary<string, ICommandQueueClient> ccqs)
         {
-            DatastoreInitializer initializer = new DatastoreInitializer("order-service", commandQueueClient);
+            DatastoreInitializer initializer = new DatastoreInitializer(ccqs);
 
             System.Console.WriteLine("Press any key to seed!");
             System.Console.ReadKey();
