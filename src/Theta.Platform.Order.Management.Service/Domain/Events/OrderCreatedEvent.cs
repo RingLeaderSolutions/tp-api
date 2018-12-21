@@ -16,11 +16,13 @@ namespace Theta.Platform.Order.Management.Service.Domain.Events
             Guid ownerId,
             decimal quantity,
 			Side side,
-            string orderType,
+            OrderType orderType,
             decimal limitPrice,
             string currencyCode,
-            string markupUnit,
-            decimal markupValue) : base (orderId)
+            MarkupUnit markupUnit,
+            decimal markupValue,
+            DateTimeOffset? goodTillDate,
+            TimeInForce timeInForce) : base (orderId)
         {
             DeskId = deskId;
             ParentOrderId = parentOrderId;
@@ -33,6 +35,8 @@ namespace Theta.Platform.Order.Management.Service.Domain.Events
             CurrencyCode = currencyCode;
             MarkupUnit = markupUnit;
             MarkupValue = markupValue;
+            GoodTillDate = goodTillDate;
+            TimeInForce = timeInForce;
         }
 
         public Guid DeskId { get; set; }
@@ -49,16 +53,18 @@ namespace Theta.Platform.Order.Management.Service.Domain.Events
 
 		public Side Side { get; set; }
 
-		// TODO: Change this back to use the OrderType enum when moved out of the Theta.Platform.Messaging project
-        public string OrderType { get; set; }
+        public OrderType OrderType { get; set; }
 
         public decimal LimitPrice { get; set; }
 
         public string CurrencyCode { get; set; }
 
-		// TODO: Change this back to use the MarkupUnit enum when moved out of the Theta.Platform.Messaging project
-		public string MarkupUnit { get; set; }
+		public MarkupUnit MarkupUnit { get; set; }
 
         public decimal MarkupValue { get; set; }
-    }
+
+        public DateTimeOffset? GoodTillDate { get; set; }
+
+        public TimeInForce TimeInForce { get; set; }
+	}
 }

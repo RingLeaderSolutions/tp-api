@@ -65,13 +65,13 @@ namespace Theta.Platform.UI.Orders.API.Controllers
 				Guid.NewGuid(),
 				request.Quantity,
 				request.Side,
-				request.Type.ToString(),
+				request.Type,
 				request.LimitPrice,
 				"GBP",
-				request.Markup.Unit.ToString(),
+				request.Markup.Unit,
 				request.Markup.Value,
 				request.Expiry.GoodTillDate,
-				request.Expiry.Type.ToString());
+				request.Expiry.Type);
 
 			await _queueClient.Send(_configuration.CommandQueueName, command);
 

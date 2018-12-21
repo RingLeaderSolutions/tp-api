@@ -8,7 +8,6 @@ namespace Theta.Platform.Order.Seed.Console.Commands
 {
     public sealed class CreateOrderCommand : Command
     {
-		// TODO: Reinstate enums when commands moved out of Theta.Platform.Messaging project.
         public CreateOrderCommand(
                     Guid deskId,
                     Guid orderId,
@@ -17,13 +16,13 @@ namespace Theta.Platform.Order.Seed.Console.Commands
                     Guid ownerId,
                     decimal quantity,
 					Side side,
-                    string orderType,
+                    OrderType orderType,
                     decimal limitPrice,
                     string currencyCode,
-                    string markupUnit,
+                    MarkupUnit markupUnit,
                     decimal markupValue,
-                    DateTime? goodTillDate,
-                    string timeInForce)
+                    DateTimeOffset? goodTillDate,
+                    TimeInForce timeInForce)
         {
             DeskId = deskId;
             OrderId = orderId;
@@ -55,18 +54,18 @@ namespace Theta.Platform.Order.Seed.Console.Commands
 
 		public Side Side { get; }
 
-        public string OrderType { get; }
+        public OrderType OrderType { get; }
 
         public decimal LimitPrice { get; }
 
         public string CurrencyCode { get; }
 
-        public string MarkupUnit { get; }
+        public MarkupUnit MarkupUnit { get; }
 
         public decimal MarkupValue { get; }
 
-        public DateTime? GoodTillDate { get; }
+        public DateTimeOffset? GoodTillDate { get; }
 
-        public string TimeInForce { get; }
+        public TimeInForce TimeInForce { get; }
 	}
 }
