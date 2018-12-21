@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Theta.Platform.Common\Theta.Platform.Common.csproj" />
     <ProjectReference Include="..\Theta.Platform.Domain\Theta.Platform.Domain.csproj" />
     <ProjectReference Include="..\Theta.Platform.Messaging.EventStore\Theta.Platform.Messaging.EventStore.csproj" />
     <ProjectReference Include="..\Theta.Platform.Messaging.ServiceBus\Theta.Platform.Messaging.ServiceBus.csproj" />

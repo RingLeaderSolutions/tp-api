@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Theta.Platform.Common.Api;
 using Theta.Platform.Domain;
 using Theta.Platform.Messaging.Commands;
 using Theta.Platform.Messaging.Events;
@@ -112,6 +113,7 @@ namespace Theta.Platform.Order.Management.Service
 
             app.UseHttpsRedirection();
             app.UseMvc();
+            app.AddStatusEndpoint();
 
             app.UseSwagger();
             app.UseSwaggerUI(c =>

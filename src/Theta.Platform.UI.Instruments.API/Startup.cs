@@ -13,6 +13,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.Swagger;
+using Theta.Platform.Common.Api;
 
 namespace Theta.Platform.UI.Instruments.API
 {
@@ -73,6 +74,7 @@ namespace Theta.Platform.UI.Instruments.API
 
             //app.UseHttpsRedirection();
             app.UseMvc();
+            app.AddStatusEndpoint();
 
             app.UseSwagger();
             app.UseSwaggerUI(c =>

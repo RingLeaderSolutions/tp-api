@@ -13,6 +13,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.Swagger;
+using Theta.Platform.Common.Api;
 using Theta.Platform.Domain;
 using Theta.Platform.Messaging.Commands;
 using Theta.Platform.Messaging.Events;
@@ -120,6 +121,7 @@ namespace Theta.Platform.RFQ.Management.Service
 
             app.UseHttpsRedirection();
             app.UseMvc();
+            app.AddStatusEndpoint();
 
             app.UseSwagger();
             app.UseSwaggerUI(c =>

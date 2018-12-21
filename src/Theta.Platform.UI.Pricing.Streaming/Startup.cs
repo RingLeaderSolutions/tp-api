@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Theta.Platform.Common.Api;
 using Theta.Platform.UI.Pricing.Streaming.Hubs;
 using Theta.Platform.UI.Pricing.Streaming.Services;
 
@@ -62,6 +63,7 @@ namespace Theta.Platform.UI.Pricing.Streaming
             //app.UseAuthentication();
 
             app.UseMvc();
+            app.AddStatusEndpoint();
 
             app.UseSignalR(routes =>
             {
