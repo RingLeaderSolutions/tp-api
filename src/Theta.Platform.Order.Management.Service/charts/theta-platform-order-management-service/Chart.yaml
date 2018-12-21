@@ -1,0 +1,4 @@
+apiVersion: v1
+description: Order Management Service
+name: theta-platform-order-management-service
+version: v0.1.0

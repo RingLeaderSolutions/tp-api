@@ -1,0 +1,12 @@
+replicaCount: 1
+theta:
+  environment: notset
+image:
+  private: false
+  pullPolicy: Always
+service:
+  internalPort: 80
+  externalPort: 80
+ingress:
+  enabled: true
+  domain: <SET AT CD TIME - TO THE PUBLIC IP DNS NAME LINKED TO NGINX RUNNING IN K8S>

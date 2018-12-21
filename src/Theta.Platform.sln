@@ -56,6 +56,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Streaming", "Streaming", "{
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{E016A9F9-08D0-44FE-B2FF-1FA8F705EC05}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Theta.Platform.RFQ.Management.Service.Tests", "Theta.Platform.RFQ.Management.Service.Tests\Theta.Platform.RFQ.Management.Service.Tests.csproj", "{CFDCEDDF-1480-4DCC-BCE9-6B5B3A39C1F2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -138,6 +140,10 @@ Global
 		{554211B9-9DE8-4950-AC2F-A087EE3C3368}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{554211B9-9DE8-4950-AC2F-A087EE3C3368}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{554211B9-9DE8-4950-AC2F-A087EE3C3368}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CFDCEDDF-1480-4DCC-BCE9-6B5B3A39C1F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CFDCEDDF-1480-4DCC-BCE9-6B5B3A39C1F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CFDCEDDF-1480-4DCC-BCE9-6B5B3A39C1F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CFDCEDDF-1480-4DCC-BCE9-6B5B3A39C1F2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -163,6 +169,7 @@ Global
 		{554211B9-9DE8-4950-AC2F-A087EE3C3368} = {15B67CC8-55F9-4380-9571-9F7C929C2981}
 		{45D601DC-0B54-454E-A160-F0C22C892903} = {74E6E762-1A8B-4E04-9D52-1786E10280CD}
 		{52915D53-848E-4462-9937-370DE9EE9CF2} = {74E6E762-1A8B-4E04-9D52-1786E10280CD}
+		{CFDCEDDF-1480-4DCC-BCE9-6B5B3A39C1F2} = {15B67CC8-55F9-4380-9571-9F7C929C2981}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0466CF9F-7513-4BB0-B64D-05ED8BF8B0D4}
