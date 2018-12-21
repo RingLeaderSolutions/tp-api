@@ -1,6 +1,8 @@
 param (
   [Parameter(Mandatory=$true)][string]$subscriptionId,
   [Parameter(Mandatory=$true)][string]$environmentName,
+  [Parameter(Mandatory=$true)][ValidateSet('staging','prod')][string]$letsencryptEnvironment,
+  [Parameter(Mandatory=$true)][string]$acmeEmail,
   [string]$region = "westeurope"
 )
 
@@ -36,4 +38,36 @@ az network public-ip update --ids $publicIpId --dns-name "$resourceGroup"
 helm init --client-only
 helm install stable/nginx-ingress --namespace kube-system --set controller.service.loadBalancerIP="$publicIpAddress" --set controller.replicaCount=2 --set rbac.create=false
 
-# TODO - enable TLS for HTTPS
+# Install cert-manager, which provides automatic Lets Encrypt certificate generation and management functionality
+helm install stable/cert-manager --namespace kube-system --set ingressShim.defaultIssuerName=letsencrypt-$letsencryptEnvironment --set ingressShim.defaultIssuerKind=ClusterIssuer --set rbac.create=false --set serviceAccount.create=false
+
+# Token replace Kubernetes YAML file
+$clusterIssuerYaml = Get-Content "Cluster-Issuer-template.yaml"
+$clusterIssuerYaml = $clusterIssuerYaml.replace('{letsencryptEnvironment}', $letsencryptEnvironment)
+if ($letsencryptEnvironment -eq 'prod') 
+{
+  $clusterIssuerYaml = $clusterIssuerYaml.replace('{letsencryptServer}', 'https://acme-v02.api.letsencrypt.org/directory')
+}
+else 
+{
+  $clusterIssuerYaml = $clusterIssuerYaml.replace('{letsencryptServer}', 'https://acme-staging-v02.api.letsencrypt.org/directory')
+}
+$clusterIssuerYaml = $clusterIssuerYaml.replace('{acmeEmail}', $acmeEmail)
+$clusterIssuerYaml | Set-Content "Cluster-Issuer-$environment-$subscriptionId.yaml"
+
+# Create a CA cluster issuer
+kubectl apply -f "Cluster-Issuer-$environment-$subscriptionId.yaml"
+
+# Token replace Kubernetes YAML file
+$certificateYaml = Get-Content "Certificate-template.yaml"
+$certificateYaml = $certificateYaml.replace('{letsencryptEnvironment}', $letsencryptEnvironment)
+$certificateYaml = $certificateYaml.replace('{environment}', $environment)
+$certificateYaml = $certificateYaml.replace('{region}', $region)
+$certificateYaml | Set-Content "Certificate-$environment-$subscriptionId.yaml"
+
+# Create a certificate object
+kubectl apply -f "Certificate-$environment-$subscriptionId.yaml"
+
+# Clean up
+Remove-Item "Cluster-Issuer-$environment-$subscriptionId.yaml"
+Remove-Item "Certificate-Binding-$environment-$subscriptionId.yaml"
