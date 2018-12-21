@@ -27,6 +27,7 @@ using Theta.Platform.UI.Orders.API.Configuration;
 using Theta.Platform.UI.Orders.API.Domain.Events;
 using Theta.Platform.UI.Orders.API.Services;
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
+using Theta.Platform.Common.Api;
 
 namespace Theta.Platform.UI.Orders.API
 {
@@ -97,6 +98,7 @@ namespace Theta.Platform.UI.Orders.API
 
             app.UseHttpsRedirection();
             app.UseMvc();
+            app.AddStatusEndpoint();
 
             app.UseSwagger();
             app.UseSwaggerUI(c =>

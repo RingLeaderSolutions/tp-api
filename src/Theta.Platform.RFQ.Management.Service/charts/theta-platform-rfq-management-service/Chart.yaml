@@ -1,0 +1,4 @@
+apiVersion: v1
+description: RFQ Management Service
+name: theta-platform-rfq-management-service
+version: v0.1.0

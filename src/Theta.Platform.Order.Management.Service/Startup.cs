@@ -1,14 +1,17 @@
 ﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Swashbuckle.AspNetCore.Swagger;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Theta.Platform.Common.Api;
 using Theta.Platform.Domain;
 using Theta.Platform.Messaging.Commands;
 using Theta.Platform.Messaging.Events;
@@ -96,8 +99,12 @@ namespace Theta.Platform.Order.Management.Service
             {
                 c.SwaggerDoc("v1", new Info { Title = "Order Management Service API", Version = "v1" });
             });
+
+            services.AddHealthChecks()
+                .AddCheck("self", () => HealthCheckResult.Healthy());
+            // TODO - add any dependency health checks here with the tag "dependency"
         }
-		
+
         public void Configure(IApplicationBuilder app, Microsoft.AspNetCore.Hosting.IHostingEnvironment env)
         {
             app.UseCors("CorsPolicy");
@@ -112,11 +119,22 @@ namespace Theta.Platform.Order.Management.Service
 
             app.UseHttpsRedirection();
             app.UseMvc();
+            app.AddStatusEndpoint();
 
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Orders API V1");
+            });
+
+            app.UseHealthChecks("/health/live", new HealthCheckOptions
+            {
+                Predicate = r => r.Name.Contains("self")
+            });
+
+            app.UseHealthChecks("/health/ready", new HealthCheckOptions
+            {
+                Predicate = r => r.Name.Contains("self") || r.Tags.Contains("dependency")
             });
         }
 
