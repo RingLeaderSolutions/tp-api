@@ -61,7 +61,20 @@ services:
         Version: 0.0.1-dev
     depends_on:
       - event.store
-  
+
+  theta.platform.rfq.management.service:
+    image: thetaplatformrfqmanagementservice
+    networks:
+      theta-service-net:
+        aliases:
+          - theta.platform.rfq.management.service
+    build:
+      context: .
+      dockerfile: Theta.Platform.RFQ.Management.Service/Dockerfile
+      args:
+        Version: 0.0.1-dev
+    depends_on:
+      - event.store
 
 networks:
   theta-service-net:
