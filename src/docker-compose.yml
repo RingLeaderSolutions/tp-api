@@ -1,6 +1,13 @@
 version: '3.4'
 
 services:
+  event.store:
+    image: eventstore/eventstore
+    networks:
+      theta-service-net:
+        aliases:
+          - event.store
+
   theta.platform.ui.instruments.api:
     image: thetaplatformuiinstrumentsapi
     networks:
@@ -12,6 +19,7 @@ services:
       dockerfile: Theta.Platform.UI.Instruments.API/Dockerfile
       args:
         Version: 0.0.1-dev
+
   theta.platform.ui.pricing.streaming:
     image: thetaplatformuipricingstreaming
     networks:
@@ -37,6 +45,22 @@ services:
       dockerfile: Theta.Platform.UI.Orders.API/Dockerfile
       args:
         Version: 0.0.1-dev
+    depends_on:
+      - event.store
+
+  theta.platform.order.management.service:
+    image: thetaplatformordermanagementservice
+    networks:
+      theta-service-net:
+        aliases:
+          - theta.platform.order.management.service
+    build:
+      context: .
+      dockerfile: Theta.Platform.Order.Management.Service/Dockerfile
+      args:
+        Version: 0.0.1-dev
+    depends_on:
+      - event.store
   
 
 networks:
