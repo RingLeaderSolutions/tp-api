@@ -9,7 +9,7 @@ namespace Theta.Platform.Order.Management.Service.Messaging.Subscribers
 {
     public class PutDownOrderSubscriber : Subscriber<PutDownOrderCommand, OrderPutDownEvent>, ISubscriber<PutDownOrderCommand, OrderPutDownEvent>
     {
-        public PutDownOrderSubscriber(IAggregateWriter<Domain.Order> aggregateWriter) : base(aggregateWriter)
+        public PutDownOrderSubscriber(IAggregateWriter<Domain.Aggregate.Order> aggregateWriter) : base(aggregateWriter)
         {
         }
 

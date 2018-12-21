@@ -9,7 +9,7 @@ namespace Theta.Platform.Order.Management.Service.Messaging.Subscribers
 {
     public class FillOrderSubscriber : Subscriber<FillOrderCommand, OrderFilledEvent>, ISubscriber<FillOrderCommand, OrderFilledEvent>
     {
-        public FillOrderSubscriber(IAggregateWriter<Domain.Order> aggregateWriter) : base(aggregateWriter)
+        public FillOrderSubscriber(IAggregateWriter<Domain.Aggregate.Order> aggregateWriter) : base(aggregateWriter)
         {
         }
 

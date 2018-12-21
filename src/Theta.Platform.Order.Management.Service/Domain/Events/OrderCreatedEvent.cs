@@ -1,9 +1,12 @@
-﻿using System;
+﻿// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
+// ReSharper disable MemberCanBePrivate.Global
+using System;
 using Theta.Platform.Messaging.Events;
+using Theta.Platform.Order.Management.Service.Domain.Aggregate;
 
 namespace Theta.Platform.Order.Management.Service.Domain.Events
 {
-    public class OrderCreatedEvent : Event
+    public sealed class OrderCreatedEvent : Event
     {
         public OrderCreatedEvent(
             Guid deskId,

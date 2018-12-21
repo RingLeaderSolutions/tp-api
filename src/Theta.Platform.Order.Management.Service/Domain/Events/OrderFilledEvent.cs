@@ -1,9 +1,12 @@
-﻿using System;
+﻿// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable UnusedMember.Global
+using System;
 using Theta.Platform.Messaging.Events;
 
 namespace Theta.Platform.Order.Management.Service.Domain.Events
 {
-    public class OrderFilledEvent : Event
+    public sealed class OrderFilledEvent : Event
     {
         public OrderFilledEvent(Guid orderId, Guid rFQId, decimal price, decimal quantity)
 			: base(orderId)

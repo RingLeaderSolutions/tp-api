@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Theta.Platform.Order.Management.Service.Domain
+namespace Theta.Platform.Order.Management.Service.Domain.Aggregate
 {
     public class Fill
     {

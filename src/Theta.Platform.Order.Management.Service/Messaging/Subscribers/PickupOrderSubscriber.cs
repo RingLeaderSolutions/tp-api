@@ -9,7 +9,7 @@ namespace Theta.Platform.Order.Management.Service.Messaging.Subscribers
 {
     public class PickupOrderSubscriber : Subscriber<PickupOrderCommand, OrderPickedUpEvent>, ISubscriber<PickupOrderCommand, OrderPickedUpEvent>
     {
-        public PickupOrderSubscriber(IAggregateWriter<Domain.Order> aggregateWriter) : base(aggregateWriter)
+        public PickupOrderSubscriber(IAggregateWriter<Domain.Aggregate.Order> aggregateWriter) : base(aggregateWriter)
         {
         }
 

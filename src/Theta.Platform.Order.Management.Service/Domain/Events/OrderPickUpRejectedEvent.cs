@@ -1,9 +1,12 @@
-﻿using System;
+﻿// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable UnusedMember.Global
+using System;
 using Theta.Platform.Messaging.Events;
 
 namespace Theta.Platform.Order.Management.Service.Domain.Events
 {
-    public class OrderPickUpRejectedEvent : Event
+    public sealed class OrderPickUpRejectedEvent : Event
     {
         public OrderPickUpRejectedEvent(Guid orderId, Guid ownerId, string reason)
 			:base(orderId)
@@ -14,8 +17,8 @@ namespace Theta.Platform.Order.Management.Service.Domain.Events
 
         public Guid OrderId => AggregateId;
 
-        public Guid OwnerId { get; }
+        public Guid OwnerId { get; set; }
 
-        public string Reason { get; }
+        public string Reason { get; set; }
     }
 }

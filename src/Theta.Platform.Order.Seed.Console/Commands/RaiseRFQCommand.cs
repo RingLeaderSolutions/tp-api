@@ -1,20 +1,30 @@
-﻿using System;
+﻿// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable UnusedAutoPropertyAccessor.Global
+using System;
 using System.Collections.Generic;
-using System.Text;
 using Theta.Platform.Messaging.Commands;
 
 namespace Theta.Platform.Order.Seed.Console.Commands
 {
-    public class RaiseRFQCommand : Command
+    public sealed class RaiseRFQCommand : Command
     {
-        public Guid RFQIdentitier { get; set; }
+	    public RaiseRFQCommand(Guid rfqIdentitier, Guid orderId, Guid instrument, DateTimeOffset requested, List<string> counterParties)
+	    {
+		    RFQIdentitier = rfqIdentitier;
+		    OrderId = orderId;
+		    Instrument = instrument;
+		    Requested = requested;
+		    CounterParties = counterParties;
+	    }
 
-        public Guid OrderId { get; set; }
+	    public Guid RFQIdentitier { get; }
 
-        public Guid Instrument { get; set; }
+        public Guid OrderId { get; }
 
-        public DateTimeOffset Requested { get; set; }
+        public Guid Instrument { get; }
 
-        public List<string> CounterParties { get; set; }
+        public DateTimeOffset Requested { get; }
+
+        public List<string> CounterParties { get; }
     }
 }

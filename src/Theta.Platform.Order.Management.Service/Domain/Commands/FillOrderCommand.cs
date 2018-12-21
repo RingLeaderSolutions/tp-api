@@ -1,9 +1,10 @@
-﻿using System;
+﻿// ReSharper disable UnusedAutoPropertyAccessor.Global
+using System;
 using Theta.Platform.Messaging.Commands;
 
 namespace Theta.Platform.Order.Management.Service.Domain.Commands
 {
-    public class FillOrderCommand : Command
+    public sealed class FillOrderCommand : Command
     {
         public Guid OrderId { get; set; }
 

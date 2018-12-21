@@ -83,24 +83,24 @@ namespace Theta.Platform.Order.Seed.Console
 			System.Console.WriteLine($"Sent CreateOrderCommand, OrderId=[{orderId}]");
 			System.Console.ReadKey();
 
-			var pickupOrderCommand = new PickupOrderCommand() { OrderId = orderId, OwnerId = Guid.NewGuid() };
+			var pickupOrderCommand = new PickupOrderCommand(orderId, Guid.NewGuid());
 			await DispatchCommand(pickupOrderCommand, orderServiceCqc);
 			System.Console.WriteLine($"Sent PickupOrderCommand (1), OrderId=[{orderId}]");
 			System.Console.ReadKey();
 
-			var putdownOrderCommand = new PutDownOrderCommand() { OrderId = orderId };
+			var putdownOrderCommand = new PutDownOrderCommand(orderId);
 			await DispatchCommand(putdownOrderCommand, orderServiceCqc);
 			System.Console.WriteLine($"Sent PutDownOrderCommand, OrderId=[{orderId}]");
 			System.Console.ReadKey();
 
-			var pickupOrderCommand2 = new PickupOrderCommand() { OrderId = orderId, OwnerId = Guid.NewGuid() };
+			var pickupOrderCommand2 = new PickupOrderCommand(orderId,Guid.NewGuid());
 			await DispatchCommand(pickupOrderCommand2, orderServiceCqc);
 			System.Console.WriteLine($"Sent PickupOrderCommand (2), OrderId=[{orderId}]");
 			System.Console.ReadKey();
 
             List<string> counterParties = new List<string>() { "Barclays", "ABN Amro", "DNB", "Nordea", "VR-Bank", "Deutche Bank", "RBS" };
 
-            var rfqCommand = new RaiseRFQCommand() { CounterParties = counterParties, Instrument = instrumentId, OrderId = orderId, RFQIdentitier = Guid.NewGuid(), Requested = DateTimeOffset.Now };
+            var rfqCommand = new RaiseRFQCommand(Guid.NewGuid(), orderId, instrumentId, DateTimeOffset.UtcNow, counterParties);
 
             await DispatchCommand(rfqCommand, rfqServiceCqc);
 
@@ -119,7 +119,7 @@ namespace Theta.Platform.Order.Seed.Console
 
             if (!FillPartial())
             {
-                var fillOrderCommand = new FillOrderCommand() { OrderId = orderId, RFQId = Guid.NewGuid(), Price = price, Quantity = createOrderCommand.Quantity };
+                var fillOrderCommand = new FillOrderCommand(orderId,Guid.NewGuid(), createOrderCommand.Quantity, price);
 
                 await DispatchCommand(fillOrderCommand, orderServiceCqc);
 				System.Console.WriteLine($"Sent FillOrderCommand (0%->100%), OrderId=[{orderId}]");
@@ -127,13 +127,12 @@ namespace Theta.Platform.Order.Seed.Console
 				return;
             }
 
-            var fillOrderCommand1 = new FillOrderCommand() { OrderId = orderId, RFQId = Guid.NewGuid(), Price = price, Quantity = (createOrderCommand.Quantity / 2) };
+            var fillOrderCommand1 = new FillOrderCommand(orderId, Guid.NewGuid(), createOrderCommand.Quantity / 2, price);
             await DispatchCommand(fillOrderCommand1, orderServiceCqc);
 			System.Console.WriteLine($"Sent FillOrderCommand (0%->50%), OrderId=[{orderId}]");
             System.Console.ReadKey();
-			
-            
-            var fillOrderCommand2 = new FillOrderCommand() { OrderId = orderId, RFQId = Guid.NewGuid(), Price = price, Quantity = createOrderCommand.Quantity - fillOrderCommand1.Quantity };
+
+			var fillOrderCommand2 = new FillOrderCommand(orderId, Guid.NewGuid(), createOrderCommand.Quantity - fillOrderCommand1.Quantity, price);
 
             await DispatchCommand(fillOrderCommand2, orderServiceCqc);
 			System.Console.WriteLine($"Sent FillOrderCommand (50%->100%), OrderId=[{orderId}]");

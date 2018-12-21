@@ -7,7 +7,7 @@ namespace Theta.Platform.Order.Management.Service.Messaging.Subscribers
 {
     public class CreateOrderSubscriber : Subscriber<CreateOrderCommand, OrderCreatedEvent>, ISubscriber<CreateOrderCommand, OrderCreatedEvent>
     {
-        public CreateOrderSubscriber(IAggregateWriter<Domain.Order> aggregateWriter) : base(aggregateWriter)
+        public CreateOrderSubscriber(IAggregateWriter<Domain.Aggregate.Order> aggregateWriter) : base(aggregateWriter)
         {
         }
 

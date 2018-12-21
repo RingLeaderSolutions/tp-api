@@ -1,9 +1,11 @@
-﻿using System;
+﻿// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable UnusedAutoPropertyAccessor.Global
+using System;
 using Theta.Platform.Messaging.Commands;
 
 namespace Theta.Platform.UI.Orders.API.Domain.Commands
 {
-    public class PickupOrderCommand : Command
+    public sealed class PickupOrderCommand : Command
     {
 	    public PickupOrderCommand(Guid orderId, Guid ownerId)
 	    {
@@ -11,8 +13,8 @@ namespace Theta.Platform.UI.Orders.API.Domain.Commands
 		    OwnerId = ownerId;
 	    }
 
-	    public Guid OrderId { get; set; }
+	    public Guid OrderId { get; }
 
-        public Guid OwnerId { get; set; }
+        public Guid OwnerId { get; }
     }
 }

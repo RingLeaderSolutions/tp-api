@@ -69,8 +69,8 @@ namespace Theta.Platform.Order.Management.Service
 
 			// Register the AggregateWriter as the implementation of both IAggregateWriter and IAggregateReader
             services.AddSingleton<OrderAggregateWriter>();
-            services.AddSingleton<IAggregateWriter<Domain.Order>>(i => i.GetService<OrderAggregateWriter>());
-            services.AddSingleton<IAggregateReader<Domain.Order>>(i => i.GetService<OrderAggregateWriter>());
+            services.AddSingleton<IAggregateWriter<Domain.Aggregate.Order>>(i => i.GetService<OrderAggregateWriter>());
+            services.AddSingleton<IAggregateReader<Domain.Aggregate.Order>>(i => i.GetService<OrderAggregateWriter>());
 
             // Retrieve and register all implementations of ISubscriber<>
 			GetImplementations(typeof(ISubscriber<ICommand, IEvent>))

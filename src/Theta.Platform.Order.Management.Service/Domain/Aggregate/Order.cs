@@ -1,12 +1,13 @@
-﻿using System;
+﻿// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable ClassNeverInstantiated.Global
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Theta.Platform.Domain;
 using Theta.Platform.Order.Management.Service.Domain.Events;
 
-namespace Theta.Platform.Order.Management.Service.Domain
+namespace Theta.Platform.Order.Management.Service.Domain.Aggregate
 {
-	// ReSharper disable once ClassNeverInstantiated.Global
 	public sealed class Order : AggregateRoot
     {
         private Order()

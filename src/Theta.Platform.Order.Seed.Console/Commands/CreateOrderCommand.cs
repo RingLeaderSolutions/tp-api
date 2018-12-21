@@ -1,10 +1,12 @@
-﻿using System;
+﻿// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable UnusedAutoPropertyAccessor.Global
+using System;
 using Theta.Platform.Messaging.Commands;
 using Theta.Platform.Order.Seed.Console.Domain;
 
 namespace Theta.Platform.Order.Seed.Console.Commands
 {
-    public class CreateOrderCommand : Command
+    public sealed class CreateOrderCommand : Command
     {
 		// TODO: Reinstate enums when commands moved out of Theta.Platform.Messaging project.
         public CreateOrderCommand(
@@ -39,32 +41,32 @@ namespace Theta.Platform.Order.Seed.Console.Commands
             TimeInForce = timeInForce;
         }
 
-        public Guid DeskId { get; set; }
+        public Guid DeskId { get; }
 
-        public Guid? ParentOrderId { get; set; }
+        public Guid? ParentOrderId { get; }
 
-        public Guid InstrumentId { get; set; }
+        public Guid InstrumentId { get; }
 
-        public Guid OwnerId { get; set; }
+        public Guid OwnerId { get; }
 
-        public Guid OrderId { get; set; }
+        public Guid OrderId { get; }
 
-        public decimal Quantity { get; set; }
+        public decimal Quantity { get; }
 
-		public Side Side { get; set; }
+		public Side Side { get; }
 
-        public string OrderType { get; set; }
+        public string OrderType { get; }
 
-        public decimal LimitPrice { get; set; }
+        public decimal LimitPrice { get; }
 
-        public string CurrencyCode { get; set; }
+        public string CurrencyCode { get; }
 
-        public string MarkupUnit { get; set; }
+        public string MarkupUnit { get; }
 
-        public decimal MarkupValue { get; set; }
+        public decimal MarkupValue { get; }
 
-        public DateTime? GoodTillDate { get; set; }
+        public DateTime? GoodTillDate { get; }
 
-        public string TimeInForce { get; set; }
+        public string TimeInForce { get; }
 	}
 }
