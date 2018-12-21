@@ -1,5 +1,6 @@
 ﻿using System;
 using Theta.Platform.Messaging.Commands;
+using Theta.Platform.Order.Seed.Console.Domain;
 
 namespace Theta.Platform.Order.Seed.Console.Commands
 {
@@ -13,6 +14,7 @@ namespace Theta.Platform.Order.Seed.Console.Commands
                     Guid instrumentId,
                     Guid ownerId,
                     decimal quantity,
+					Side side,
                     string orderType,
                     decimal limitPrice,
                     string currencyCode,
@@ -27,6 +29,7 @@ namespace Theta.Platform.Order.Seed.Console.Commands
             InstrumentId = instrumentId;
             OwnerId = ownerId;
             Quantity = quantity;
+            Side = side;
             OrderType = orderType;
             LimitPrice = limitPrice;
             CurrencyCode = currencyCode;
@@ -47,6 +50,8 @@ namespace Theta.Platform.Order.Seed.Console.Commands
         public Guid OrderId { get; set; }
 
         public decimal Quantity { get; set; }
+
+		public Side Side { get; set; }
 
         public string OrderType { get; set; }
 

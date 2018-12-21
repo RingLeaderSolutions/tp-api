@@ -13,6 +13,7 @@ namespace Theta.Platform.Order.Management.Service.Domain.Commands
                     Guid instrumentId,
                     Guid ownerId,
                     decimal quantity,
+					Side side,
                     string orderType,
                     decimal limitPrice,
                     string currencyCode,
@@ -27,6 +28,7 @@ namespace Theta.Platform.Order.Management.Service.Domain.Commands
             InstrumentId = instrumentId;
             OwnerId = ownerId;
             Quantity = quantity;
+            Side = side;
             OrderType = orderType;
             LimitPrice = limitPrice;
             CurrencyCode = currencyCode;
@@ -47,6 +49,8 @@ namespace Theta.Platform.Order.Management.Service.Domain.Commands
         public Guid OrderId { get; set; }
 
         public decimal Quantity { get; set; }
+
+		public Side Side { get; set; }
 
         public string OrderType { get; set; }
 

@@ -12,6 +12,7 @@ namespace Theta.Platform.Order.Management.Service.Domain.Events
             Guid instrumentId,
             Guid ownerId,
             decimal quantity,
+			Side side,
             string orderType,
             decimal limitPrice,
             string currencyCode,
@@ -23,6 +24,7 @@ namespace Theta.Platform.Order.Management.Service.Domain.Events
             InstrumentId = instrumentId;
             OwnerId = ownerId;
             Quantity = quantity;
+            Side = side;
             OrderType = orderType;
             LimitPrice = limitPrice;
             CurrencyCode = currencyCode;
@@ -41,6 +43,8 @@ namespace Theta.Platform.Order.Management.Service.Domain.Events
 		public Guid OrderId => AggregateId;
 
 		public decimal Quantity { get; set; }
+
+		public Side Side { get; set; }
 
 		// TODO: Change this back to use the OrderType enum when moved out of the Theta.Platform.Messaging project
         public string OrderType { get; set; }

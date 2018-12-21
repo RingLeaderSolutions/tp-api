@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Theta.Platform.Messaging.Commands;
 using Theta.Platform.Order.Seed.Console.Commands;
+using Theta.Platform.Order.Seed.Console.Domain;
 
 namespace Theta.Platform.Order.Seed.Console
 {
@@ -70,8 +71,9 @@ namespace Theta.Platform.Order.Seed.Console
             decimal markupValue, Guid orderId, Guid deskId, Guid ownerId,
             string markupUnit, string orderType, DateTime? expiration, string timeInForce)
         {
-	        var createOrderCommand = new CreateOrderCommand(
-		        deskId, orderId, null, instrumentId, ownerId, quantity, orderType, limitPrice, currency,
+	        var side = new Random().Next() % 2 == 0 ? Side.Buy : Side.Sell;
+ 	        var createOrderCommand = new CreateOrderCommand(
+		        deskId, orderId, null, instrumentId, ownerId, quantity, side, orderType, limitPrice, currency,
 		        markupUnit, markupValue, expiration, timeInForce);
 
             var orderServiceCqc = cqcs.First(x => x.Key == "order-service");

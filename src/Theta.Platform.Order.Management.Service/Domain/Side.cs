@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace Theta.Platform.UI.Orders.API.Domain
+namespace Theta.Platform.Order.Management.Service.Domain
 {
 	[JsonConverter(typeof(StringEnumConverter))]
 	public enum Side
