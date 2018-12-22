@@ -7,6 +7,7 @@ services:
       theta-service-net:
         aliases:
           - event.store
+          - event-store
 
   theta.platform.ui.instruments.api:
     image: thetaplatformuiinstrumentsapi
