@@ -1,12 +1,12 @@
 kind: Service  
 apiVersion: v1  
 metadata:  
-  name: "es"
+  name: "event-store"
 spec:  
   selector:
-    app: "es"
+    app: "event-store"
   ports:
     - protocol: "TCP"
-      port: 2113
-      targetPort: 2113
+      port: 1113
+      targetPort: 1113
   clusterIP: None

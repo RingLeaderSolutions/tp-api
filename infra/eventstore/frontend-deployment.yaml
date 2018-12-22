@@ -1,13 +1,13 @@
 apiVersion: extensions/v1beta1  
 kind: Deployment  
 metadata:  
-  name: frontend-es
+  name: event-store-frontend
 spec:  
   replicas: 1
   template:
     metadata:
       labels:
-        app: frontend-es
+        app: event-store-frontend
         track: stable
     spec:
       containers:
@@ -18,12 +18,12 @@ spec:
               exec:
                 command: ["/usr/sbin/nginx","-s","quit"]
           volumeMounts:
-            - name: "nginx-es-frontend-conf"
+            - name: "nginx-event-store-frontend-conf"
               mountPath: "/etc/nginx/conf.d"
       volumes:
-        - name: "nginx-es-frontend-conf"
+        - name: "nginx-event-store-frontend-conf"
           configMap:
-            name: "nginx-es-frontend-conf"
+            name: "nginx-event-store-frontend-conf"
             items:
               - key: "frontend.conf"
                 path: "frontend.conf"

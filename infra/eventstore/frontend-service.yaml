@@ -1,10 +1,10 @@
 kind: Service  
 apiVersion: v1  
 metadata:  
-  name: "frontend-es"
+  name: "event-store-frontend"
 spec:  
   selector:
-    app: "frontend-es"
+    app: "event-store-frontend"
   ports:
     - protocol: "TCP"
       port: 2113

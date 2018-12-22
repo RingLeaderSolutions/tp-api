@@ -16,11 +16,23 @@ $resourceGroup = "theta-$environment"
 az aks get-credentials --resource-group $resourceGroup --name "$resourceGroup-cluster"
 kubectl config use-context "$resourceGroup-cluster"
 
-# Deploy eventstore
-kubectl create -f eventstore/deployment.yaml
-kubectl create -f eventstore/service.yaml
+# (1) Deploy eventstore
+kubectl --namespace=$environment create -f eventstore/deployment.yaml
+kubectl --namespace=$environment create -f eventstore/service.yaml
 
-# Expose publicly for testing purposes
-kubectl create configmap nginx-es-frontend-conf --from-file=eventstore/frontend.conf
-kubectl create -f eventstore/frontend-deployment.yaml
-kubectl create -f eventstore/frontend-service.yaml
+# (2) Expose publicly for testing purposes
+
+# Rewrite the nginx config as this references the namespace, which is different per environment
+$nginxConfig = Get-Content eventstore/frontend.conf.template
+$nginxConfig = $nginxConfig -Replace "{EnvironmentNamespace}", $environment
+
+# Write the nginx config out to a frontend.conf file
+Out-File "eventstore/frontend.conf" -InputObject $nginxConfig -Encoding ASCII -NoClobber
+
+kubectl --namespace=$environment create configmap nginx-event-store-frontend-conf --from-file=eventstore/frontend.conf
+
+# Remove the temporary nginx config
+Remove-Item "eventstore/frontend.conf"
+
+kubectl --namespace=$environment create -f eventstore/frontend-deployment.yaml
+kubectl --namespace=$environment create -f eventstore/frontend-service.yaml
