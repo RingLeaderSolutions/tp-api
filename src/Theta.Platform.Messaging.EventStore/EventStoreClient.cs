@@ -187,10 +187,10 @@ namespace Theta.Platform.Messaging.EventStore
 					var reconnecting = EventStoreHelpers.GetReconnectingStream(_connection)
 						.Subscribe(_ => obs.OnNext(StreamingConnectionState.Reconnecting));
 
-					var closed = EventStoreHelpers.GetReconnectingStream(_connection)
+					var closed = EventStoreHelpers.GetClosedStream(_connection)
 						.Subscribe(_ => obs.OnNext(StreamingConnectionState.Closed));
 
-					var authFailed = EventStoreHelpers.GetReconnectingStream(_connection)
+					var authFailed = EventStoreHelpers.GetAuthFailedStream(_connection)
 						.Subscribe(_ => obs.OnNext(StreamingConnectionState.AuthenticationFailed));
 
 					return new CompositeDisposable(connecting, connected, disconnected, reconnecting, closed, authFailed);
