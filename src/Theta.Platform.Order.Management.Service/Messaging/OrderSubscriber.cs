@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Theta.Platform.Common.Api;
 using Theta.Platform.Domain;
 using Theta.Platform.Messaging.Commands;
 using Theta.Platform.Messaging.Events;
@@ -18,13 +19,15 @@ namespace Theta.Platform.Order.Management.Service.Messaging
         private readonly ICommandQueueClient _commandQueueClient;
         private readonly IAggregateReader<Domain.Aggregate.Order> _aggregateReader;
         private readonly Dictionary<string, List<ISubscriber<ICommand, IEvent>>> _commandToSubscriberDictionary;
+        private readonly StartupHostedServiceHealthCheck _startupHostedServiceHealthCheck;
 
         private IDisposable _commandSubscription;
 
         public OrderSubscriber(
 	        ICommandQueueClient commandQueueClient,
 			IAggregateReader<Domain.Aggregate.Order> aggregateReader,
-			IEnumerable<ISubscriber<ICommand, IEvent>> subscribers)
+			IEnumerable<ISubscriber<ICommand, IEvent>> subscribers,
+            StartupHostedServiceHealthCheck startupHostedServiceHealthCheck)
         {
             _commandQueueClient = commandQueueClient;
             _aggregateReader = aggregateReader;
@@ -32,6 +35,8 @@ namespace Theta.Platform.Order.Management.Service.Messaging
             _commandToSubscriberDictionary = subscribers
 				.GroupBy(s => s.CommandType)
 				.ToDictionary(s => s.Key.Name, s => s.ToList());
+
+            _startupHostedServiceHealthCheck = startupHostedServiceHealthCheck;
         }
 
         // TODO: An exception here is indicative of a fatal messaging communication exception, meaning the application should probably crash
@@ -59,6 +64,8 @@ namespace Theta.Platform.Order.Management.Service.Messaging
 					// TODO: Logging here
 					// TODO: An onError here is indicative of a fatal messaging communication exception, meaning the application should probably crash
 		        });
+
+            _startupHostedServiceHealthCheck.StartupTaskCompleted = true;
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
