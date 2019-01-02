@@ -20,8 +20,8 @@ $resourceGroup = "theta-$environment"
 kubectl config delete-context "$resourceGroup-cluster"
 
 # Setup of the AKS cluster (node size and count could be script parameters)
-#Write-Host "Creating AKS cluster, this could take ~10 mins"
-#az aks create -l $location -n "$resourceGroup-cluster" -g $resourceGroup --generate-ssh-keys -k 1.11.5 -c 1 -s Standard_B2s --disable-rbac
+Write-Host "Creating AKS cluster, this could take ~10 mins"
+az aks create -l $location -n "$resourceGroup-cluster" -g $resourceGroup --generate-ssh-keys -k 1.11.5 -c 1 -s Standard_B2s --disable-rbac
 
 # Set the default context to this environment's cluster
 az aks get-credentials --resource-group $resourceGroup --name "$resourceGroup-cluster" --overwrite-existing
