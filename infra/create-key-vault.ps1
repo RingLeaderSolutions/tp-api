@@ -1,7 +1,7 @@
 param (
   [Parameter(Mandatory=$true)][string]$subscriptionId,
   [Parameter(Mandatory=$true)][string]$environmentName,
-  [string]$region = "westeurope"
+  [string]$location = "westeurope"
 )
 
 . 'common/environment-names.ps1'
@@ -16,11 +16,11 @@ $resourceGroup = "theta-$environment"
 $groupExists = az group exists -n $resourceGroup
 if ($groupExists -eq 'false')
 {
-  az group create -n $resourceGroup -l $region
+  az group create -n $resourceGroup -l $location
 }
 
 # Create a conventionally named key vault for the platform (e.g. theta-dev-platform)
-az keyvault create -n $resourceGroup-platform-vault -g $resourceGroup -l $region
+az keyvault create -n $resourceGroup-platform-vault -g $resourceGroup -l $location
 
 # Add a dummy secret for testing purposes
 az keyvault secret set -n testSecret --vault-name $resourceGroup-platform-vault --value MySuperSecretThatIDontWantToShareWithYou!
