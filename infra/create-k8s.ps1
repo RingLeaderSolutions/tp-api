@@ -3,7 +3,7 @@ param (
   [Parameter(Mandatory=$true)][string]$environmentName,
   [Parameter(Mandatory=$true)][ValidateSet('staging','prod')][string]$letsencryptEnvironment,
   [Parameter(Mandatory=$true)][string]$acmeEmail,
-  [string]$region = "westeurope"
+  [string]$location = "westeurope"
 )
 
 . 'common/environment-names.ps1'
@@ -14,11 +14,26 @@ az account set -s $subscriptionId
 
 $resourceGroup = "theta-$environment"
 
-# TODO - create AKS and ACR resources
+# TODO - create a global ACR resource
+
+# If recreating the cluster, delete the old context
+kubectl config delete-context "$resourceGroup-cluster"
+
+# Setup of the AKS cluster (node size and count could be script parameters)
+#Write-Host "Creating AKS cluster, this could take ~10 mins"
+#az aks create -l $location -n "$resourceGroup-cluster" -g $resourceGroup --generate-ssh-keys -k 1.11.5 -c 1 -s Standard_B2s --disable-rbac
 
 # Set the default context to this environment's cluster
-az aks get-credentials --resource-group $resourceGroup --name "$resourceGroup-cluster"
+az aks get-credentials --resource-group $resourceGroup --name "$resourceGroup-cluster" --overwrite-existing
 kubectl config use-context "$resourceGroup-cluster"
+
+# Setup tiller for Helm
+kubectl create serviceaccount tiller --namespace kube-system
+kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller
+
+# Setup the environment namespace
+kubectl create namespace $environment
+kubectl create clusterrolebinding default-view --clusterrole=view --serviceaccount=$environment:default
 
 # Get AKS Resource Group, normally named starting MC_
 $aksResourceGroup = az aks show --resource-group $resourceGroup --name "$resourceGroup-cluster" --query nodeResourceGroup -o tsv
@@ -35,7 +50,7 @@ Write-Host "Created static public ip with id '$publicIpId' and address '$publicI
 az network public-ip update --ids $publicIpId --dns-name "$resourceGroup"
 
 # Deploy the nginx-ingress chart with Helm
-helm init --client-only
+helm init --upgrade --wait --service-account default
 helm install stable/nginx-ingress --namespace kube-system --set controller.service.loadBalancerIP="$publicIpAddress" --set controller.replicaCount=2 --set rbac.create=false
 
 # Install cert-manager, which provides automatic Lets Encrypt certificate generation and management functionality
@@ -62,7 +77,7 @@ kubectl apply -f "Cluster-Issuer-$environment-$subscriptionId.yaml"
 $certificateYaml = Get-Content "Certificate-template.yaml"
 $certificateYaml = $certificateYaml.replace('{letsencryptEnvironment}', $letsencryptEnvironment)
 $certificateYaml = $certificateYaml.replace('{environment}', $environment)
-$certificateYaml = $certificateYaml.replace('{region}', $region)
+$certificateYaml = $certificateYaml.replace('{location}', $location)
 $certificateYaml | Set-Content "Certificate-$environment-$subscriptionId.yaml"
 
 # Create a certificate object
@@ -70,4 +85,4 @@ kubectl apply -f "Certificate-$environment-$subscriptionId.yaml"
 
 # Clean up
 Remove-Item "Cluster-Issuer-$environment-$subscriptionId.yaml"
-Remove-Item "Certificate-Binding-$environment-$subscriptionId.yaml"
+Remove-Item "Certificate-$environment-$subscriptionId.yaml"

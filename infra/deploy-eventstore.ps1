@@ -1,7 +1,7 @@
 param (
   [Parameter(Mandatory=$true)][string]$subscriptionId,
   [Parameter(Mandatory=$true)][string]$environmentName,
-  [string]$region = "westeurope"
+  [string]$location = "westeurope"
 )
 
 . 'common/environment-names.ps1'
