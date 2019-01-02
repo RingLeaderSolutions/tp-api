@@ -79,6 +79,7 @@ namespace Theta.Platform.Order.Management.Service
 					services.Add(new ServiceDescriptor(typeof(ISubscriber<ICommand, IEvent>), type, ServiceLifetime.Transient));
 				});
 			
+            services.AddSingleton<StartupHostedServiceHealthCheck>();
             services.AddSingleton<IHostedService, OrderSubscriber>();
 
 			// ASP.NET addons
@@ -101,8 +102,8 @@ namespace Theta.Platform.Order.Management.Service
             });
 
             services.AddHealthChecks()
-                .AddCheck("self", () => HealthCheckResult.Healthy());
-            // TODO - add any dependency health checks here with the tag "dependency"
+                .AddCheck("self", () => HealthCheckResult.Healthy())
+                .AddCheck<StartupHostedServiceHealthCheck>("OrderSubscriber", tags: new [] { "dependency" });
         }
 
         public void Configure(IApplicationBuilder app, Microsoft.AspNetCore.Hosting.IHostingEnvironment env)
